@@ -43,6 +43,7 @@ private:
   const std::chrono::milliseconds checkInterval_;
   ulong lastWifiCheckMillis_ = 0;
 
+  WiFi_STA_IPConfig staticIpConfig_;
 
   AsyncWebServer *webServer_{};
   DNSServer *dnsServer_{};
@@ -50,6 +51,9 @@ private:
   DoubleResetDetector *drd_{};
 
   WM_Config *wmConfig_{};
+
+  static constexpr const char* wifiConfigFile_ = "/wifi_cred.dat";
+
 
 // Use USE_DHCP_IP == true for dynamic DHCP IP, false to use static IP which you
 // have to change accordingly to your network

@@ -79,9 +79,8 @@ void WifiManager::setupConfigAP(ESPAsync_WiFiManager *espWifiManager) {
 #if !USE_DHCP_IP
   // Set (static IP, Gateway, Subnetmask, DNS1 and DNS2) or (IP, Gateway,
   // Subnetmask). New in v1.0.5 New in v1.4.0
-  WiFi_STA_IPConfig staticIpConfig;
-  initSTAIPConfigStruct(staticIpConfig);
-  espWifiManager->setSTAStaticIPConfig(WM_STA_IPconfig_);
+  initSTAIPConfigStruct(staticIpConfig_);
+  espWifiManager->setSTAStaticIPConfig(staticIpConfig_);
 #endif
 
 #if USING_CORS_FEATURE
@@ -130,7 +129,22 @@ void WifiManager::updateConfig(ESPAsync_WiFiManager *espWifiManager,
   }
 }
 
-void WifiManager::saveConfigToFS() {}
+void WifiManager::saveConfigToFS() {
+  File file = FileFS.open(wifiConfigFile_, "w");
+  Logger::log(Logger::DEBUG, "Saving wifi config");
+
+  if (!file) {
+    Logger::log(Logger::ERROR, "Failed to create config file on FS");
+    return;
+  }
+
+  file.write((uint8_t *)&wmConfig_, sizeof(WM_Config));
+  file.write((uint8_t *)&staticIpConfig_, sizeof(WiFi_STA_IPConfig));
+
+  file.close();
+  Logger::log(Logger::DEBUG, "Wifi config saved");
+}
+
 void WifiManager::loadConfigFromFS() {}
 
 void WifiManager::checkStatus() {
@@ -182,20 +196,17 @@ uint8_t WifiManager::connectMultiWiFi() {
 
   if (status == WL_CONNECTED) {
     //@formatter:off
-     Logger::log(
-      Logger::INFO,
-      "WiFi connected after time: %i\n"
-      "SSID: %s\n"
-      "RSSI=%s\n"
-      "Channel: %s\n"
-      "IP address: %s",
-      (i * WIFI_MULTI_CONNECT_WAITING_MS) + WIFI_MULTI_1ST_CONNECT_WAITING_MS,
-      WiFi.SSID().c_str(),
-      WiFi.RSSI(),
-      WiFi.channel(),
-      WiFi.localIP().toString().c_str());
+    Logger::log(Logger::INFO,
+                "WiFi connected after time: %i\n"
+                "SSID: %s\n"
+                "RSSI=%s\n"
+                "Channel: %s\n"
+                "IP address: %s",
+                (i * WIFI_MULTI_CONNECT_WAITING_MS) +
+                    WIFI_MULTI_1ST_CONNECT_WAITING_MS,
+                WiFi.SSID().c_str(), WiFi.RSSI(), WiFi.channel(),
+                WiFi.localIP().toString().c_str());
     //@formatter:on
-
   } else {
     Logger::log(Logger::WARNING, "Could not connect to wifi in time!");
   }
