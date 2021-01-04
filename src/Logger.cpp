@@ -35,26 +35,21 @@ const char *const LOG_LEVEL_STRINGS[] MEM_TYPE = {
 
 void Logger::setup() {}
 
-
-void Logger::log(Level level, const char *module, const char *message) {
-  if (level < getLogLevel()) {
-    return;
-  }
-
-  if (getInstance().loggerOutputFunction_) {
-    getInstance().loggerOutputFunction_(level, module, message);
-  } else {
-    Logger::defaultLog(level, module, message);
-  }
-}
-
 void Logger::log(Level level, const char *format, ...) {
   va_list args;
   va_start(args, format);
   vsprintf(logBuffer_.data(), format, args);
   va_end(args);
 
-  log(level, logBuffer_.data());
+  if (level < getLogLevel()) {
+    return;
+  }
+
+  if (getInstance().loggerOutputFunction_) {
+    getInstance().loggerOutputFunction_(level, "", logBuffer_.data());
+  } else {
+    Logger::defaultLog(level, "", logBuffer_.data());
+  }
 }
 
 Logger &Logger::getInstance() {
@@ -79,7 +74,7 @@ String Logger::formatBytes(size_t bytes) {
 }
 
 void Logger::defaultLog(Logger::Level level, const char *module,
-                     const char *message) {
+                        const char *message) {
   Serial.print(F("["));
 
   Serial.print(asString(level));
@@ -95,6 +90,8 @@ void Logger::defaultLog(Logger::Level level, const char *module,
   Serial.println(message);
 }
 
-const char *Logger::asString(Logger::Level level) { return LOG_LEVEL_STRINGS[level]; }
+const char *Logger::asString(Logger::Level level) {
+  return LOG_LEVEL_STRINGS[level];
+}
 
 } // namespace open_heat

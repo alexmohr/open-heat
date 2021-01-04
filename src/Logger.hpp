@@ -32,8 +32,6 @@ public:
 
   static void log(Level level, const char* format, ...);
 
-  static void log(Level level, const char* module, const char* message);
-
   static const char* asString(Level level);
 
   static String formatBytes(size_t bytes);
