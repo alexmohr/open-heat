@@ -13,8 +13,6 @@ class Filesystem {
  public:
   void setup();
 
-  void saveFile(String filename);
-  void loadConfig(String filename);
  private:
   void listFiles();
 

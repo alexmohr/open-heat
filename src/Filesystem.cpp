@@ -34,7 +34,7 @@ void Filesystem::listFiles() {
   while (dir.next()) {
     String fileName = dir.fileName();
     size_t fileSize = dir.fileSize();
-    Logger::log(Logger::DEBUG, "FS File: %s, size: %s\n", fileName.c_str(),
+    Logger::log(Logger::DEBUG, "FS File: %s, size: %s", fileName.c_str(),
                 Logger::formatBytes(fileSize).c_str());
   }
 }
