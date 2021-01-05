@@ -14,16 +14,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.clang-format" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/codeStyles/Project.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/codeStyles/codeStyleConfig.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Filesystem.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/HAL.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/HAL.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiCredentials.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiCredentials.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManagerConfig.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManagerConfig.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManagerConfig.hpp" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -54,12 +59,23 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.mappings" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.highlight.symlinks" value="true" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.date" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.permissions" value="false" />
+    <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../ESPAsync_WiFiManager_debug/CMakeLists.txt" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src" />
+    </key>
   </component>
   <component name="RunManager" selected="PlatformIO.PlatformIO Upload (1)">
     <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
@@ -72,9 +88,9 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
-        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
@@ -112,7 +128,9 @@
       <workItem from="1609701846175" duration="42000" />
       <workItem from="1609701909239" duration="3584000" />
       <workItem from="1609705623223" duration="8621000" />
-      <workItem from="1609715781482" duration="4851000" />
+      <workItem from="1609715781482" duration="5285000" />
+      <workItem from="1609763604028" duration="1772000" />
+      <workItem from="1609766709545" duration="33650000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -121,7 +139,56 @@
       <option name="project" value="LOCAL" />
       <updated>1609719192415</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="Add clion idea folder to simplify sharing configs.">
+      <created>1609720936001</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1609720936001</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Fixed infinite recursion in logger">
+      <created>1609720955525</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1609720955525</updated>
+    </task>
+    <task id="LOCAL-00004" summary="cleaned up filesystem">
+      <created>1609720978893</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1609720978893</updated>
+    </task>
+    <task id="LOCAL-00005" summary="cleaned platformio.ini">
+      <created>1609721001461</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1609721001461</updated>
+    </task>
+    <task id="LOCAL-00006" summary="added save, load and connect methods to manager">
+      <created>1609721041731</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1609721041731</updated>
+    </task>
+    <task id="LOCAL-00007" summary="added save, load and connect methods to manager">
+      <created>1609721048274</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1609721048274</updated>
+    </task>
+    <task id="LOCAL-00008" summary="removed obsolete defines, which are now set via platformio.ini">
+      <created>1609721067681</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1609721067681</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -141,7 +208,13 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="tmp" />
-    <option name="LAST_COMMIT_MESSAGE" value="tmp" />
+    <MESSAGE value="Add clion idea folder to simplify sharing configs." />
+    <MESSAGE value="Fixed infinite recursion in logger" />
+    <MESSAGE value="cleaned up filesystem" />
+    <MESSAGE value="cleaned platformio.ini" />
+    <MESSAGE value="added save, load and connect methods to manager" />
+    <MESSAGE value="removed obsolete defines, which are now set via platformio.ini" />
+    <option name="LAST_COMMIT_MESSAGE" value="removed obsolete defines, which are now set via platformio.ini" />
   </component>
   <component name="XSLT-Support.FileAssociations.UIState">
     <expand />

@@ -6,17 +6,24 @@
 #define FILESYSTEM_HPP_
 
 #include "hardware/HAL.hpp"
-
+#include <Config.hpp>
 
 namespace open_heat {
 class Filesystem {
  public:
-  void setup();
+     void setup();
+      Config& getConfig();
+      void clearConfig();
+
+      void persistConfig();
 
  private:
   void listFiles();
+  void initConfig();
 
+  static constexpr const char* configFile_ = "/config.dat";
 
+  Config config_{};
   FS* filesystem = &FileFS;
 };
 }

@@ -7,53 +7,92 @@
 
 #include <chrono>
 
-#include <network/WifiManagerConfig.hpp>
+#include <Config.hpp>
+#include <Filesystem.hpp>
 
 namespace open_heat {
 namespace network {
 class WifiManager {
-public:
+  public:
+  WifiManager(
+    std::chrono::milliseconds checkInterval,
+    Filesystem* filesystem,
+    AsyncWebServer* webServer,
+    DNSServer* dnsServer,
+    WIFI_MULTI* wifiMulti,
+    DoubleResetDetector* drd) :
+      checkInterval_(checkInterval),
+      webServer_(webServer),
+      dnsServer_(dnsServer),
+      wifiMulti_(wifiMulti),
+      drd_{drd},
+      filesystem_(filesystem){};
 
-  WifiManager(std::chrono::milliseconds checkInterval,
-              AsyncWebServer *webServer, DNSServer *dnsServer,
-              WM_Config *wmConfig_, ESP8266WiFiMulti *wifiMulti,
-              DoubleResetDetector *drd)
-      : checkInterval_(checkInterval), webServer_(webServer),
-        dnsServer_(dnsServer), wifiMulti_(wifiMulti),
-        drd_{drd}, wmConfig_(wmConfig_) {};
-
-  void checkStatus();
+  void loop();
   void setup();
 
-private:
-  void setupConfigAP(ESPAsync_WiFiManager *espWifiManager);
-  void updateConfig(ESPAsync_WiFiManager *espWifiManager, uint8_t i) const;
+  private:
+  bool showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager);
 
-  void loadConfigFromFS();
-  void saveConfigToFS();
+  void updateConfig(ESPAsync_WiFiManager* espWifiManager);
+  void updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) const;
 
-
-  void addAccessPointFromConfig(uint8_t i);
+  bool loadAPsFromConfig();
 
   void checkWifi();
   uint8_t connectMultiWiFi();
 
-  void initSTAIPConfigStruct(WiFi_STA_IPConfig &ipConfig);
+  void initSTAIPConfigStruct(WiFi_STA_IPConfig& ipConfig);
+  void initAdditionalParams();
 
   const std::chrono::milliseconds checkInterval_;
   ulong lastWifiCheckMillis_ = 0;
 
-  WiFi_STA_IPConfig staticIpConfig_;
+  AsyncWebServer* webServer_{};
+  DNSServer* dnsServer_{};
+  WIFI_MULTI* wifiMulti_{};
+  DoubleResetDetector* drd_{};
+  Filesystem* filesystem_{};
 
-  AsyncWebServer *webServer_{};
-  DNSServer *dnsServer_{};
-  WIFI_MULTI *wifiMulti_{};
-  DoubleResetDetector *drd_{};
+  ESPAsync_WMParameter paramMqttServer_{
+    "MQTTServer",
+    "MQTT Server",
+    "",
+    MQTT_SERVER_NAME_MAX_SIZE};
 
-  WM_Config *wmConfig_{};
+  ESPAsync_WMParameter paramMqttPortString_{
+    "MQTTPort",
+    "MQTT Port",
+    "1883",
+    MQTT_PORT_STR_MAX_SIZE};
 
-  static constexpr const char* wifiConfigFile_ = "/wifi_cred.dat";
+  ESPAsync_WMParameter paramMqttTopic_{
+    "MQTTTopic",
+    "MQTT Topic",
+    "",
+    MQTT_TOPIC_MAX_SIZE};
 
+  ESPAsync_WMParameter paramMqttUsername_{
+    "MQTTUsername",
+    "MQTT Username",
+    "",
+    MQTT_USERNAME_MAX_SIZE};
+
+  ESPAsync_WMParameter paramMqttPassword_{
+    "MQTTPassword",
+    "MQTT Password",
+    "",
+    MQTT_PASSWORD_MAX_SIZE};
+
+  ESPAsync_WMParameter* additionalParameters_[5] = {
+    &paramMqttServer_,
+    &paramMqttPortString_,
+    &paramMqttTopic_,
+    &paramMqttUsername_,
+    &paramMqttPassword_,
+  };
+
+#define NUMBER_PARAMETERS (sizeof(AIO_SERVER_TOTAL_DATA) / sizeof(WMParam_Data))
 
 // Use USE_DHCP_IP == true for dynamic DHCP IP, false to use static IP which you
 // have to change accordingly to your network
@@ -70,8 +109,7 @@ private:
 //#define USE_DHCP_IP     false
 #endif
 
-#if (USE_DHCP_IP ||                                                            \
-     (defined(USE_STATIC_IP_CONFIG_IN_CP) && !USE_STATIC_IP_CONFIG_IN_CP))
+#if (USE_DHCP_IP || (defined(USE_STATIC_IP_CONFIG_IN_CP) && !USE_STATIC_IP_CONFIG_IN_CP))
 // Use DHCP
 #warning Using DHCP IP
   IPAddress stationIP = IPAddress(0, 0, 0, 0);

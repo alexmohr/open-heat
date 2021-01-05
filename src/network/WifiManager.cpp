@@ -4,76 +4,72 @@
 //
 #include "WifiManager.hpp"
 #include <Logger.hpp>
+#include <string>
 
 namespace open_heat {
 namespace network {
 
-void WifiManager::setup() {
-
-  // Indicates whether ESP has WiFi credentials saved from previous session, or
-  // double reset detected
-  bool initialConfig = false;
-
+void WifiManager::setup()
+{
   digitalWrite(LED_BUILTIN, LED_ON);
 
   ESPAsync_WiFiManager espWifiManager(webServer_, dnsServer_, "OpenHeat");
 
-  String ssid = espWifiManager.WiFi_SSID();
-  String passwd = espWifiManager.WiFi_Pass();
-  if ((ssid == "") || (passwd == "")) {
-    Logger::log(Logger::INFO, "No AP credentials");
-    initialConfig = true;
-  }
-
+  // Check if any config is valid.
+  bool startConfigPortal = !loadAPsFromConfig();
   if (drd_->detectDoubleReset()) {
     Logger::log(Logger::INFO, "Detected double reset");
-    initialConfig = true;
+    startConfigPortal = true;
   }
 
-  if (initialConfig) {
+  if (startConfigPortal) {
     // Starts an access point
-    setupConfigAP(&espWifiManager);
-    saveConfigToFS();
-  } else {
-    // Load stored data, the addAP ready for MultiWiFi reconnection
-    loadConfigFromFS();
-
-    for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
-      addAccessPointFromConfig(i);
+    while (!showConfigurationPortal(&espWifiManager)) {
+      Logger::log(Logger::WARNING, "Configuration did not yield valid wifi, retrying");
     }
-
-    if (WiFi.status() != WL_CONNECTED) {
-      connectMultiWiFi();
-    }
+  } else if (!loadAPsFromConfig()) {
+    Logger::log(Logger::INFO, "no valid config present, resetting!");
+    espWifiManager.resetSettings();
+    ESP.reset();
   }
 
-  if (WiFi.status() == WL_CONNECTED) {
-    String ip = WiFi.localIP().toString();
-    Logger::log(Logger::INFO, "Connected to wifi, local ip: %s", ip.c_str());
-  } else {
-    Logger::log(Logger::WARNING, "Not connected: %s",
-                espWifiManager.getStatus(WiFi.status()));
+  if (WiFi.status() != WL_CONNECTED) {
+    checkWifi();
   }
 
   digitalWrite(LED_BUILTIN, LED_OFF);
 }
 
-void WifiManager::addAccessPointFromConfig(uint8_t i) {
-  // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
-  if ((String(wmConfig_->WiFi_Creds[i].wifi_ssid) == "") ||
-      (strlen(wmConfig_->WiFi_Creds[i].wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
-    return;
+bool WifiManager::loadAPsFromConfig()
+{
+  bool anyConfigValid = false;
+  for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
+    // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
+    auto& config = filesystem_->getConfig();
+    if (
+      (String(config.WifiCredentials[i].wifi_ssid) == "")
+      || (strlen(config.WifiCredentials[i].wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
+      Logger::log(Logger::INFO, "Wifi config in slot %i is not valid", i);
+      continue;
+    }
+
+    anyConfigValid = true;
+    Logger::log(
+      Logger::Level::TRACE,
+      "Wifi config in slot %i is valid: SSID: %s, PW: %s",
+      i,
+      config.WifiCredentials[i].wifi_ssid,
+      config.WifiCredentials[i].wifi_pw);
+
+    wifiMulti_->addAP(
+      config.WifiCredentials[i].wifi_ssid, config.WifiCredentials[i].wifi_pw);
   }
 
-  Logger::log(Logger::Level::TRACE, "Adding SSID = %s, PW = %s",
-              wmConfig_->WiFi_Creds[i].wifi_ssid,
-              wmConfig_->WiFi_Creds[i].wifi_pw);
-
-  wifiMulti_->addAP(wmConfig_->WiFi_Creds[i].wifi_ssid,
-                    wmConfig_->WiFi_Creds[i].wifi_pw);
+  return anyConfigValid;
 }
 
-void WifiManager::setupConfigAP(ESPAsync_WiFiManager *espWifiManager) {
+bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
+{
   Logger::log(Logger::INFO, "Starting Config Portal");
 
 #if !USE_DHCP_IP
@@ -87,67 +83,97 @@ void WifiManager::setupConfigAP(ESPAsync_WiFiManager *espWifiManager) {
   espWifiManager->setCORSHeader("Your Access-Control-Allow-Origin");
 #endif
 
+  initAdditionalParams();
+  for (auto& param : additionalParameters_) {
+    espWifiManager->addParameter(param);
+  }
+
   // SSID and PW for Config Portal
   String ssid = "OpenHeat_ESP_" + String(ESP_getChipId(), HEX);
-  const char *password = "OpenHeat";
+  const char* password = "OpenHeat";
 
   espWifiManager->setConfigPortalChannel(0);
   espWifiManager->setConfigPortalTimeout(0);
-  if (!espWifiManager->startConfigPortal(ssid.c_str(), password)) {
-    Serial.println(F("Not connected to WiFi"));
-  } else {
-    Serial.println(F("connected"));
-  }
+  auto& config = filesystem_->getConfig();
 
-  // Clear old configuration
-  memset(&wmConfig_, 0, sizeof(WM_Config));
+  wifiMulti_->cleanAPlist();
+  espWifiManager->startConfigPortal(ssid.c_str(), password);
 
   for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
-    updateConfig(espWifiManager, i);
-    addAccessPointFromConfig(i);
+    String tempSSID = espWifiManager->getSSID(i);
+    String tempPW = espWifiManager->getPW(i);
+
+    // Re-insert old config if user did not enter new credentials
+    if (tempSSID.isEmpty() && tempPW.isEmpty()) {
+      Logger::log(Logger::DEBUG, "WiFi config slot %i restored from config", i);
+      wifiMulti_->addAP(
+        config.WifiCredentials[i].wifi_ssid, config.WifiCredentials[i].wifi_pw);
+    } else {
+      Logger::log(Logger::DEBUG, "WiFi config slot %i updated from portal", i);
+      wifiMulti_->addAP(tempSSID.c_str(), tempPW.c_str());
+    }
+  }
+
+  updateConfig(espWifiManager);
+  return connectMultiWiFi() == WL_CONNECTED;
+}
+
+void WifiManager::updateConfig(ESPAsync_WiFiManager* espWifiManager)
+{
+  updateWifiCredentials(espWifiManager);
+
+  auto& config = filesystem_->getConfig();
+
+  memset(&config.MqttServer, 0, sizeof(config.MqttServer));
+  memset(&config.MqttTopic, 0, sizeof(config.MqttTopic));
+  memset(&config.MqttUsername, 0, sizeof(config.MqttUsername));
+  memset(&config.MqttPassword, 0, sizeof(config.MqttPassword));
+
+  strcpy(config.MqttServer, paramMqttServer_.getValue());
+  strcpy(config.MqttTopic, paramMqttTopic_.getValue());
+  strcpy(config.MqttUsername, paramMqttUsername_.getValue());
+  strcpy(config.MqttPassword, paramMqttPassword_.getValue());
+
+  char* pEnd;
+  const int newPort = std::strtol(paramMqttPortString_.getValue(), &pEnd, 10);
+  config.MqttPort = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
+
+  filesystem_->persistConfig();
+}
+
+void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) const
+{
+  auto& config = filesystem_->getConfig();
+  String tempSSID;
+  String tempPW;
+  for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
+    tempSSID.clear();
+    tempPW.clear();
+
+    tempSSID = espWifiManager->getSSID(i);
+    tempPW = espWifiManager->getPW(i);
+
+    auto ssidLen = tempSSID.length();
+    auto pwLen = tempPW.length();
+    if (
+      (ssidLen <= SSID_MAX_LEN) && (pwLen <= PASS_MAX_LEN) && (ssidLen > 0)
+      && (pwLen >= MIN_AP_PASSWORD_SIZE)) {
+
+      memset(&config.WifiCredentials[i], 0, sizeof(WiFi_Credentials));
+      strcpy((config.WifiCredentials[i].wifi_ssid), tempSSID.c_str());
+      strcpy((config.WifiCredentials[i].wifi_pw), tempPW.c_str());
+    }
+    Logger::log(
+      Logger::DEBUG,
+      "WiFi config slot %i: SSID: %s, PW: %s",
+      i,
+      config.WifiCredentials[i].wifi_ssid,
+      config.WifiCredentials[i].wifi_pw);
   }
 }
 
-void WifiManager::updateConfig(ESPAsync_WiFiManager *espWifiManager,
-                               uint8_t i) const {
-  String tempSSID = espWifiManager->getSSID(i);
-  String tempPW = espWifiManager->getPW(i);
-
-  if (strlen(tempSSID.c_str()) <
-      sizeof(wmConfig_->WiFi_Creds[i].wifi_ssid) - 1) {
-    strcpy(wmConfig_->WiFi_Creds[i].wifi_ssid, tempSSID.c_str());
-  } else {
-    strncpy(wmConfig_->WiFi_Creds[i].wifi_ssid, tempSSID.c_str(),
-            sizeof(wmConfig_->WiFi_Creds[i].wifi_ssid) - 1);
-  }
-
-  if (strlen(tempPW.c_str()) < sizeof(wmConfig_->WiFi_Creds[i].wifi_pw) - 1) {
-    strcpy(wmConfig_->WiFi_Creds[i].wifi_pw, tempPW.c_str());
-  } else {
-    strncpy(wmConfig_->WiFi_Creds[i].wifi_pw, tempPW.c_str(),
-            sizeof(wmConfig_->WiFi_Creds[i].wifi_pw) - 1);
-  }
-}
-
-void WifiManager::saveConfigToFS() {
-  File file = FileFS.open(wifiConfigFile_, "w");
-  Logger::log(Logger::DEBUG, "Saving wifi config");
-
-  if (!file) {
-    Logger::log(Logger::ERROR, "Failed to create config file on FS");
-    return;
-  }
-
-  file.write((uint8_t *)&wmConfig_, sizeof(WM_Config));
-  file.write((uint8_t *)&staticIpConfig_, sizeof(WiFi_STA_IPConfig));
-
-  file.close();
-  Logger::log(Logger::DEBUG, "Wifi config saved");
-}
-
-void WifiManager::loadConfigFromFS() {}
-
-void WifiManager::checkStatus() {
+void WifiManager::loop()
+{
   static ulong current_millis = millis();
 
   // Check WiFi periodically.
@@ -157,14 +183,18 @@ void WifiManager::checkStatus() {
   }
 }
 
-void WifiManager::checkWifi() {
-  if ((WiFi.status() != WL_CONNECTED)) {
-    Logger::log(Logger::WARNING, "WIFI disconnected, reconnecting...");
-    connectMultiWiFi();
-  }
+void WifiManager::checkWifi()
+{
+  if (WiFi.status() == WL_CONNECTED)
+    return;
+
+  Logger::log(Logger::WARNING, "WIFI disconnected, reconnecting...");
+  if (connectMultiWiFi() == WL_CONNECTED)
+    return;
 }
 
-uint8_t WifiManager::connectMultiWiFi() {
+uint8_t WifiManager::connectMultiWiFi()
+{
   Logger::log(Logger::INFO, "Connecting MultiWifi...");
 
   // STA = client mode
@@ -182,6 +212,7 @@ uint8_t WifiManager::connectMultiWiFi() {
 
   int i = 0;
   uint8_t status = wifiMulti_->run();
+
   delay(WIFI_MULTI_1ST_CONNECT_WAITING_MS);
 
   while ((i++ < 10) && (status != WL_CONNECTED)) {
@@ -190,22 +221,24 @@ uint8_t WifiManager::connectMultiWiFi() {
     if (status == WL_CONNECTED) {
       break;
     }
-
     delay(WIFI_MULTI_CONNECT_WAITING_MS);
   }
 
   if (status == WL_CONNECTED) {
     //@formatter:off
-    Logger::log(Logger::INFO,
-                "WiFi connected after time: %i\n"
-                "SSID: %s\n"
-                "RSSI=%s\n"
-                "Channel: %s\n"
-                "IP address: %s",
-                (i * WIFI_MULTI_CONNECT_WAITING_MS) +
-                    WIFI_MULTI_1ST_CONNECT_WAITING_MS,
-                WiFi.SSID().c_str(), WiFi.RSSI(), WiFi.channel(),
-                WiFi.localIP().toString().c_str());
+    Logger::log(
+      Logger::INFO,
+      "Wifi connected:\n"
+      "\tTime: %i\n"
+      "\tSSID: %s\n"
+      "\tRSSI=%i\n"
+      "\tChannel: %i\n"
+      "\tIP address: %s",
+      (i * WIFI_MULTI_CONNECT_WAITING_MS) + WIFI_MULTI_1ST_CONNECT_WAITING_MS,
+      WiFi.SSID().c_str(),
+      WiFi.RSSI(),
+      WiFi.channel(),
+      WiFi.localIP().toString().c_str());
     //@formatter:on
   } else {
     Logger::log(Logger::WARNING, "Could not connect to wifi in time!");
@@ -214,7 +247,8 @@ uint8_t WifiManager::connectMultiWiFi() {
   return status;
 }
 
-void WifiManager::initSTAIPConfigStruct(WiFi_STA_IPConfig &ipConfig) {
+void WifiManager::initSTAIPConfigStruct(WiFi_STA_IPConfig& ipConfig)
+{
   ipConfig._sta_static_ip = stationIP;
   ipConfig._sta_static_gw = gatewayIP;
   ipConfig._sta_static_sn = netMask;
@@ -222,6 +256,32 @@ void WifiManager::initSTAIPConfigStruct(WiFi_STA_IPConfig &ipConfig) {
   ipConfig._sta_static_dns1 = dns1IP;
   ipConfig._sta_static_dns2 = dns2IP;
 #endif
+}
+
+void WifiManager::initAdditionalParams()
+{
+  auto& config = filesystem_->getConfig();
+  WMParam_Data paramData;
+
+  paramMqttServer_.getWMParam_Data(paramData);
+  strcpy(paramData._value, config.MqttServer);
+  paramMqttServer_.setWMParam_Data(paramData);
+
+  paramMqttPortString_.getWMParam_Data(paramData);
+  strcpy(paramData._value, String(config.MqttPort).c_str());
+  paramMqttPortString_.setWMParam_Data(paramData);
+
+  paramMqttTopic_.getWMParam_Data(paramData);
+  strcpy(paramData._value, config.MqttTopic);
+  paramMqttTopic_.setWMParam_Data(paramData);
+
+  paramMqttUsername_.getWMParam_Data(paramData);
+  strcpy(paramData._value, config.MqttUsername);
+  paramMqttUsername_.setWMParam_Data(paramData);
+
+  paramMqttPassword_.getWMParam_Data(paramData);
+  strcpy(paramData._value, config.MqttPassword);
+  paramMqttPassword_.setWMParam_Data(paramData);
 }
 
 } // namespace network

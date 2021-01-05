@@ -1,0 +1,45 @@
+---
+BasedOnStyle:  WebKit
+BraceWrapping:
+  AfterControlStatement: MultiLine
+  IndentBraces: true
+
+AlignAfterOpenBracket: AlwaysBreak
+AllowShortFunctionsOnASingleLine: None
+AlwaysBreakTemplateDeclarations: Yes
+BinPackArguments: false
+BinPackParameters: false
+ColumnLimit:     90
+AllowAllConstructorInitializersOnNextLine: true
+AllowAllArgumentsOnNextLine: true
+FixNamespaceComments: true
+IncludeBlocks:   Preserve
+IncludeCategories:
+  - Regex:           '^".+\.(h|hh|hpp|hxx)"$'
+    Priority:        1
+  - Regex:           '^<.+\.(h|hh|hpp|hxx)>$'
+    Priority:        2
+  - Regex:           '^<[^.]+>$'
+    Priority:        3
+IncludeIsMainRegex: '(_unittest)?$'
+Cpp11BracedListStyle: true
+NamespaceIndentation: None
+SpaceAfterTemplateKeyword: false
+SpaceBeforeCpp11BracedList: false
+PenaltyReturnTypeOnItsOwnLine: 999
+
+SpaceBeforeCtorInitializerColon: true
+ConstructorInitializerIndentWidth: 4
+BreakBeforeInheritanceComma: false
+BreakInheritanceList: AfterColon
+BreakConstructorInitializersBeforeComma: false
+BreakConstructorInitializers: AfterColon
+ConstructorInitializerAllOnOneLineOrOnePerLine: true
+
+IndentWidth: 2
+ObjCBlockIndentWidth: 2
+ContinuationIndentWidth: 2
+
+
+AllowAllParametersOfDeclarationOnNextLine: false
+...
