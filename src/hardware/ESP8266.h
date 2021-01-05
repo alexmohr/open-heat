@@ -24,8 +24,9 @@
 
 #define ESP_getChipId()   (ESP.getChipId())
 
-#define LED_ON      LOW
-#define LED_OFF     HIGH
+static constexpr uint8_t LED_ON = LOW;
+static constexpr uint8_t LED_OFF = HIGH;
+
 
 // Filesystem
 #include <LittleFS.h>

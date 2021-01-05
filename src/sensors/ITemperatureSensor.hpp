@@ -8,11 +8,21 @@
 #ifndef ITEMPERATURESENSOR_HPP_
 #define ITEMPERATURESENSOR_HPP_
 
+
+enum TEMP_SENSORS {
+  BME280 = 0,
+  TP1000
+};
+
+
 namespace open_heat {
 namespace sensors {
+
 class ITemperatureSensor {
  public:
-  virtual int getTemperature() = 0;
+  virtual float getTemperature() = 0;
+  virtual void setup() = 0;
+  virtual void loop() = 0;
 };
 
 }
