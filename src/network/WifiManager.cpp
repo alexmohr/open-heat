@@ -22,20 +22,14 @@ void WifiManager::setup()
     startConfigPortal = true;
   }
 
-  if (startConfigPortal) {
+  if (startConfigPortal || connectMultiWiFi() != WL_CONNECTED) {
     // Starts an access point
     while (!showConfigurationPortal(&espWifiManager)) {
       Logger::log(Logger::WARNING, "Configuration did not yield valid wifi, retrying");
     }
-  } else if (!loadAPsFromConfig()) {
-    Logger::log(Logger::INFO, "no valid config present, resetting!");
-    espWifiManager.resetSettings();
-    ESP.reset();
   }
 
-  if (WiFi.status() != WL_CONNECTED) {
-    checkWifi();
-  }
+  checkWifi();
 
   digitalWrite(LED_BUILTIN, LED_OFF);
 }
@@ -61,7 +55,7 @@ bool WifiManager::loadAPsFromConfig()
       config.WifiCredentials[i].wifi_ssid,
       config.WifiCredentials[i].wifi_pw);
 
-    wifiMulti_->addAP(
+    wifiMulti_.addAP(
       config.WifiCredentials[i].wifi_ssid, config.WifiCredentials[i].wifi_pw);
   }
 
@@ -96,7 +90,7 @@ bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
   espWifiManager->setConfigPortalTimeout(0);
   auto& config = filesystem_->getConfig();
 
-  wifiMulti_->cleanAPlist();
+  wifiMulti_.cleanAPlist();
   espWifiManager->startConfigPortal(ssid.c_str(), password);
 
   for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
@@ -106,11 +100,11 @@ bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
     // Re-insert old config if user did not enter new credentials
     if (tempSSID.isEmpty() && tempPW.isEmpty()) {
       Logger::log(Logger::DEBUG, "WiFi config slot %i restored from config", i);
-      wifiMulti_->addAP(
+      wifiMulti_.addAP(
         config.WifiCredentials[i].wifi_ssid, config.WifiCredentials[i].wifi_pw);
     } else {
       Logger::log(Logger::DEBUG, "WiFi config slot %i updated from portal", i);
-      wifiMulti_->addAP(tempSSID.c_str(), tempPW.c_str());
+      wifiMulti_.addAP(tempSSID.c_str(), tempPW.c_str());
     }
   }
 
@@ -174,23 +168,29 @@ void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) co
 
 void WifiManager::loop()
 {
-  static ulong current_millis = millis();
+  ulong currentMillis = millis();
 
   // Check WiFi periodically.
-  if (current_millis > lastWifiCheckMillis_) {
+  if (currentMillis > nextWifiCheckMillis_) {
     checkWifi();
-    lastWifiCheckMillis_ = current_millis + checkInterval_.count();
+    nextWifiCheckMillis_ = currentMillis + checkInterval_.count();
   }
 }
 
 void WifiManager::checkWifi()
 {
-  if (WiFi.status() == WL_CONNECTED)
+  if (WiFi.status() == WL_CONNECTED){
     return;
+  }
 
-  Logger::log(Logger::WARNING, "WIFI disconnected, reconnecting...");
-  if (connectMultiWiFi() == WL_CONNECTED)
+
+  Logger::log(Logger::WARNING, "WIFi disconnected, reconnecting...");
+  if (connectMultiWiFi() == WL_CONNECTED) {
+    reconnectCount_ = 0;
     return;
+  }
+
+  Logger::log(Logger::WARNING, "WiFi reconnection failed, %i times", ++reconnectCount_);
 }
 
 uint8_t WifiManager::connectMultiWiFi()
@@ -211,18 +211,20 @@ uint8_t WifiManager::connectMultiWiFi()
 #endif
 
   int i = 0;
-  uint8_t status = wifiMulti_->run();
+  uint8_t status = wifiMulti_.run();
 
   delay(WIFI_MULTI_1ST_CONNECT_WAITING_MS);
 
   while ((i++ < 10) && (status != WL_CONNECTED)) {
-    status = wifiMulti_->run();
+    status = wifiMulti_.run();
 
     if (status == WL_CONNECTED) {
       break;
     }
     delay(WIFI_MULTI_CONNECT_WAITING_MS);
   }
+
+  auto connectTime = (i * WIFI_MULTI_CONNECT_WAITING_MS) + WIFI_MULTI_1ST_CONNECT_WAITING_MS;
 
   if (status == WL_CONNECTED) {
     //@formatter:off
@@ -234,14 +236,14 @@ uint8_t WifiManager::connectMultiWiFi()
       "\tRSSI=%i\n"
       "\tChannel: %i\n"
       "\tIP address: %s",
-      (i * WIFI_MULTI_CONNECT_WAITING_MS) + WIFI_MULTI_1ST_CONNECT_WAITING_MS,
+      connectTime,
       WiFi.SSID().c_str(),
       WiFi.RSSI(),
       WiFi.channel(),
       WiFi.localIP().toString().c_str());
     //@formatter:on
   } else {
-    Logger::log(Logger::WARNING, "Could not connect to wifi in time!");
+    Logger::log(Logger::WARNING, "WiFi connect timeout: %i", connectTime);
   }
 
   return status;

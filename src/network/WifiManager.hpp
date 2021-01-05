@@ -19,12 +19,11 @@ class WifiManager {
     Filesystem* filesystem,
     AsyncWebServer* webServer,
     DNSServer* dnsServer,
-    WIFI_MULTI* wifiMulti,
     DoubleResetDetector* drd) :
       checkInterval_(checkInterval),
       webServer_(webServer),
       dnsServer_(dnsServer),
-      wifiMulti_(wifiMulti),
+      wifiMulti_(WIFI_MULTI()),
       drd_{drd},
       filesystem_(filesystem){};
 
@@ -46,11 +45,13 @@ class WifiManager {
   void initAdditionalParams();
 
   const std::chrono::milliseconds checkInterval_;
-  ulong lastWifiCheckMillis_ = 0;
+  ulong nextWifiCheckMillis_ = 0;
+  unsigned char reconnectCount_ = 0;
+  unsigned char maxReconnects_ = 50;
 
   AsyncWebServer* webServer_{};
   DNSServer* dnsServer_{};
-  WIFI_MULTI* wifiMulti_{};
+  WIFI_MULTI wifiMulti_{};
   DoubleResetDetector* drd_{};
   Filesystem* filesystem_{};
 
