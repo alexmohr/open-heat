@@ -24,5 +24,8 @@ platformio -c clion run --target release -e nodemcuv2
 ## Updating
 OTA updates will be supported.|
 
+## Contributions
+As this project is still in a very early stage no contributions will be accpeted at the moment.
+
 Copyright 2020 Alexander Mohr, MIT
 
