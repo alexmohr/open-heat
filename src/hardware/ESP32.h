@@ -18,6 +18,8 @@
 #include <WiFiMulti.h>
 #define WIFI_MULTI WiFiMulti
 
+#include <ESPmDNS.h>
+
 // The library will be depreciated after being merged to future major Arduino esp32 core
 // release 2.x At that time, just remove this library inclusion
 #include <LITTLEFS.h> // https://github.com/lorol/LITTLEFS

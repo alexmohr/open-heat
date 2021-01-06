@@ -13,12 +13,12 @@ void WifiManager::setup()
 {
   digitalWrite(LED_BUILTIN, LED_ON);
 
-  ESPAsync_WiFiManager espWifiManager(webServer_, dnsServer_, "OpenHeat");
+  ESPAsync_WiFiManager espWifiManager(webServer_, dnsServer_, HOST_NAME);
 
   // Check if any config is valid.
   bool startConfigPortal = !loadAPsFromConfig();
   if (drd_->detectDoubleReset()) {
-    Logger::log(Logger::INFO, "Detected double reset");
+    Logger::log(Logger::INFO, ">>> Detected double reset <<<");
     startConfigPortal = true;
   }
 

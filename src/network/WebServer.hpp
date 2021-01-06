@@ -5,6 +5,15 @@
 #ifndef WEBSERVER_HPP_
 #define WEBSERVER_HPP_
 
-class WebServer {};
+namespace open_heat {
+namespace network {
+class WebServer {
+  public:
+  void setup();
+  void loop();
+};
+
+} // namespace network
+} // namespace open_heat
 
 #endif // WEBSERVER_HPP_
