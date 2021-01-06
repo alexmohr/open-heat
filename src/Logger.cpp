@@ -20,13 +20,13 @@ std::array<char, 256> logBuffer_;
 #define MEM_TYPE PROGMEM
 #endif
 
-const char LEVEL_TRACE[] MEM_TYPE   = "[TRACE]";
-const char LEVEL_DEBUG[] MEM_TYPE   = "[DEBUG]";
-const char LEVEL_INFO[] MEM_TYPE    = "[INFO] ";
-const char LEVEL_WARNING[] MEM_TYPE = "[WARN] ";
-const char LEVEL_ERROR[] MEM_TYPE   = "[ERROR]";
-const char LEVEL_FATAL[] MEM_TYPE   = "[FATAL]";
-const char LEVEL_OFF[] MEM_TYPE     = "[OFF]  ";
+const char LEVEL_TRACE[] MEM_TYPE   = "\033[1;37m[TRACE]";
+const char LEVEL_DEBUG[] MEM_TYPE   = "\033[1;37m[DEBUG]";
+const char LEVEL_INFO[] MEM_TYPE    = "\033[1;32m[INFO] ";
+const char LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN] ";
+const char LEVEL_ERROR[] MEM_TYPE   = "\033[1;31m[ERROR]";
+const char LEVEL_FATAL[] MEM_TYPE   = "\033[1;31m[FATAL]";
+const char LEVEL_OFF[] MEM_TYPE     = "\033[1;31m[OFF]  ";
 
 const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
   LEVEL_TRACE,
@@ -91,8 +91,8 @@ String Logger::formatBytes(size_t bytes)
 
 void Logger::defaultLog(Logger::Level level, const char* module, const char* message)
 {
-  Serial.print(millis());
-  Serial.print(F("\t"));
+ /* Serial.print(millis());
+  Serial.print(F("\t"));*/
   Serial.print(asString(level));
   Serial.print(F(" "));
 
@@ -102,7 +102,8 @@ void Logger::defaultLog(Logger::Level level, const char* module, const char* mes
     Serial.print(F(" "));
   }
 
-  Serial.println(message);
+  Serial.print(message);
+  Serial.println("\033[1;97m");
 }
 
 const char* Logger::asString(Logger::Level level)
