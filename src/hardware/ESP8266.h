@@ -19,6 +19,7 @@
 
 // From v1.1.0
 #include <ESP8266WiFiMulti.h>
+#include <ESP8266mDNS.h>
 
 #define WIFI_MULTI ESP8266WiFiMulti
 

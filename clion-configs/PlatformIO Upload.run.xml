@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="PlatformIO Upload" type="platformio" factoryName="PlatformIO Upload" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Production" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Production">
+  <configuration default="false" name="PlatformIO Upload" type="platformio" factoryName="PlatformIO Upload" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Production" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-eqiva" RUN_TARGET_NAME="Production">
     <method v="2">
       <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
     </method>

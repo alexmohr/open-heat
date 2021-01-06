@@ -2,9 +2,9 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="open-heat" targetName="Z_DUMMY_TARGET" />
-      <config projectName="open-heat" targetName="Production" />
-      <config projectName="open-heat" targetName="Debug" />
+      <config projectName="open-eqiva" targetName="Production" />
+      <config projectName="open-eqiva" targetName="Debug" />
+      <config projectName="open-eqiva" targetName="Z_DUMMY_TARGET" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -14,16 +14,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/sensors/TP100.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/sensors/TP100.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/arduino-project-settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hardware/ESP32.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/ESP32.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/hardware/ESP8266.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/ESP8266.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/BME280.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/BME280.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/BME280.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/BME280.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/TP100.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/TP100.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -67,6 +73,11 @@
     <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../ESPAsync_WiFiManager_debug/CMakeLists.txt" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.path.for.package.eslint" value="project" />
+    <property name="node.js.path.for.package.tslint" value="project" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
   </component>
@@ -76,7 +87,7 @@
     </key>
   </component>
   <component name="RunManager" selected="PlatformIO.PlatformIO Upload (1)">
-    <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
+    <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-eqiva" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -91,12 +102,12 @@
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
+    <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PlatformIO Upload (1)" type="platformio" factoryName="PlatformIO Upload" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Production" CONFIG_NAME="nodemcuv2">
+    <configuration name="PlatformIO Upload (1)" type="platformio" factoryName="PlatformIO Upload" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Production" CONFIG_NAME="nodemcuv2">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -130,6 +141,8 @@
       <workItem from="1609763604028" duration="1772000" />
       <workItem from="1609766709545" duration="33650000" />
       <workItem from="1609850490300" duration="10451000" />
+      <workItem from="1609884717802" duration="1786000" />
+      <workItem from="1609887689694" duration="5330000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>

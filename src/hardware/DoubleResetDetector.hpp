@@ -5,7 +5,7 @@
 #ifndef DOUBLERESETDETECTOR_HPP_
 #define DOUBLERESETDETECTOR_HPP_
 
-#define DOUBLERESETDETECTOR_DEBUG       true  //false
+#define DOUBLERESETDETECTOR_DEBUG       false
 
 #include <ESP_DoubleResetDetector.h>      //https://github.com/khoih-prog/ESP_DoubleResetDetector
 

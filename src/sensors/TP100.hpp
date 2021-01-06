@@ -13,12 +13,12 @@ namespace sensors {
 
 class TP100 : public ITemperatureSensor {
   public: // ITemperatureSensor
-      float getTemperature() override;
-    void setup() override;
+  float getTemperature() override;
+  void setup() override;
   void loop() override;
 };
 
-}
-}
+} // namespace sensors
+} // namespace open_heat
 
 #endif // OPEN_HEAT_TP100_HPP

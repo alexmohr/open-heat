@@ -22,6 +22,8 @@ static constexpr int MQTT_TOPIC_MAX_SIZE = 256;
 static constexpr int MQTT_USERNAME_MAX_SIZE = 64;
 static constexpr int MQTT_PASSWORD_MAX_SIZE = 64;
 
+static constexpr const char* HOST_NAME = "OpenHeat";
+
 typedef struct {
   char wifi_ssid[SSID_MAX_LEN];
   char wifi_pw[PASS_MAX_LEN];

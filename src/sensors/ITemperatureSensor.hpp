@@ -11,7 +11,7 @@
 
 enum TEMP_SENSORS {
   BME280 = 0,
-  TP1000
+  TP100
 };
 
 
