@@ -30,6 +30,7 @@ class MQTT {
   private:
   Filesystem& filesystem_;
   MQTTClient mqttClient_;
+  WiFiClient wiFiClient_;
 };
 } // namespace network
 } // namespace open_heat
