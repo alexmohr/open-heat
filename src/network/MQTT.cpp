@@ -16,6 +16,8 @@ void open_heat::network::MQTT::setup()
     config.MqttServer,
     config.MqttPort);
 
+
+  mqttClient_.begin(config.MqttServer, config.MqttPort, wiFiClient_);
   const char* username = nullptr;
   const char* password = nullptr;
 
@@ -37,17 +39,14 @@ void open_heat::network::MQTT::setup()
   if (!mqttClient_.connected()) {
     Logger::log(
       Logger::DEBUG,
-      "Failed to connect to mqtt in setup, check your config: "
-      "username: %s, password: %s, server %s:%i",
-      username,
-      password,
+      "Failed to connect to mqtt in setup, check your config: server %s:%i",
       config.MqttServer,
       config.MqttPort);
     return;
   }
 
   mqttClient_.subscribe(config.MqttTopic);
-  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
+  //mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 
   Logger::log(Logger::DEBUG, "MQTT connected, subscribed and callback ready");
 }
