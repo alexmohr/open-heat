@@ -27,7 +27,12 @@ void Filesystem::setup()
   listFiles();
   Logger::log(Logger::DEBUG, "FS setup done");
 
-  initConfig();
+  if (isConfigValid()) {
+    initConfig();
+  } else {
+    clearConfig();
+  }
+
 }
 
 void Filesystem::listFiles()
@@ -87,6 +92,17 @@ void Filesystem::initConfig()
 
   file.close();
   Logger::log(Logger::DEBUG, "Successfully loaded config");
+}
+
+bool Filesystem::isConfigValid()
+{
+  File file = FileFS.open(configFile_, "r");
+  if (file.size() != sizeof (Config)) {
+    Logger::log(Logger::ERROR, "Config layout changed, invalidating and new config necessary");
+    return false;
+  }
+
+  return true;
 }
 
 } // namespace open_heat

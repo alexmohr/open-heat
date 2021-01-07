@@ -10,23 +10,16 @@ open_heat::network::MQTT* open_heat::network::MQTT::instance_;
 void open_heat::network::MQTT::setup()
 {
   auto& config = filesystem_.getConfig();
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG,
-    "MQTT connection: %s:%i",
-    config.MqttServer,
-    config.MqttPort);
-
-
-  mqttClient_.begin(config.MqttServer, config.MqttPort, wiFiClient_);
+  mqttClient_.begin(config.MQTT.Server, config.MQTT.Port, wiFiClient_);
   const char* username = nullptr;
   const char* password = nullptr;
 
-  if (strlen(config.MqttUsername) > 0) {
-    username = config.MqttUsername;
+  if (strlen(config.MQTT.Username) > 0) {
+    username = config.MQTT.Username;
   }
 
-  if (strlen(config.MqttPassword) > 0) {
-    password = config.MqttPassword;
+  if (strlen(config.MQTT.Password) > 0) {
+    password = config.MQTT.Password;
   }
 
   static constexpr std::chrono::milliseconds mqttConnectTimeout(3000);
@@ -40,13 +33,13 @@ void open_heat::network::MQTT::setup()
     Logger::log(
       Logger::DEBUG,
       "Failed to connect to mqtt in setup, check your config: server %s:%i",
-      config.MqttServer,
-      config.MqttPort);
+      config.MQTT.Server,
+      config.MQTT.Port);
     return;
   }
 
-  mqttClient_.subscribe(config.MqttTopic);
-  //mqttClient_.onMessage(&MQTT::messageReceivedCallback);
+  mqttClient_.subscribe(config.MQTT.Topic);
+  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 
   Logger::log(Logger::DEBUG, "MQTT connected, subscribed and callback ready");
 }

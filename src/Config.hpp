@@ -11,16 +11,21 @@
 #include "network/WifiCredentials.hpp"
 #include <ESPAsync_WiFiManager.h>
 
-static constexpr int MIN_AP_PASSWORD_SIZE = 8;
-static constexpr int SSID_MAX_LEN = 32;
-static constexpr int PASS_MAX_LEN = 64;
+static constexpr uint8_t MIN_AP_PASSWORD_SIZE = 8;
+static constexpr uint8_t SSID_MAX_LEN = 32;
+static constexpr uint8_t PASS_MAX_LEN = 64;
 
-static constexpr int MQTT_DEFAULT_PORT = 1883;
-static constexpr char MQTT_SERVER_NAME_MAX_SIZE = 32;
-static constexpr int MQTT_PORT_STR_MAX_SIZE = 6;
-static constexpr int MQTT_TOPIC_MAX_SIZE = 256;
-static constexpr int MQTT_USERNAME_MAX_SIZE = 64;
-static constexpr int MQTT_PASSWORD_MAX_SIZE = 64;
+static constexpr uint16_t MQTT_DEFAULT_PORT = 1883;
+static constexpr uint8_t MQTT_SERVER_NAME_MAX_SIZE = 32;
+static constexpr uint8_t MQTT_PORT_STR_MAX_SIZE = 6;
+static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 255;
+static constexpr uint8_t MQTT_USERNAME_MAX_SIZE = 64;
+static constexpr uint8_t MQTT_PASSWORD_MAX_SIZE = 64;
+
+static constexpr uint8_t UPDATE_MIN_USERNAME_LEN = 1;
+static constexpr uint8_t UPDATE_MAX_USERNAME_LEN = 32;
+static constexpr uint8_t UPDATE_MIN_PW_LEN = 1;
+static constexpr uint8_t UPDATE_MAX_PW_LEN = 64;
 
 static constexpr const char* HOST_NAME = "OpenHeat";
 
@@ -34,15 +39,25 @@ typedef struct {
   String wifi_pw;
 } WiFi_Credentials_String;
 
+typedef struct MQTTSettings {
+  char Server[MQTT_SERVER_NAME_MAX_SIZE]{};
+  int Port = MQTT_DEFAULT_PORT;
+  char Topic[MQTT_TOPIC_MAX_SIZE]{};
+  char Username[MQTT_USERNAME_MAX_SIZE]{};
+  char Password[MQTT_PASSWORD_MAX_SIZE]{};
+} MQTTSettings;
+
+typedef struct UpdateSettings {
+  char Username[UPDATE_MAX_USERNAME_LEN]{};
+  char Password[UPDATE_MAX_PW_LEN]{};
+} UpdateSettings;
+
 typedef struct Config {
   WiFi_Credentials WifiCredentials[NUM_WIFI_CREDENTIALS]{{"", ""}, {"", ""}};
   WiFi_STA_IPConfig StaticIp;
+  MQTTSettings MQTT;
+  UpdateSettings Update;
 
-  char MqttServer[MQTT_SERVER_NAME_MAX_SIZE]{};
-  int MqttPort = MQTT_DEFAULT_PORT;
-  char MqttTopic[MQTT_TOPIC_MAX_SIZE]{};
-  char MqttUsername[MQTT_USERNAME_MAX_SIZE]{};
-  char MqttPassword[MQTT_PASSWORD_MAX_SIZE]{};
 } Config;
 
 #endif // WIFIMANAGERCONFIG_HPP_

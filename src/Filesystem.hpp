@@ -20,6 +20,7 @@ class Filesystem {
  private:
   void listFiles();
   void initConfig();
+  bool isConfigValid();
 
   static constexpr const char* configFile_ = "/config.dat";
 

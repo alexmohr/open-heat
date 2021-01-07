@@ -6,10 +6,11 @@
 #define LOGGER_HPP_
 
 #include "Arduino.h"
+#include "Print.h"
 
 namespace open_heat {
-class Logger {
 
+class Logger {
 public:
   enum Level
   {

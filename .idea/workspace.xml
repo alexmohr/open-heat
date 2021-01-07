@@ -2,34 +2,33 @@
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="open-eqiva" targetName="Production" />
-      <config projectName="open-eqiva" targetName="Debug" />
-      <config projectName="open-eqiva" targetName="Z_DUMMY_TARGET" />
+      <config projectName="open-heat" targetName="Z_DUMMY_TARGET" />
+      <config projectName="open-heat" targetName="Production" />
+      <config projectName="open-heat" targetName="Debug" />
     </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
       <configuration PROFILE_NAME="nodemcuv2" CONFIG_NAME="nodemcuv2" ENABLED="true" />
+      <configuration PROFILE_NAME="esp32" CONFIG_NAME="esp32" ENABLED="true" />
+      <configuration PROFILE_NAME="nodemcuv2-debug" CONFIG_NAME="nodemcuv2" GENERATION_OPTIONS="-DCMAKE_BUILD_TYPE=nodemcuv2debug" ENABLED="true" />
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.gitignore" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.idea/arduino-project-settings.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hardware/ESP32.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/ESP32.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/hardware/ESP8266.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/ESP8266.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Filesystem.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Logger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/TP100.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/TP100.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -50,9 +49,6 @@
   </component>
   <component name="MacroExpansionManager">
     <option name="directoryName" value="wjowkc07" />
-  </component>
-  <component name="OCResolveContextSettings">
-    <option name="configuration" value="0-nodemcuv2-Z_DUMMY_TARGET" />
   </component>
   <component name="ProjectId" id="1mZSiUXCM3vnXDA5doy47NIP9wM" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -79,20 +75,20 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.sourceCode" />
+    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
-  <component name="RunManager" selected="PlatformIO.PlatformIO Upload (1)">
-    <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-eqiva" RUN_TARGET_NAME="Z_DUMMY_TARGET">
+  <component name="RunManager" selected="PlatformIO.PlatformIO Upload">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+    <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -102,12 +98,7 @@
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="PlatformIO Upload (1)" type="platformio" factoryName="PlatformIO Upload" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Production" CONFIG_NAME="nodemcuv2">
+    <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -120,7 +111,6 @@
     <list>
       <item itemvalue="CMake Application.Z_DUMMY_TARGET" />
       <item itemvalue="PlatformIO.PlatformIO Upload" />
-      <item itemvalue="PlatformIO.PlatformIO Upload (1)" />
       <item itemvalue="PlatformIO.PlatformIO Debug" />
     </list>
   </component>
@@ -221,7 +211,21 @@
       <option name="project" value="LOCAL" />
       <updated>1609854031522</updated>
     </task>
-    <option name="localTasksCounter" value="12" />
+    <task id="LOCAL-00012" summary="Add color to logoutput">
+      <created>1609949802941</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1609949802941</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Fix mqtt crash">
+      <created>1609952139202</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1609952139202</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -250,7 +254,9 @@
     <MESSAGE value="Update readme.md" />
     <MESSAGE value="Add esp32 config and add nodemcuv2 to github actions." />
     <MESSAGE value="Fix #2" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix #2" />
+    <MESSAGE value="Add color to logoutput" />
+    <MESSAGE value="Fix mqtt crash" />
+    <option name="LAST_COMMIT_MESSAGE" value="Fix mqtt crash" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -259,6 +265,11 @@
           <url>file://$PROJECT_DIR$/.pio/libdeps/nodemcuv2/Adafruit BME280 Library/Adafruit_BME280.cpp</url>
           <line>81</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/network/WebServer.cpp</url>
+          <line>63</line>
+          <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

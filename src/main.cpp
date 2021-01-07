@@ -18,30 +18,31 @@
 
 static constexpr std::chrono::milliseconds wifiCheckInterval(5000);
 
-AsyncWebServer asyncWebServer_(80);
+
 DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 
+#if TEMP_SENSOR == BME280
+open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
+#elif TEMP_SENSOR == TP100
+open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::TP100();
+#else
+#error "Not supported temp sensor"
+#endif
+
 open_heat::Filesystem filesystem_;
 open_heat::network::MQTT mqtt_(filesystem_);
-open_heat::network::WebServer webServer_();
+open_heat::network::WebServer webServer_(filesystem_, *tempSensor_);
 open_heat::network::WifiManager wifiManager_(
   wifiCheckInterval,
   &filesystem_,
-  &asyncWebServer_,
+  webServer_.getWebServer(),
   &dnsServer_,
   &drd_);
 
 // open_heat::network::MQTT mqtt_(filesystem_);
 
-#if TEMP_SENSOR == BME280
-open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
-#endif
-#if TEMP_SENSOR == TP100
-// open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::TP100();
-#else
-#error "Not supported temp sensor"
-#endif
+
 
 void waitForSerialPort()
 {
@@ -54,7 +55,6 @@ void waitForSerialPort()
 
 void rotateMotor()
 {
-
   open_heat::Logger::log(open_heat::Logger::INFO, "Testing motor");
   digitalWrite(D5, HIGH);
   digitalWrite(D6, LOW);
@@ -97,7 +97,9 @@ void setup()
   logVersions();
 
   filesystem_.setup();
+
   wifiManager_.setup();
+  webServer_.setup();
   mqtt_.setup();
 
   tempSensor_->setup();
