@@ -1,0 +1,168 @@
+<html lang='en'>
+
+<head>
+    <meta charset='utf-8'>
+    <meta name='viewport' content='width=device-width,initial-scale=1' />
+
+    <style>
+        html {
+            background-color: #424242;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-size: 16px;
+            font-family: 'Roboto', sans-serif;
+            font-weight: 300;
+            color: #4a4a4a;
+            border-radius: 5%;
+        }
+
+        input {
+            border: none;
+            border-radius: 1%;
+            padding: 1rem;
+            margin: 0.25em;
+            font-size: 1rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+        }
+
+        label {
+            margin-right: 1em;
+            font-size: 1.15rem;
+            display: inline-block;
+            width: 75px;
+        }
+
+        .btn {
+            background: #303F9F;
+            color:#EEEEEE;
+        }
+
+        .flex-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .flex-nav {
+            flex-grow: 1;
+            flex-shrink: 0;
+            background: #303F9F;
+            height: 3rem;
+        }
+
+        .flex-menu {
+            padding: 1rem 2rem;
+            float: right;
+        }
+
+        .featured {
+            background: #3F51B5;
+            color: #ffffff;
+            padding: 1em;
+        }
+
+        .featured h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            font-weight: 300;
+        }
+
+        .flex-card {
+            flex: 1;
+            flex-grow: 1;
+            flex-shrink: 0;
+            flex-basis: 400px;
+            display: flex;
+            flex-wrap: wrap;
+            background: #ffffff;
+            margin: .5rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+        }
+
+
+        .flex-card:hover {
+            box-shadow: 0 20px 28px rgba(0, 0, 0, 0.75), 0 10px 10px rgba(0, 0, 0, 0.22);
+        }
+
+        .flex-card div {
+            flex: 100%;
+        }
+
+        .flex-card .hero {
+            position: relative;
+            color: #ffffff;
+            height: 75px;
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)) no-repeat;
+            background-size: cover;
+        }
+
+        .flex-card .hero h3 {
+            position: absolute;
+            bottom: 15px;
+            left: 0;
+            padding: 0 1rem;
+        }
+
+        .flex-card .content {
+            color: #555;
+            padding: 1.5rem 1rem 2rem 1rem;
+        }
+
+    </style>
+</head>
+
+<body>
+<div class="flex-container">
+    <div class="flex-nav">
+    </div>
+</div>
+
+<div class="featured">
+    <h1>Open Heat</h1>
+</div>
+
+<div class="flex-container animated zoomIn">
+    <div class="flex-card">
+        <div class="hero">
+            <h3>Temperature</h3>
+        </div>
+        <div class="content">
+            <label for="currentTemp">Measured</label>
+            <input readonly="readonly" id="currentTemp" value="{CURRENT_TEMP}"><br>
+
+            <label for="setTemp">Set</label>
+            <input id="setTemp" type="number" value="{SET_TEMP}"><br>
+        </div>
+    </div>
+    <div class="flex-card">
+        <div class="hero">
+            <h3>Update Firmware</h3>
+        </div>
+        <div class="content">
+            <form method='POST' action='/installUpdate' enctype='multipart/form-data'>
+                <input type='file' accept='.bin,.bin.gz' name='firmware' >
+                <input type='submit' value='Update Firmware' class="btn" >
+            </form>
+        </div>
+    </div>
+    <div class="flex-card">
+        <div class="hero">
+            <h3>Log</h3>
+        </div>
+        <div class="content">
+            <form method='POST' action='/installUpdate' enctype='multipart/form-data'>
+                <input type='file' accept='.bin,.bin.gz' name='firmware' >
+                <input type='submit' value='Update Firmware' class="btn" >
+            </form>
+        </div>
+    </div>
+
+</div>
+</body>
+
+</html>

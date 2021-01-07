@@ -17,7 +17,7 @@ class WifiManager {
   WifiManager(
     std::chrono::milliseconds checkInterval,
     Filesystem* filesystem,
-    AsyncWebServer* webServer,
+    AsyncWebServer& webServer,
     DNSServer* dnsServer,
     DoubleResetDetector* drd) :
       checkInterval_(checkInterval),
@@ -49,7 +49,7 @@ class WifiManager {
   unsigned char reconnectCount_ = 0;
   unsigned char maxReconnects_ = 50;
 
-  AsyncWebServer* webServer_{};
+  AsyncWebServer& webServer_;
   DNSServer* dnsServer_{};
   WIFI_MULTI wifiMulti_{};
   DoubleResetDetector* drd_{};
@@ -85,12 +85,26 @@ class WifiManager {
     "",
     MQTT_PASSWORD_MAX_SIZE};
 
-  ESPAsync_WMParameter* additionalParameters_[5] = {
+    ESPAsync_WMParameter paramUpdateUsername_{
+    "UpdateUsername",
+    "Update Username",
+    "",
+    UPDATE_MAX_USERNAME_LEN};
+
+  ESPAsync_WMParameter paramUpdatePassword_{
+    "UpdatePassword",
+    "UpdateUser Password",
+    "",
+    UPDATE_MAX_PW_LEN};
+
+  ESPAsync_WMParameter* additionalParameters_[7] = {
     &paramMqttServer_,
     &paramMqttPortString_,
     &paramMqttTopic_,
     &paramMqttUsername_,
     &paramMqttPassword_,
+    &paramUpdateUsername_,
+    &paramUpdatePassword_,
   };
 
 #define NUMBER_PARAMETERS (sizeof(AIO_SERVER_TOTAL_DATA) / sizeof(WMParam_Data))
