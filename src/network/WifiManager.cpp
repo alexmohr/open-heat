@@ -13,7 +13,8 @@ void WifiManager::setup()
 {
   digitalWrite(LED_BUILTIN, LED_ON);
 
-  ESPAsync_WiFiManager espWifiManager(&webServer_, dnsServer_, HOST_NAME);
+  auto &config = filesystem_->getConfig();
+  ESPAsync_WiFiManager espWifiManager(&webServer_, dnsServer_, config.Hostname);
 
   // Check if any config is valid.
   bool startConfigPortal = !loadAPsFromConfig();
@@ -43,7 +44,7 @@ bool WifiManager::loadAPsFromConfig()
     if (
       (String(config.WifiCredentials[i].wifi_ssid) == "")
       || (strlen(config.WifiCredentials[i].wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
-      Logger::log(Logger::INFO, "Wifi config in slot %i is not valid", i);
+      Logger::log(Logger::DEBUG, "Wifi config in slot %i is invalid", i);
       continue;
     }
 
@@ -117,6 +118,35 @@ void WifiManager::updateConfig(ESPAsync_WiFiManager* espWifiManager)
   updateWifiCredentials(espWifiManager);
 
   auto& config = filesystem_->getConfig();
+  clearSettings(config);
+  updateSettings(config);
+}
+
+void WifiManager::updateSettings(Config& config)
+{
+  // Host
+  strcpy(config.Hostname, paramHostname_.getValue());
+
+  // MQTT
+  strcpy(config.MQTT.Server, paramMqttServer_.getValue());
+  strcpy(config.MQTT.Topic, paramMqttTopic_.getValue());
+  strcpy(config.MQTT.Username, paramMqttUsername_.getValue());
+  strcpy(config.MQTT.Password, paramMqttPassword_.getValue());
+
+  // Update
+  strcpy(config.Update.Username, paramUpdateUsername_.getValue());
+  strcpy(config.Update.Password, paramUpdatePassword_.getValue());
+
+  auto newPort = static_cast<unsigned short>(strtol(paramMqttPortString_.getValue(), nullptr, 10));
+  config.MQTT.Port = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
+
+  filesystem_->persistConfig();
+}
+
+void WifiManager::clearSettings( Config& config)
+{
+  // Clear settings - Host
+  memset(&config.Hostname, 0, sizeof(config.Hostname));
 
   // Clear settings - MQTT
   memset(&config.MQTT.Server, 0, sizeof(config.MQTT.Server));
@@ -127,22 +157,6 @@ void WifiManager::updateConfig(ESPAsync_WiFiManager* espWifiManager)
   // Clear settings - Update
   memset(&config.Update.Username, 0, sizeof(config.Update.Username));
   memset(&config.Update.Password, 0, sizeof(config.Update.Password));
-
-  // Update settings - MQTT
-  strcpy(config.MQTT.Server, paramMqttServer_.getValue());
-  strcpy(config.MQTT.Topic, paramMqttTopic_.getValue());
-  strcpy(config.MQTT.Username, paramMqttUsername_.getValue());
-  strcpy(config.MQTT.Password, paramMqttPassword_.getValue());
-
-  // Update settings - Update
-  strcpy(config.Update.Username, paramUpdateUsername_.getValue());
-  strcpy(config.Update.Password, paramUpdatePassword_.getValue());
-
-  char* pEnd;
-  const int newPort = std::strtol(paramMqttPortString_.getValue(), &pEnd, 10);
-  config.MQTT.Port = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
-
-  filesystem_->persistConfig();
 }
 
 void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) const
@@ -178,13 +192,12 @@ void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) co
 
 void WifiManager::loop()
 {
-  ulong currentMillis = millis();
-
   // Check WiFi periodically.
-  if (currentMillis > nextWifiCheckMillis_) {
-    checkWifi();
-    nextWifiCheckMillis_ = currentMillis + checkInterval_.count();
-  }
+  if ( millis() < nextWifiCheckMillis_)
+    return;
+
+  checkWifi();
+  nextWifiCheckMillis_ = millis() + checkInterval_.count();
 }
 
 void WifiManager::checkWifi()
@@ -274,6 +287,11 @@ void WifiManager::initAdditionalParams()
 {
   auto& config = filesystem_->getConfig();
   WMParam_Data paramData;
+
+  // Host
+  paramHostname_.getWMParam_Data(paramData);
+  strcpy(paramData._value, config.Hostname);
+  paramHostname_.setWMParam_Data(paramData);
 
   // MQTT
   paramMqttServer_.getWMParam_Data(paramData);

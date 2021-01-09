@@ -27,7 +27,9 @@ static constexpr uint8_t UPDATE_MAX_USERNAME_LEN = 32;
 static constexpr uint8_t UPDATE_MIN_PW_LEN = 1;
 static constexpr uint8_t UPDATE_MAX_PW_LEN = 64;
 
-static constexpr const char* HOST_NAME = "OpenHeat";
+static constexpr uint8_t HOST_NAME_MAX_LEN = 32;
+
+static constexpr const char* DEFAULT_HOST_NAME = "OpenHeat";
 
 typedef struct {
   char wifi_ssid[SSID_MAX_LEN];
@@ -41,7 +43,7 @@ typedef struct {
 
 typedef struct MQTTSettings {
   char Server[MQTT_SERVER_NAME_MAX_SIZE]{};
-  int Port = MQTT_DEFAULT_PORT;
+  unsigned short Port = MQTT_DEFAULT_PORT;
   char Topic[MQTT_TOPIC_MAX_SIZE]{};
   char Username[MQTT_USERNAME_MAX_SIZE]{};
   char Password[MQTT_PASSWORD_MAX_SIZE]{};
@@ -57,6 +59,7 @@ typedef struct Config {
   WiFi_STA_IPConfig StaticIp;
   MQTTSettings MQTT;
   UpdateSettings Update;
+  char Hostname[HOST_NAME_MAX_LEN]{};
 
 } Config;
 

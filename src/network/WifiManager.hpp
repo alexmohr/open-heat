@@ -44,6 +44,9 @@ class WifiManager {
   void initSTAIPConfigStruct(WiFi_STA_IPConfig& ipConfig);
   void initAdditionalParams();
 
+  static void clearSettings(Config& config);
+  void updateSettings(Config& config);
+
   const std::chrono::milliseconds checkInterval_;
   ulong nextWifiCheckMillis_ = 0;
   unsigned char reconnectCount_ = 0;
@@ -85,7 +88,7 @@ class WifiManager {
     "",
     MQTT_PASSWORD_MAX_SIZE};
 
-    ESPAsync_WMParameter paramUpdateUsername_{
+  ESPAsync_WMParameter paramUpdateUsername_{
     "UpdateUsername",
     "Update Username",
     "",
@@ -97,7 +100,14 @@ class WifiManager {
     "",
     UPDATE_MAX_PW_LEN};
 
-  ESPAsync_WMParameter* additionalParameters_[7] = {
+  ESPAsync_WMParameter paramHostname_{
+    "Hostname",
+    "Hostname",
+    DEFAULT_HOST_NAME,
+    HOST_NAME_MAX_LEN};
+
+  ESPAsync_WMParameter* additionalParameters_[8] = {
+    &paramHostname_,
     &paramMqttServer_,
     &paramMqttPortString_,
     &paramMqttTopic_,
@@ -106,8 +116,6 @@ class WifiManager {
     &paramUpdateUsername_,
     &paramUpdatePassword_,
   };
-
-#define NUMBER_PARAMETERS (sizeof(AIO_SERVER_TOTAL_DATA) / sizeof(WMParam_Data))
 
 // Use USE_DHCP_IP == true for dynamic DHCP IP, false to use static IP which you
 // have to change accordingly to your network

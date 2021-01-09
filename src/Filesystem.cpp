@@ -91,6 +91,10 @@ void Filesystem::initConfig()
   file.readBytes((char*)&config_, sizeof(Config));
 
   file.close();
+  if (0 == strlen(config_.Hostname)) {
+    strcpy(config_.Hostname, DEFAULT_HOST_NAME);
+  }
+
   Logger::log(Logger::DEBUG, "Successfully loaded config");
 }
 
