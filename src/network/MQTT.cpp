@@ -5,11 +5,15 @@
 #include "MQTT.hpp"
 #include <Logger.hpp>
 
-open_heat::network::MQTT* open_heat::network::MQTT::instance_;
 
 void open_heat::network::MQTT::setup()
 {
   auto& config = filesystem_.getConfig();
+  if (strlen(config.MQTT.Server) == 0 || config.MQTT.Port == 0) {
+    Logger::log(
+      Logger::DEBUG, "MQTT Server or port not set up");
+  }
+
   mqttClient_.begin(config.MQTT.Server, config.MQTT.Port, wiFiClient_);
   const char* username = nullptr;
   const char* password = nullptr;
@@ -25,7 +29,7 @@ void open_heat::network::MQTT::setup()
   static constexpr std::chrono::milliseconds mqttConnectTimeout(3000);
   unsigned long startMillis = millis();
   unsigned long stopMillis = startMillis + mqttConnectTimeout.count();
-  while (!mqttClient_.connect("open_heat", username, password) && stopMillis < millis()) {
+  while (!mqttClient_.connect(config.Hostname, username, password) && stopMillis < millis()) {
     delay(200);
   }
 
@@ -46,6 +50,20 @@ void open_heat::network::MQTT::setup()
 
 void open_heat::network::MQTT::loop()
 {
+  mqttClient_.loop();
+
+  if (!mqttClient_.connected()) {
+    setup();
+  }
+
+  if (millis() < nextCheckMillis_) {
+    return;
+  }
+
+  const auto& config = filesystem_.getConfig();
+  Logger::log(Logger::DEBUG, "Sending MQTT update");
+  publish(config.MQTT.Topic, String(tempSensor_.getTemperature()));
+  nextCheckMillis_ = millis() + checkIntervalMillis_;
 }
 
 void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& payload)
@@ -55,4 +73,11 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
     "Received message in topic: %s, msg: %s",
     topic.c_str(),
     payload.c_str());
+}
+
+void open_heat::network::MQTT::publish(const String& topic, const String& message)
+{
+ if (! mqttClient_.publish(topic, message)){
+   Logger::log(Logger::ERROR, "Mqtt publish failed: %i" ,mqttClient_.lastError());
+ }
 }

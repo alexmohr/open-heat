@@ -2,16 +2,21 @@
 
 <head>
     <meta charset='utf-8'>
-    <meta name='viewport' content='width=device-width,initial-scale=1' />
-
+    <meta name="viewport" content="width=device-width, user-scalable=no">
     <style>
         html {
-            background-color: #424242;
+            background-color: #212121;
+        }
+
+        a {
+            text-decoration: none;
         }
 
         * {
             margin: 0;
             padding: 0;
+            color: #E0E0E0;
+            overflow-x: hidden;
         }
 
         body {
@@ -19,28 +24,66 @@
             font-family: 'Roboto', sans-serif;
             font-weight: 300;
             color: #4a4a4a;
-            border-radius: 5%;
+
         }
 
         input {
+            width: 120px;
+            background: #212121;
             border: none;
             border-radius: 1%;
             padding: 1rem;
+            height: 50px;
             margin: 0.25em;
             font-size: 1rem;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+        }
+
+        .input-group-text {
+            width: 120px;
+            background: #212121;
+            border: none;
+            border-radius: 1%;
+            padding: 1rem;
+            height: 50px;
+            margin-left: -0.5em;
+            z-index: -1;
+            font-size: 1rem;
+            box-shadow: 0 10px 20px -20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+
+        }
+
+        .inputMedium {
+            width: 155px;
+        }
+
+        .inputSmall {
+            width: 85px;
+        }
+
+        .inputLarge {
+            width: 260px;
         }
 
         label {
             margin-right: 1em;
             font-size: 1.15rem;
             display: inline-block;
-            width: 75px;
+            width: 85px;
+        }
+
+        .break {
+            flex-basis: 100%;
+            height: 0;
         }
 
         .btn {
             background: #303F9F;
             color:#EEEEEE;
+            border-radius: 4px;
+        }
+        .btnLarge {
+            width: 262px;
         }
 
         .flex-container {
@@ -67,19 +110,19 @@
         }
 
         .featured h1 {
-            font-size: 3rem;
+            font-size: 2rem;
             margin-bottom: 1rem;
             font-weight: 300;
         }
 
         .flex-card {
+            overflow-y: hidden;
             flex: 1;
-            flex-grow: 1;
             flex-shrink: 0;
             flex-basis: 400px;
             display: flex;
             flex-wrap: wrap;
-            background: #ffffff;
+            background: #263238;
             margin: .5rem;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
         }
@@ -96,7 +139,7 @@
         .flex-card .hero {
             position: relative;
             color: #ffffff;
-            height: 75px;
+            height: 70px;
             background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)) no-repeat;
             background-size: cover;
         }
@@ -108,8 +151,13 @@
             padding: 0 1rem;
         }
 
+        .content {
+            min-height: 100%;
+            min-width: 400px;
+        }
+
         .flex-card .content {
-            color: #555;
+            color: #BDBDBD;
             padding: 1.5rem 1rem 2rem 1rem;
         }
 
@@ -123,7 +171,7 @@
 </div>
 
 <div class="featured">
-    <h1>Open Heat</h1>
+    <h1><a href="/">Open Heat</a></h1>
 </div>
 
 <div class="flex-container animated zoomIn">
@@ -133,32 +181,81 @@
         </div>
         <div class="content">
             <label for="currentTemp">Measured</label>
-            <input readonly="readonly" id="currentTemp" value="{CURRENT_TEMP}"><br>
+            <input class="inputSmall" readonly="readonly" id="currentTemp" value="{CURRENT_TEMP}">
+            <span class="input-group-text">°C</span><br>
 
-            <label for="setTemp">Set</label>
-            <input id="setTemp" type="number" value="{SET_TEMP}"><br>
+            <form method='POST' action='/' enctype='multipart/form-data'>
+                <label for="setTemp">Set</label>
+                <input class="inputSmall" id="setTemp" name="setTemp" type="number" value="{SET_TEMP}">
+                <span class="input-group-text">°C</span>
+                <input type='submit' value='Confirm' class="btn" >
+            </form>
+            <form method='POST' action='/off' enctype='multipart/form-data'>
+                <label></label>
+                <input type='submit' value='Turn off' class="btn btnLarge" >
+            </form>
         </div>
     </div>
     <div class="flex-card">
         <div class="hero">
-            <h3>Update Firmware</h3>
+            <h3>Settings</h3>
         </div>
         <div class="content">
-            <form method='POST' action='/installUpdate' enctype='multipart/form-data'>
-                <input type='file' accept='.bin,.bin.gz' name='firmware' >
-                <input type='submit' value='Update Firmware' class="btn" >
+            <h3>Network</h3>
+            <form method='POST' action='/' enctype='multipart/form-data'>
+                <label for="netHost">Hostname</label>
+                <input id="netHost" class="inputLarge" name="netHost" value="{HOSTNAME}"><br>
+
+            <h3>MQTT</h3>
+                <label for="mqttHost">Host</label>
+                <input id="mqttHost" class="inputMedium" name="mqttHost" value="{MQTT_HOST}"> :
+                <input size="3" id="mqttPort" class="inputSmall" name="mqttPort" value="{MQTT_PORT}"><br>
+
+                <label for="mqttTopic">Topic</label>
+                <input id="mqttTopic" class="inputLarge" name="mqttTopic" value="{MQTT_TOPIC}"><br>
+
+                <label for="mqttUsername">Username</label>
+                <input id="mqttUsername" class="inputLarge" name="mqttUsername" value="{MQTT_USER}"><br>
+
+                <label for="mqttPassword">Password</label>
+                <input id="mqttPassword" class="inputLarge" name="mqttPassword" value="{MQTT_PW}">
+
+                <br>
+                <br>
+                <input type='submit' value='Update settings'  class="btn btnLarge" >
             </form>
+
         </div>
+
     </div>
+    <div class="flex-card">
+        <div class="hero">
+            <h3>System</h3>
+        </div>
+
+        <div class="content">
+            <h3>Firmware update</h3>
+            <form method='POST' action='/installUpdate' enctype='multipart/form-data'>
+                <input type='file' class="input inputLarge" accept='.bin,.bin.gz' name='firmware' >
+                <input type='submit'  value='Update' class="btn" >
+            </form>
+            <br>
+<!--            <h3>Control</h3>-->
+<!--            <form method='GET' action='/restart' enctype='multipart/form-data'>-->
+<!--                <input type='submit' value='Restart' class="btn" >-->
+<!--            </form>-->
+        </div>
+
+
+    </div>
+
+    <div class="break"></div>
     <div class="flex-card">
         <div class="hero">
             <h3>Log</h3>
         </div>
         <div class="content">
-            <form method='POST' action='/installUpdate' enctype='multipart/form-data'>
-                <input type='file' accept='.bin,.bin.gz' name='firmware' >
-                <input type='submit' value='Update Firmware' class="btn" >
-            </form>
+          {LOG_DATA}
         </div>
     </div>
 

@@ -8,15 +8,20 @@
 #include "hardware/HAL.hpp"
 #include <ESPAsyncWebServer.h>
 #include <Filesystem.hpp>
+#include <heating/RadiatorValve.hpp>
 #include <sensors/ITemperatureSensor.hpp>
 
 namespace open_heat {
 namespace network {
 class WebServer {
   public:
-  WebServer(Filesystem& filesystem, sensors::ITemperatureSensor& tempSensor) :
+      WebServer(
+        Filesystem& filesystem,
+        sensors::ITemperatureSensor& tempSensor,
+        open_heat::heating::RadiatorValve& valve) :
       filesystem_(filesystem),
       tempSensor_(tempSensor),
+          valve_(valve),
       asyncWebServer_(AsyncWebServer(80))
   {
   }
@@ -32,14 +37,14 @@ class WebServer {
   private:
   Filesystem& filesystem_;
   sensors::ITemperatureSensor& tempSensor_;
+  open_heat::heating::RadiatorValve& valve_;
+
   String htmlBuffer_;
 
   AsyncWebServer asyncWebServer_;
-  String updateUser_ = "";
-  String updatePassword_ = "";
 
   static constexpr const char* CONTENT_TYPE_HTML = "text/html";
-  enum HtmlReturnCode { OK = 200, DENIED = 403, NOT_FOUND = 404 };
+  enum HtmlReturnCode { HTTP_OK = 200, HTTP_DENIED = 403, HTTP_NOT_FOUND = 404 };
 
   static void installUpdateHandleUpload(
     const String& filename,
@@ -47,6 +52,17 @@ class WebServer {
     uint8_t* data,
     size_t len,
     bool final);
+  void updateHTML();
+  static bool updateField(
+  AsyncWebServerRequest* request,
+  const char* paramName,
+  char* field,
+  int fieldLen);
+  void rootHandleGet(AsyncWebServerRequest* request);
+  void rootHandlePost(AsyncWebServerRequest* pRequest);
+  void updateSetTemp(const AsyncWebServerRequest* request);
+  void offHandlePost(AsyncWebServerRequest* pRequest);
+  void updateConfig(AsyncWebServerRequest* request);
 };
 
 } // namespace network
