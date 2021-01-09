@@ -44,6 +44,7 @@ void open_heat::heating::RadiatorValve::loop()
   unsigned short rotateTime = 500;
   const float lastFactor = 0.75f;
   float diff;
+  String direction;
   if (temp > maxTemp) {
     diff = maxTemp - temp;
 
@@ -54,6 +55,7 @@ void open_heat::heating::RadiatorValve::loop()
     }
 
     rotateTime = static_cast<unsigned short>((float)rotateTime * std::abs(diff));
+    direction = "close";
     closeValve(rotateTime);
   } else {
     diff = minTemp - temp;
@@ -66,6 +68,7 @@ void open_heat::heating::RadiatorValve::loop()
 
 
     rotateTime = static_cast<unsigned short>((float)rotateTime * std::abs(diff));
+    direction = "open";
     openValve(rotateTime);
   }
 
@@ -73,8 +76,9 @@ void open_heat::heating::RadiatorValve::loop()
 
   open_heat::Logger::log(
     open_heat::Logger::DEBUG,
-    "Corrected temperature difference %f, rotated valve for %ims",
+    "Corrected temperature difference %f, %s valve for %ims",
     diff,
+    direction.c_str(),
     rotateTime);
 
   nextCheckMillis_ = millis() + checkIntervalMillis_;

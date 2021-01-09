@@ -16,23 +16,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RadiatorValve.cpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RadiatorValve.hpp" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -137,7 +123,7 @@
       <workItem from="1609850490300" duration="10451000" />
       <workItem from="1609884717802" duration="1786000" />
       <workItem from="1609887689694" duration="5330000" />
-      <workItem from="1610196206830" duration="30872000" />
+      <workItem from="1610196206830" duration="31879000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -230,7 +216,14 @@
       <option name="project" value="LOCAL" />
       <updated>1609952139202</updated>
     </task>
-    <option name="localTasksCounter" value="14" />
+    <task id="LOCAL-00014" summary="add heating algorithm">
+      <created>1610233504588</created>
+      <option name="number" value="00014" />
+      <option name="presentableId" value="LOCAL-00014" />
+      <option name="project" value="LOCAL" />
+      <updated>1610233504588</updated>
+    </task>
+    <option name="localTasksCounter" value="15" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -261,7 +254,8 @@
     <MESSAGE value="Fix #2" />
     <MESSAGE value="Add color to logoutput" />
     <MESSAGE value="Fix mqtt crash" />
-    <option name="LAST_COMMIT_MESSAGE" value="Fix mqtt crash" />
+    <MESSAGE value="add heating algorithm" />
+    <option name="LAST_COMMIT_MESSAGE" value="add heating algorithm" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
