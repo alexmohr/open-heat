@@ -25,15 +25,8 @@ void open_heat::network::MQTT::setup()
   if (strlen(config.MQTT.Password) > 0) {
     password = config.MQTT.Password;
   }
-
-  static constexpr std::chrono::milliseconds mqttConnectTimeout(3000);
-  unsigned long startMillis = millis();
-  unsigned long stopMillis = startMillis + mqttConnectTimeout.count();
-  while (!mqttClient_.connect(config.Hostname, username, password) && stopMillis < millis()) {
-    delay(200);
-  }
-
-  if (!mqttClient_.connected()) {
+  
+  if (!mqttClient_.connect(config.Hostname, username, password)) {
     Logger::log(
       Logger::DEBUG,
       "Failed to connect to mqtt in setup, check your config: server %s:%i",
