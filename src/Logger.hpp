@@ -8,6 +8,17 @@
 #include "Arduino.h"
 #include "Print.h"
 
+#if defined(ARDUINO_ARCH_AVR)
+#include <avr/pgmspace.h>
+#endif
+
+// There appears to be an incompatibility with ESP8266 2.3.0.
+#if defined(ESP8266)
+#define MEM_TYPE
+#else
+#define MEM_TYPE PROGMEM
+#endif
+
 namespace open_heat {
 
 class Logger {
@@ -22,9 +33,10 @@ public:
    FATAL,
   };
 
-  typedef void (*LoggerOutputFunction)(Level level,
+
+  typedef std::function<void(Level level,
                                        const char* module,
-                                       const char* message);
+                                       const char* message)> LoggerOutputFunction;
 
   static void setup();
 
@@ -37,20 +49,19 @@ public:
 
   static String formatBytes(size_t bytes);
 
+  static void addPrinter(LoggerOutputFunction outFun);
+
  private:
-   Logger() = default;
+   Logger();
    Logger(const Logger &);
   void operator = (const Logger &);
 
   static Logger & getInstance();
   static void defaultLog(Level level, const char* module, const char* message);
 
-  LoggerOutputFunction loggerOutputFunction_;
+  std::vector<LoggerOutputFunction> loggerOutputFunctions_;
 
-
-  Level level_;
-
-  //static std::array<char, 256> logBuffer_;
+  Level level_{Level::DEBUG};
 };
 }
 

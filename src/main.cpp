@@ -34,9 +34,10 @@ open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::TP
 #endif
 
 open_heat::Filesystem filesystem_;
-open_heat::network::MQTT mqtt_(filesystem_, *tempSensor_);
 
-open_heat::heating::RadiatorValve valve_(*tempSensor_);
+
+open_heat::heating::RadiatorValve valve_(*tempSensor_, filesystem_);
+open_heat::network::MQTT mqtt_(filesystem_, *tempSensor_, &valve_);
 open_heat::network::WebServer webServer_(filesystem_, *tempSensor_, valve_);
 
 
@@ -73,7 +74,6 @@ void waitForSerialPort()
     delay(200);
   }
   Serial.println("");
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Serial port ready");
 }
 
 void setupPins()
@@ -113,10 +113,12 @@ void setup()
 
   wifiManager_.setup();
 
-  mqtt_.setup();
 
   valve_.setup();
   webServer_.setup();
+  mqtt_.setup();
+
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Setup done");
 }
 
 void loop()
