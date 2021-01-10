@@ -1,11 +1,51 @@
 <html lang='en'>
 
 <head>
+    <title>Open Heat</title>
     <meta charset='utf-8'>
     <meta name="viewport" content="width=device-width, user-scalable=no">
+    <script>
+        if (!!window.EventSource) {
+            const logEvents = new EventSource('/logEvents');
+
+
+            logEvents.addEventListener('message', function(e) {
+                const div = document.getElementById('logDiv');
+                const paragraph = document.createElement("p");
+                const text = document.createTextNode(e.data);
+                const str = JSON.stringify(e.data);
+                if (str.includes("[DEBUG]") || str.includes("[TRACE]")) {
+                    paragraph.className = "logDebug";
+                } else if (str.includes("[INFO]")) {
+                    paragraph.className = "logInfo";
+                } else {
+                    paragraph.className = "logError";
+                }
+
+                paragraph.appendChild(text);
+                div.insertBefore(paragraph, div.firstChild);
+            }, false);
+
+         //   const tempEvents = new EventSource('/tempEvents');
+         /*   tempEvents.addEventListener('message', function(e) {
+                if (e.data.contains("set:")) {
+                    const input = document.getElementById("setTemp");
+                } else if (e.data.contains("is:")) {
+                    const input = document.getElementById("currentTemp");
+                    input.value = e.data.split(":")[1];
+                }
+
+            }, false);*/
+
+        }
+    </script>
     <style>
         html {
             background-color: #212121;
+        }
+
+        p {
+            font-weight: 500;
         }
 
         a {
@@ -29,9 +69,9 @@
 
         input {
             width: 120px;
-            background: #212121;
+            background: #121212;
             border: none;
-            border-radius: 1%;
+            border-radius: 4px;
             padding: 1rem;
             height: 50px;
             margin: 0.25em;
@@ -41,9 +81,9 @@
 
         .input-group-text {
             width: 120px;
-            background: #212121;
+            background: #121212;
             border: none;
-            border-radius: 1%;
+            border-radius: 4px;
             padding: 1rem;
             height: 50px;
             margin-left: -0.5em;
@@ -73,7 +113,7 @@
         }
 
         .break {
-            flex-basis: 100%;
+            flex-basis: 100%%;
             height: 0;
         }
 
@@ -122,18 +162,13 @@
             flex-basis: 400px;
             display: flex;
             flex-wrap: wrap;
-            background: #263238;
+            background: #212121;
             margin: .5rem;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
         }
 
-
-        .flex-card:hover {
-            box-shadow: 0 20px 28px rgba(0, 0, 0, 0.75), 0 10px 10px rgba(0, 0, 0, 0.22);
-        }
-
         .flex-card div {
-            flex: 100%;
+            flex: 100%%;
         }
 
         .flex-card .hero {
@@ -152,7 +187,7 @@
         }
 
         .content {
-            min-height: 100%;
+            min-height: 100%%;
             min-width: 400px;
         }
 
@@ -161,7 +196,18 @@
             padding: 1.5rem 1rem 2rem 1rem;
         }
 
+        .logInfo {
+            color: #2E7D32;
+        }
+        .logDebug {
+            color: #757575;
+        }
+        .logError {
+            color: #b71c1c;
+        }
+
     </style>
+
 </head>
 
 <body>
@@ -181,12 +227,12 @@
         </div>
         <div class="content">
             <label for="currentTemp">Measured</label>
-            <input class="inputSmall" readonly="readonly" id="currentTemp" value="{CURRENT_TEMP}">
+            <input class="inputSmall" readonly="readonly" id="currentTemp" value="%CURRENT_TEMP%">
             <span class="input-group-text">°C</span><br>
 
             <form method='POST' action='/' enctype='multipart/form-data'>
                 <label for="setTemp">Set</label>
-                <input class="inputSmall" id="setTemp" name="setTemp" type="number" value="{SET_TEMP}">
+                <input class="inputSmall" id="setTemp" name="setTemp" type="number" value="%SET_TEMP%">
                 <span class="input-group-text">°C</span>
                 <input type='submit' value='Confirm' class="btn" >
             </form>
@@ -204,21 +250,21 @@
             <h3>Network</h3>
             <form method='POST' action='/' enctype='multipart/form-data'>
                 <label for="netHost">Hostname</label>
-                <input id="netHost" class="inputLarge" name="netHost" value="{HOSTNAME}"><br>
+                <input id="netHost" class="inputLarge" name="netHost" value="%HOSTNAME%"><br>
 
             <h3>MQTT</h3>
                 <label for="mqttHost">Host</label>
-                <input id="mqttHost" class="inputMedium" name="mqttHost" value="{MQTT_HOST}"> :
-                <input size="3" id="mqttPort" class="inputSmall" name="mqttPort" value="{MQTT_PORT}"><br>
+                <input id="mqttHost" class="inputMedium" name="mqttHost" value="%MQTT_HOST%"> :
+                <input size="3" id="mqttPort" class="inputSmall" name="mqttPort" value="%MQTT_PORT%"><br>
 
                 <label for="mqttTopic">Topic</label>
-                <input id="mqttTopic" class="inputLarge" name="mqttTopic" value="{MQTT_TOPIC}"><br>
+                <input id="mqttTopic" class="inputLarge" name="mqttTopic" value="%MQTT_TOPIC%"><br>
 
                 <label for="mqttUsername">Username</label>
-                <input id="mqttUsername" class="inputLarge" name="mqttUsername" value="{MQTT_USER}"><br>
+                <input id="mqttUsername" class="inputLarge" name="mqttUsername" value="%MQTT_USER%"><br>
 
                 <label for="mqttPassword">Password</label>
-                <input id="mqttPassword" class="inputLarge" name="mqttPassword" value="{MQTT_PW}">
+                <input id="mqttPassword" class="inputLarge" name="mqttPassword" value="%MQTT_PW%">
 
                 <br>
                 <br>
@@ -254,8 +300,7 @@
         <div class="hero">
             <h3>Log</h3>
         </div>
-        <div class="content">
-          {LOG_DATA}
+        <div class="content" id="logDiv">
         </div>
     </div>
 

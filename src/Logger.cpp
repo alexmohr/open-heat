@@ -7,18 +7,9 @@
 #include <cstdarg>
 
 namespace open_heat {
-std::array<char, 256> logBuffer_;
+// ToDo this could be moved into progmem if more RAM is needed
+std::array<char, 256>  logBuffer_;
 
-#if defined(ARDUINO_ARCH_AVR)
-#include <avr/pgmspace.h>
-#endif
-
-// There appears to be an incompatibility with ESP8266 2.3.0.
-#if defined(ESP8266)
-#define MEM_TYPE
-#else
-#define MEM_TYPE PROGMEM
-#endif
 
 const char LEVEL_TRACE[] MEM_TYPE   = "\033[1;37m[TRACE]";
 const char LEVEL_DEBUG[] MEM_TYPE   = "\033[1;37m[DEBUG]";
@@ -38,8 +29,12 @@ const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
   LEVEL_OFF,
 };
 
+
+Logger::Logger() = default;
+
 void Logger::setup()
 {
+  getInstance().loggerOutputFunctions_.push_back(LoggerOutputFunction(defaultLog));
 }
 
 void Logger::log(Level level, const char* format, ...)
@@ -53,10 +48,8 @@ void Logger::log(Level level, const char* format, ...)
     return;
   }
 
-  if (getInstance().loggerOutputFunction_) {
-    getInstance().loggerOutputFunction_(level, "", logBuffer_.data());
-  } else {
-    Logger::defaultLog(level, "", logBuffer_.data());
+  for (const auto& outFun: getInstance().loggerOutputFunctions_) {
+   outFun(level, "", logBuffer_.data());
   }
 }
 
@@ -91,8 +84,6 @@ String Logger::formatBytes(size_t bytes)
 
 void Logger::defaultLog(Logger::Level level, const char* module, const char* message)
 {
- /* Serial.print(millis());
-  Serial.print(F("\t"));*/
   Serial.print(asString(level));
   Serial.print(F(" "));
 
@@ -109,6 +100,10 @@ void Logger::defaultLog(Logger::Level level, const char* module, const char* mes
 const char* Logger::asString(Logger::Level level)
 {
   return LOG_LEVEL_STRINGS[level];
+}
+void Logger::addPrinter(Logger::LoggerOutputFunction outFun)
+{
+  getInstance().loggerOutputFunctions_.push_back(outFun);
 }
 
 } // namespace open_heat

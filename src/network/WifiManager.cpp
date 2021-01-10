@@ -137,7 +137,7 @@ void WifiManager::updateSettings(Config& config)
   strcpy(config.Update.Username, paramUpdateUsername_.getValue());
   strcpy(config.Update.Password, paramUpdatePassword_.getValue());
 
-  auto newPort = static_cast<unsigned short>(strtol(paramMqttPortString_.getValue(), nullptr, 10));
+  auto newPort = static_cast<unsigned short>(std::strtol(paramMqttPortString_.getValue(), nullptr, 10));
   config.MQTT.Port = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
 
   filesystem_->persistConfig();

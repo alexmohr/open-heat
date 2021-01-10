@@ -60,6 +60,7 @@ typedef struct Config {
   MQTTSettings MQTT;
   UpdateSettings Update;
   char Hostname[HOST_NAME_MAX_LEN]{};
+  float SetTemperature;
 
 } Config;
 
