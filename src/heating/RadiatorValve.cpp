@@ -102,6 +102,7 @@ float open_heat::heating::RadiatorValve::getConfiguredTemp() const
 {
   return setTemp_;
 }
+
 void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
 {
   if (temp == setTemp_) {

@@ -11,22 +11,22 @@ namespace open_heat {
 std::array<char, 256>  logBuffer_;
 
 
-const char LEVEL_TRACE[] MEM_TYPE   = "\033[1;37m[TRACE]";
-const char LEVEL_DEBUG[] MEM_TYPE   = "\033[1;37m[DEBUG]";
-const char LEVEL_INFO[] MEM_TYPE    = "\033[1;32m[INFO] ";
-const char LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN] ";
-const char LEVEL_ERROR[] MEM_TYPE   = "\033[1;31m[ERROR]";
-const char LEVEL_FATAL[] MEM_TYPE   = "\033[1;31m[FATAL]";
-const char LEVEL_OFF[] MEM_TYPE     = "\033[1;31m[OFF]  ";
+const char CONSOLE_LEVEL_TRACE[] MEM_TYPE   = "\033[1;37m[TRACE]";
+const char CONSOLE_LEVEL_DEBUG[] MEM_TYPE   = "\033[1;37m[DEBUG]";
+const char CONSOLE_LEVEL_INFO[] MEM_TYPE    = "\033[1;32m[INFO] ";
+const char CONSOLE_LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN] ";
+const char CONSOLE_LEVEL_ERROR[] MEM_TYPE   = "\033[1;31m[ERROR]";
+const char CONSOLE_LEVEL_FATAL[] MEM_TYPE   = "\033[1;31m[FATAL]";
+const char CONSOLE_LEVEL_OFF[] MEM_TYPE     = "\033[1;31m[OFF]  ";
 
-const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
-  LEVEL_TRACE,
-  LEVEL_DEBUG,
-  LEVEL_INFO,
-  LEVEL_WARNING,
-  LEVEL_ERROR,
-  LEVEL_FATAL,
-  LEVEL_OFF,
+const char* const CONSOLE_LOG_LEVEL_STRINGS[] MEM_TYPE = {
+  CONSOLE_LEVEL_TRACE,
+  CONSOLE_LEVEL_DEBUG,
+  CONSOLE_LEVEL_INFO,
+  CONSOLE_LEVEL_WARNING,
+  CONSOLE_LEVEL_ERROR,
+  CONSOLE_LEVEL_FATAL,
+  CONSOLE_LEVEL_OFF,
 };
 
 
@@ -99,7 +99,7 @@ void Logger::defaultLog(Logger::Level level, const char* module, const char* mes
 
 const char* Logger::asString(Logger::Level level)
 {
-  return LOG_LEVEL_STRINGS[level];
+  return CONSOLE_LOG_LEVEL_STRINGS[level];
 }
 void Logger::addPrinter(Logger::LoggerOutputFunction outFun)
 {

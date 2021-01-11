@@ -6,6 +6,7 @@
 #define OPEN_EQIVA_MQTT_CUH
 
 #include <Filesystem.hpp>
+#include <Logger.hpp>
 #include <MQTT.h>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/ITemperatureSensor.hpp>
@@ -15,10 +16,11 @@ namespace open_heat {
 namespace network {
 class MQTT {
   public:
-  explicit MQTT(Filesystem& filesystem,
-                    sensors::ITemperatureSensor& tempSensor,
-                    heating::RadiatorValve* valve) : filesystem_(filesystem),
-          tempSensor_(tempSensor)
+  explicit MQTT(
+    Filesystem& filesystem,
+    sensors::ITemperatureSensor& tempSensor,
+    heating::RadiatorValve* valve) :
+      filesystem_(filesystem), tempSensor_(tempSensor)
   {
     config_ = &filesystem_.getConfig();
     valve_ = valve;
@@ -29,8 +31,14 @@ class MQTT {
   void loop();
 
   private:
+  void connect();
   static void publish(const String& topic, const String& message);
   static void messageReceivedCallback(String& topic, String& payload);
+
+  void mqttLogPrinter(
+    open_heat::Logger::Level level,
+    const char* module,
+    const char* message);
 
   private:
   Filesystem& filesystem_;
@@ -47,6 +55,8 @@ class MQTT {
   static String getConfiguredTempTopic_;
 
   static String getMeasuredTempTopic_;
+
+  static String logTopic_;
 
   WiFiClient wiFiClient_;
 
