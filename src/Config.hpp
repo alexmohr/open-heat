@@ -1,9 +1,8 @@
 //
-// Copyright (c) 2020 Alexander Mohr
-// Licensed under the terms of the MIT license
+// Copyright (c) 2021 Alexander Mohr
+// Licensed under the terms of the GNU General Public License v3.0
 //
-// This configuration is directly taken from
-// https://github.com/khoih-prog/ESP_WiFiManager
+
 #ifndef WIFIMANAGERCONFIG_HPP_
 #define WIFIMANAGERCONFIG_HPP_
 
