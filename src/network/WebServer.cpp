@@ -21,23 +21,6 @@ static const char HTML_REDIRECT_NOW[] PROGMEM
 
 String logBuffer_;
 
-const char LEVEL_TRACE[] MEM_TYPE = "[TRACE]";
-const char LEVEL_DEBUG[] MEM_TYPE = "[DEBUG]";
-const char LEVEL_INFO[] MEM_TYPE = "[INFO]";
-const char LEVEL_WARNING[] MEM_TYPE = "[WARN]";
-const char LEVEL_ERROR[] MEM_TYPE = "[ERROR]";
-const char LEVEL_FATAL[] MEM_TYPE = "[FATAL]";
-const char LEVEL_OFF[] MEM_TYPE = "[OFF]";
-
-const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
-  LEVEL_TRACE,
-  LEVEL_DEBUG,
-  LEVEL_INFO,
-  LEVEL_WARNING,
-  LEVEL_ERROR,
-  LEVEL_FATAL,
-  LEVEL_OFF,
-};
 
 void open_heat::network::WebServer::setup()
 {

@@ -5,7 +5,7 @@
 #include "MQTT.hpp"
 #include <Logger.hpp>
 
- Config* open_heat::network::MQTT::config_;
+Config* open_heat::network::MQTT::config_;
 open_heat::heating::RadiatorValve* open_heat::network::MQTT::valve_;
 MQTTClient open_heat::network::MQTT::mqttClient_;
 
@@ -16,6 +16,10 @@ String open_heat::network::MQTT::setConfiguredTempTopic_;
 String open_heat::network::MQTT::getConfiguredTempTopic_;
 String open_heat::network::MQTT::getMeasuredTempTopic_;
 
+String open_heat::network::MQTT::logTopic_;
+
+String logBuffer_;
+
 void open_heat::network::MQTT::setup()
 {
   auto& config = filesystem_.getConfig();
@@ -23,26 +27,7 @@ void open_heat::network::MQTT::setup()
     Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
   }
 
-  mqttClient_.begin(config.MQTT.Server, config.MQTT.Port, wiFiClient_);
-  const char* username = nullptr;
-  const char* password = nullptr;
-
-  if (strlen(config.MQTT.Username) > 0) {
-    username = config.MQTT.Username;
-  }
-
-  if (strlen(config.MQTT.Password) > 0) {
-    password = config.MQTT.Password;
-  }
-
-  if (!mqttClient_.connect(config.Hostname, username, password)) {
-    Logger::log(
-      Logger::DEBUG,
-      "Failed to connect to mqtt in setup, check your config: server %s:%i",
-      config.MQTT.Server,
-      config.MQTT.Port);
-    return;
-  }
+  connect();
 
   setConfiguredTempTopic_ = config_->MQTT.Topic;
   setConfiguredTempTopic_ += "temperature/target/set";
@@ -62,9 +47,15 @@ void open_heat::network::MQTT::setup()
   setModeTopic_ = config_->MQTT.Topic;
   setModeTopic_ += "mode/set";
   mqttClient_.subscribe(setModeTopic_);
-  Logger::log(
-    Logger::INFO, "MQTT subscribed to topic: %s", setModeTopic_.c_str());
+  Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", setModeTopic_.c_str());
 
+  logTopic_ = config_->MQTT.Topic;
+  logTopic_ += "log";
+
+  Logger::addPrinter(
+    [this](Logger::Level level, const char* module, const char* message) {
+      mqttLogPrinter(level, module, message);
+    });
 
   mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 }
@@ -74,14 +65,12 @@ void open_heat::network::MQTT::loop()
   mqttClient_.loop();
 
   if (!mqttClient_.connected()) {
-    setup();
+    connect();
   }
 
   if (millis() < nextCheckMillis_) {
     return;
   }
-
-  const auto& config = filesystem_.getConfig();
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
@@ -96,7 +85,6 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
     "Received message in topic: %s, msg: %s",
     topic.c_str(),
     payload.c_str());
-
 
   if (topic == setConfiguredTempTopic_) {
     auto newTemp = std::strtod(payload.c_str(), nullptr);
@@ -115,4 +103,46 @@ void open_heat::network::MQTT::publish(const String& topic, const String& messag
   if (!mqttClient_.publish(topic, message)) {
     Logger::log(Logger::ERROR, "Mqtt publish failed: %i", mqttClient_.lastError());
   }
+}
+
+void open_heat::network::MQTT::connect()
+{
+  mqttClient_.begin(config_->MQTT.Server, config_->MQTT.Port, wiFiClient_);
+  const char* username = nullptr;
+  const char* password = nullptr;
+
+  if (strlen(config_->MQTT.Username) > 0) {
+    username = config_->MQTT.Username;
+  }
+
+  if (strlen(config_->MQTT.Password) > 0) {
+    password = config_->MQTT.Password;
+  }
+
+  if (!mqttClient_.connect(config_->Hostname, username, password)) {
+    Logger::log(
+      Logger::DEBUG,
+      "Failed to connect to mqtt in setup, check your config: server %s:%i",
+      config_->MQTT.Server,
+      config_->MQTT.Port);
+    return;
+  }
+}
+void open_heat::network::MQTT::mqttLogPrinter(
+  open_heat::Logger::Level level,
+  const char* module,
+  const char* message)
+{
+  logBuffer_ = LOG_LEVEL_STRINGS[level];
+  logBuffer_ += F(" ");
+
+  if (strlen(module) > 0) {
+    logBuffer_ += F(": ");
+    logBuffer_ += module;
+    logBuffer_ += F(": ");
+  }
+
+  logBuffer_ += message;
+  // do not use publish method, because it also logs.
+  mqttClient_.publish(logTopic_, logBuffer_);
 }
