@@ -49,63 +49,42 @@ void open_heat::heating::RadiatorValve::loop()
     return;
   }
 
-  unsigned short rotateTime = 1000;
-  const float lastFactor = 1.0f;
-  const float maxChangePerLoop = 0.25;
-  float diff = 0;
+  const short rotateTimePerDegree = 2200;
 
-  // diffToLast > 0: warmer than in last loop
-  // diffToLast < 0: colder than in last loop
-  float diffToLast = temp - lastTemp_;
-  if (temp > maxTemp) {
-    diff = maxTemp - temp;
+  const float temperatureChange = temp - lastTemp_;
+  const float minTemperatureChange = 0.1;
+  const float requiredChange = setTemp_ - temp;
 
-    // temp still rising?
-    if (temp > lastTemp_) {
-      diff += lastFactor * lastDiff_;
-      Logger::log(Logger::DEBUG, "temp still rising, adding correction");
-    }
+  const bool tempRising = (temp > lastTemp_) && std::abs(temperatureChange) > minTemperatureChange;
+  const bool tempSinking = (temp < lastTemp_) && std::abs(temperatureChange) > minTemperatureChange;
+  const bool tempTooHigh = temp > maxTemp;
+  const bool tempTooLow = temp < minTemp;
 
-    if (diffToLast < maxChangePerLoop) {
-      rotateTime = static_cast<unsigned short>((float)rotateTime * std::abs(diff));
-      closeValve(rotateTime);
+  double rotateTime = 0;
+  if (tempSinking) {
+    if (tempTooLow) {
+      rotateTime = requiredChange * rotateTimePerDegree;
     } else {
-      Logger::log(Logger::INFO, "Temp changed enough, do not change valve");
+      // temp is sinking as it should
     }
-
+  } else if (tempRising) {
+    if (tempTooHigh) {
+      rotateTime = -(requiredChange * rotateTimePerDegree);
+    } else {
+      // temp is rising as it should
+    }
   } else {
-    diff = minTemp - temp;
-
-    // temp still sinking?
-    if (temp < lastTemp_) {
-      Logger::log(Logger::DEBUG, "temp still sinking, adding correction");
-      diff += lastFactor * lastDiff_;
-    }
-
-    if (diffToLast < 0.1f) {
-      rotateTime += 150;
-    }
-
-    if (diffToLast < maxChangePerLoop) {
-      rotateTime = static_cast<unsigned short>((float)rotateTime * std::abs(diff));
-      openValve(rotateTime);
-    } else {
-      Logger::log(Logger::INFO, "Temp changed enough, do not change valve");
+    // no change.
+    if (tempTooLow) {
+      rotateTime = 100;
+    } if (tempTooHigh){
+      rotateTime = -100;
     }
   }
 
-  lastDiff_ = diff;
-  lastTemp_ = temp;
-
-  open_heat::Logger::log(
-    open_heat::Logger::INFO,
-    "Corrected temperature difference  %.2f°C, changed for %ims, temp now %.2f°C, "
-    "tempLast %.2f°C, diffToLast: %.2f°C",
-    diff,
-    rotateTime,
-    temp,
-    lastTemp_,
-    diffToLast);
+  Logger::log(Logger::INFO, "Rotate Time: %f, change %f", rotateTime,
+              temperatureChange);
+  rotateValve(static_cast<short>(rotateTime));
 
   nextCheckMillis_ = millis() + checkIntervalMillis_;
 }
@@ -117,7 +96,6 @@ void open_heat::heating::RadiatorValve::setup()
   lastTemp_ = tempSensor_.getTemperature();
 
   closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
-
 }
 
 float open_heat::heating::RadiatorValve::getConfiguredTemp() const
@@ -132,12 +110,11 @@ void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
 
   if (0 == temp) {
     turnOff_ = true;
-    // update in next loop
-    nextCheckMillis_ = 0;
   }
 
   open_heat::Logger::log(open_heat::Logger::INFO, "New target temperature %f", temp);
   setTemp_ = temp;
+  nextCheckMillis_ = 0;
 
   updateConfig();
 }
@@ -174,4 +151,14 @@ void open_heat::heating::RadiatorValve::setPinsLow()
 {
   digitalWrite(MOTOR_GROUND, LOW);
   digitalWrite(MOTOR_VIN, LOW);
+}
+
+void open_heat::heating::RadiatorValve::rotateValve(short time)
+{
+  // negative time is close
+  if (time < 0) {
+    closeValve(std::abs(time));
+  } else {
+    openValve(time);
+  }
 }
