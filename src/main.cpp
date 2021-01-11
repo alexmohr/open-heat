@@ -1,6 +1,6 @@
 //
 // Copyright (c) 2020 Alexander Mohr
-// Open-Heat - Radiator control for ESP8266
+// Open-HEAT - Radiator control for ESP8266
 // Licensed under the terms of the MIT license
 //
 
@@ -106,18 +106,18 @@ void setup()
 
   setupPins();
 
-  logVersions();
+
 
   filesystem_.setup();
   tempSensor_->setup();
 
   wifiManager_.setup();
 
-
   valve_.setup();
-  webServer_.setup();
   mqtt_.setup();
+  webServer_.setup();
 
+  logVersions();
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Setup done");
 }
 

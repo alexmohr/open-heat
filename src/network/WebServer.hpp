@@ -62,7 +62,7 @@ class WebServer {
   void rootHandleGet(AsyncWebServerRequest* request);
   void rootHandlePost(AsyncWebServerRequest* pRequest);
   void updateSetTemp(const AsyncWebServerRequest* request);
-  void offHandlePost(AsyncWebServerRequest* pRequest);
+  void togglePost(AsyncWebServerRequest* pRequest);
   void updateConfig(AsyncWebServerRequest* request);
 
   String indexHTMLProcessor(const String& var);

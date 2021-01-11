@@ -74,7 +74,7 @@ void open_heat::network::MQTT::loop()
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
-  publish(getModeTopic_, "heating");
+  publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(valve_->getMode()));
   nextCheckMillis_ = millis() + checkIntervalMillis_;
 }
 
@@ -93,6 +93,18 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
   } else if (topic == getConfiguredTempTopic_) {
     auto setTemp = valve_->getConfiguredTemp();
     publish(getConfiguredTempTopic_, String(setTemp));
+  } else if (topic == setModeTopic_) {
+    heating::RadiatorValve::Mode mode;
+    if (payload == "heat") {
+      mode = heating::RadiatorValve::HEAT;
+    } else if (payload == "off") {
+      mode = heating::RadiatorValve::OFF;
+    } else {
+      Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
+      return;
+    }
+    valve_->setMode(mode);
+    publish(getModeTopic_, payload);
   }
 }
 

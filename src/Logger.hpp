@@ -12,22 +12,16 @@
 #include <avr/pgmspace.h>
 #endif
 
-// There appears to be an incompatibility with ESP8266 2.3.0.
-#if defined(ESP8266)
-#define MEM_TYPE
-#else
 #define MEM_TYPE PROGMEM
-#endif
-
 namespace open_heat {
 
 static constexpr const char LEVEL_TRACE[] MEM_TYPE = "[TRACE]";
 static constexpr const char LEVEL_DEBUG[] MEM_TYPE = "[DEBUG]";
-static constexpr const char LEVEL_INFO[] MEM_TYPE = "[INFO]";
+static constexpr const char LEVEL_INFO[] MEM_TYPE = "[INFO] ";
 static constexpr const char LEVEL_WARNING[] MEM_TYPE = "[WARN]";
 static constexpr const char LEVEL_ERROR[] MEM_TYPE = "[ERROR]";
 static constexpr const char LEVEL_FATAL[] MEM_TYPE = "[FATAL]";
-static constexpr const char LEVEL_OFF[] MEM_TYPE = "[OFF]";
+static constexpr const char LEVEL_OFF[] MEM_TYPE = "[OFF]  ";
 
 static constexpr const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
   LEVEL_TRACE,

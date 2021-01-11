@@ -1,6 +1,8 @@
 # Open Heat
 This projects provides a firmware for an ESP8266 to control radiator valves.
 
+**Licence is currently MIT, but will be changed to GPL due to LGPL of ESPAsyncWebServer and ISACtrl**
+
 ## Status 
 Not usable yet!
 
@@ -24,18 +26,61 @@ To build run
 platformio -c clion run --target release -e nodemcuv2
 ```
 
+## Updating
+Download the latest firmware from releases and upload it on the web-ui.
+Make sure to download the correct version, otherwise your MCU has to be flashed via USB again.
+
+## MQTT 
+The heater can be controlled via mqtt and integrated into home assistant.
+It offers the following topics, all of them are prefixed with the configured topic (`$TOPIC`):
+* Set target temp: `$TOPIC/temperature/target/set`
+* Get target temp: `$TOPIC/temperature/target/get`
+* Get measured temp: `$TOPIC/temperature/measured/get`
+* Get current mode (can be off or heating): `$TOPIC/mode/get`
+* Set current mode (can be off or heating): `$TOPIC/mode/set`
+
+Example configuration for home assistant:
+```yaml
+climate:
+  - platform: mqtt
+    modes:
+      - "off"
+      - "heat"
+    name: Living room
+    temperature_command_topic: "living_room/front/temperature/target/set"
+    temperature_state_topic: "living_room/front/temperature/target/get"
+    current_temperature_topic: "living_room/front/temperature/measured/get"
+    mode_command_topic: "living_room/front/mode/set"
+    mode_state_topic: "living_room/front/mode/get"
+
+```
+
 ## Receiving logs 
 ### Serial
 ``platformio -c clion device monitor -e nodemcuv2 -f esp8266_exception_decoder``
 
+### MQTT 
+Subscribe to topic `$CONFIGURED_TOPIC/log`
+
+### Browser
+Logs are displayed in the web ui at the bottom of the page.
+
 ## Installation
 
-## Updating
-Download the latest firmware from releases and upload it on the web-ui. 
-Make sure to download the correct version, otherwise your MCU has to be flashed via USB again.
-
 ## Contributions
-As this project is still in a very early stage no contributions will be accpeted at the moment.
+As this project is still in a very early stage no contributions will be accepted at the moment.
 
-Copyright 2020 Alexander Mohr, MIT
+## Attributions and libraries
+Special thanks to traumflug and their regulator implementation in [ISTAtrol](https://github.com/Traumflug/ISTAtrol/blob/master/firmware/main.c).
+Parts of the regulator algorithm where taken from there and adapted to this project.
+
+### Libraries
+* [ESP Async WebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
+* [ESP AsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP)
+* [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
+* [ESP_DoubleResetDetector](https://github.com/khoih-prog/ESP_DoubleResetDetector)
+* [ESPAsync_WiFiManager](https://github.com/khoih-prog/ESPAsync_WiFiManager)
+* [Adafruit BME280 Library](https://github.com/adafruit/Adafruit_BME280_Library/)
+* [MQTT](https://github.com/256dpi/arduino-mqtt)
+
 
