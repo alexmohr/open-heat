@@ -17,20 +17,8 @@
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -90,11 +78,6 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -132,6 +115,8 @@
       <workItem from="1609887689694" duration="5330000" />
       <workItem from="1610196206830" duration="33571000" />
       <workItem from="1610282051053" duration="3989000" />
+      <workItem from="1610347508512" duration="26000" />
+      <workItem from="1610349227598" duration="89000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
