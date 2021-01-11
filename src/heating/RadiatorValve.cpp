@@ -49,7 +49,7 @@ void open_heat::heating::RadiatorValve::loop()
     return;
   }
 
-  unsigned short rotateTime = 800;
+  unsigned short rotateTime = 1000;
   const float lastFactor = 1.0f;
   const float maxChangePerLoop = 0.25;
   float diff = 0;

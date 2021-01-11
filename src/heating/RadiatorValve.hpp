@@ -41,7 +41,7 @@ class RadiatorValve {
   bool turnOff_ = false;
 
   unsigned long nextCheckMillis_{0};
-  unsigned long checkIntervalMillis_ = 1 * 90 * 1000;
+  unsigned long checkIntervalMillis_ = 2 * 60 * 1000;
 
 };
 } // namespace heating
