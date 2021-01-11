@@ -1,10 +1,10 @@
 # Open Heat
+![BPlatformIO CI](https://github.com/alexmohr/open-heat/workflows/PlatformIO%20CI/badge.svg)
+
 This projects provides a firmware for an ESP8266 to control radiator valves.
 
-**Licence is currently MIT, but will be changed to GPL due to LGPL of ESPAsyncWebServer and ISACtrl**
-
 ## Status 
-Not usable yet!
+Early alpha
 
 ## Hardware
   * ESP8266

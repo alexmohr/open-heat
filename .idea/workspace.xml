@@ -16,16 +16,34 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Filesystem.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Logger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/DoubleResetDetector.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/DoubleResetDetector.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/ESP32.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/ESP32.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/ESP8266.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/ESP8266.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/HAL.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/HAL.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/pins.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/pins.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiCredentials.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiCredentials.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/BME280.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/BME280.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/BME280.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/BME280.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/TP100.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/TP100.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/TP100.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/TP100.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -135,7 +153,7 @@
       <workItem from="1610347508512" duration="26000" />
       <workItem from="1610349227598" duration="89000" />
       <workItem from="1610349330134" duration="138000" />
-      <workItem from="1610389631155" duration="12510000" />
+      <workItem from="1610389631155" duration="12974000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -256,7 +274,14 @@
       <option name="project" value="LOCAL" />
       <updated>1610390364795</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Changed regulator and add mode support to mqtt and web ui">
+      <created>1610403642110</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1610403642110</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -291,7 +316,8 @@
     <MESSAGE value="add direction to radiator log, display set temp as int." />
     <MESSAGE value="valve change" />
     <MESSAGE value="Add mqtt log topic." />
-    <option name="LAST_COMMIT_MESSAGE" value="Add mqtt log topic." />
+    <MESSAGE value="Changed regulator and add mode support to mqtt and web ui" />
+    <option name="LAST_COMMIT_MESSAGE" value="Changed regulator and add mode support to mqtt and web ui" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -303,7 +329,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/network/MQTT.cpp</url>
-          <line>7</line>
+          <line>8</line>
           <option name="timeStamp" value="3" />
         </line-breakpoint>
       </breakpoints>
