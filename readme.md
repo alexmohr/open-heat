@@ -72,7 +72,7 @@ As this project is still in a very early stage no contributions will be accepted
 
 ## Attributions and libraries
 Special thanks to traumflug and their regulator implementation in [ISTAtrol](https://github.com/Traumflug/ISTAtrol/blob/master/firmware/main.c).
-Parts of the regulator algorithm where taken from there and adapted to this project.
+Altough it was heavily modified and improved the I-Regulator still forms the base of the valve control.
 
 ### Libraries
 * [ESP Async WebServer](https://github.com/me-no-dev/ESPAsyncWebServer)

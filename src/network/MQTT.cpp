@@ -23,42 +23,12 @@ String logBuffer_;
 
 void open_heat::network::MQTT::setup()
 {
-  auto& config = filesystem_.getConfig();
-  if (strlen(config.MQTT.Server) == 0 || config.MQTT.Port == 0) {
-    Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
-  }
-
   connect();
-
-  setConfiguredTempTopic_ = config_->MQTT.Topic;
-  setConfiguredTempTopic_ += "temperature/target/set";
-  mqttClient_.subscribe(setConfiguredTempTopic_);
-  Logger::log(
-    Logger::INFO, "MQTT subscribed to topic: %s", setConfiguredTempTopic_.c_str());
-
-  getConfiguredTempTopic_ = config_->MQTT.Topic;
-  getConfiguredTempTopic_ += "temperature/target/get";
-
-  getMeasuredTempTopic_ = config_->MQTT.Topic;
-  getMeasuredTempTopic_ += "temperature/measured/get";
-
-  getModeTopic_ = config_->MQTT.Topic;
-  getModeTopic_ += "mode/get";
-
-  setModeTopic_ = config_->MQTT.Topic;
-  setModeTopic_ += "mode/set";
-  mqttClient_.subscribe(setModeTopic_);
-  Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", setModeTopic_.c_str());
-
-  logTopic_ = config_->MQTT.Topic;
-  logTopic_ += "log";
 
   Logger::addPrinter(
     [this](Logger::Level level, const char* module, const char* message) {
       mqttLogPrinter(level, module, message);
     });
-
-  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 }
 
 void open_heat::network::MQTT::loop()
@@ -120,6 +90,11 @@ void open_heat::network::MQTT::publish(const String& topic, const String& messag
 
 void open_heat::network::MQTT::connect()
 {
+  if (strlen(config_->MQTT.Server) == 0 || config_->MQTT.Port == 0) {
+    Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
+    return;
+  }
+
   mqttClient_.begin(config_->MQTT.Server, config_->MQTT.Port, wiFiClient_);
   const char* username = nullptr;
   const char* password = nullptr;
@@ -140,6 +115,31 @@ void open_heat::network::MQTT::connect()
       config_->MQTT.Port);
     return;
   }
+
+  setConfiguredTempTopic_ = config_->MQTT.Topic;
+  setConfiguredTempTopic_ += "temperature/target/set";
+  mqttClient_.subscribe(setConfiguredTempTopic_);
+  Logger::log(
+    Logger::INFO, "MQTT subscribed to topic: %s", setConfiguredTempTopic_.c_str());
+
+  getConfiguredTempTopic_ = config_->MQTT.Topic;
+  getConfiguredTempTopic_ += "temperature/target/get";
+
+  getMeasuredTempTopic_ = config_->MQTT.Topic;
+  getMeasuredTempTopic_ += "temperature/measured/get";
+
+  getModeTopic_ = config_->MQTT.Topic;
+  getModeTopic_ += "mode/get";
+
+  setModeTopic_ = config_->MQTT.Topic;
+  setModeTopic_ += "mode/set";
+  mqttClient_.subscribe(setModeTopic_);
+  Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", setModeTopic_.c_str());
+
+  logTopic_ = config_->MQTT.Topic;
+  logTopic_ += "log";
+
+  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 }
 void open_heat::network::MQTT::mqttLogPrinter(
   open_heat::Logger::Level level,
