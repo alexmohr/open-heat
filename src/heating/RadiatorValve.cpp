@@ -7,15 +7,6 @@
 #include <Arduino.h>
 #include <Logger.hpp>
 
-/** \def PREDICTION_STEEPNESS
-  When deciding about valve movements, the regulation algorithm tries to
-  predict the future by extrapolating the last temperature change. This
-  value says how far to extrapolate. Larger values make regulation more
-  aggressive, smaller values make it less aggressive.
-  Unit:  1
-  Range: 1, 2, 4, 8 or 16 (must be exponent 2 to keep the binary small)
-*/
-#define PREDICTION_STEEPNESS 4
 
 open_heat::heating::RadiatorValve::RadiatorValve(
   open_heat::sensors::ITemperatureSensor& tempSensor,
@@ -24,6 +15,16 @@ open_heat::heating::RadiatorValve::RadiatorValve(
 {
   setPinsLow();
 }
+
+void open_heat::heating::RadiatorValve::setup()
+{
+  const auto& config = filesystem_.getConfig();
+  setTemp_ = config.SetTemperature;
+  lastTemp_ = tempSensor_.getTemperature();
+
+  // closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
+}
+
 
 void open_heat::heating::RadiatorValve::loop()
 {
@@ -40,11 +41,16 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   const auto temp = tempSensor_.getTemperature();
-  const auto hysteresis = 0.05;
-  const short openTime = 400;
-  const short closeTIme = openTime / 2;
 
-  // https://github.com/Traumflug/ISTAtrol/blob/master/firmware/main.c
+  // 0.5 works; 0.3 both works
+  const auto openHysteresis = 0.3f;
+  const auto closeHysteresis = 0.15f;
+  short openTime = 400;
+  const short closeTime = openTime / 2;
+
+  // If valve was opened waiting time is increased
+  unsigned long additionalWaitTime = 0;
+
   float predictionError = temp - lastPredictTemp_;
   Logger::log(
     Logger::DEBUG,
@@ -57,29 +63,68 @@ void open_heat::heating::RadiatorValve::loop()
   Logger::log(
     Logger::DEBUG, "Predicted temp %.2f in %lu ms", predictTemp, checkIntervalMillis_);
 
+  if (0 == predictTemp) {
+    nextCheckMillis_ = millis() + checkIntervalMillis_ + additionalWaitTime;
+    lastPredictTemp_ = predictTemp;
+    lastTemp_ = temp;
+    return;
+  }
+
+  const float temperatureChange = temp - lastTemp_;
+  const float minTemperatureChange = 0.06;
+
   // Act according to the prediction.
-  if (predictTemp < (setTemp_ - hysteresis)) {
-    openValve(openTime);
-  } else if (predictTemp > (setTemp_ + hysteresis)) {
-    closeValve(closeTIme);
+  if (predictTemp < (setTemp_ - openHysteresis)) {
+    if (temperatureChange < minTemperatureChange) {
+
+      const float diff = 1;
+      if (setTemp_ - predictTemp > diff && setTemp_ - temp > diff ) {
+        openTime *= 3;
+        Logger::log(
+          Logger::DEBUG, "3x open time due to large temp difference");
+      }
+
+      openValve(openTime);
+      // wait longer after opening the valve,
+      // this should prevent over heating but also increases time to heat.
+      additionalWaitTime = checkIntervalMillis_;
+    } else {
+      Logger::log(
+        Logger::INFO,
+        "RISE, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+        lastTemp_,
+        temp,
+        temperatureChange);
+    }
+
+  } else if (predictTemp > (setTemp_ + closeHysteresis)) {
+    if (temperatureChange >= -minTemperatureChange) {
+      closeValve(closeTime);
+    } else {
+      Logger::log(
+        Logger::INFO,
+        "SINK, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+        lastTemp_,
+        temp,
+        temperatureChange);
+    }
+
   } else {
-    Logger::log(Logger::DEBUG, "Valve not changed");
+    if ((temp - lastTemp_) > 0.1 && std::abs(temp - setTemp_) < 0.33) {
+      // temp is rising and near limit. close valve a bit to prevent spikes
+      closeValve(closeTime);
+      Logger::log(Logger::WARNING, "Spike prevention!");
+    } else {
+      Logger::log(Logger::DEBUG, "Valve not changed");
+    }
   }
 
   lastPredictTemp_ = predictTemp;
   lastTemp_ = temp;
 
-  nextCheckMillis_ = millis() + checkIntervalMillis_;
+  nextCheckMillis_ = millis() + checkIntervalMillis_ + additionalWaitTime;
 }
 
-void open_heat::heating::RadiatorValve::setup()
-{
-  const auto& config = filesystem_.getConfig();
-  setTemp_ = config.SetTemperature;
-  lastTemp_ = tempSensor_.getTemperature();
-
-  closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
-}
 
 float open_heat::heating::RadiatorValve::getConfiguredTemp() const
 {
@@ -155,7 +200,7 @@ const char* open_heat::heating::RadiatorValve::modeToCharArray(
   const open_heat::heating::RadiatorValve::Mode mode)
 {
   if (mode == heating::RadiatorValve::HEAT) {
-    return  "heat";
+    return "heat";
   } else if (mode == heating::RadiatorValve::OFF) {
     return "off";
   } else {
