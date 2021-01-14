@@ -21,6 +21,7 @@ void open_heat::heating::RadiatorValve::setup()
   const auto& config = filesystem_.getConfig();
   setTemp_ = config.SetTemperature;
   lastTemp_ = tempSensor_.getTemperature();
+  mode_ = config.Mode;
 
   // closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
 }
@@ -188,25 +189,27 @@ void open_heat::heating::RadiatorValve::setPinsLow()
   digitalWrite(MOTOR_VIN, LOW);
 }
 
-void open_heat::heating::RadiatorValve::setMode(
-  open_heat::heating::RadiatorValve::Mode mode)
+void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
 {
   mode_ = mode;
   if (mode_ != HEAT) {
     turnOff_ = true;
   }
+  auto& config = filesystem_.getConfig();
+  config.Mode = mode_;
+  filesystem_.persistConfig();
 }
-open_heat::heating::RadiatorValve::Mode open_heat::heating::RadiatorValve::getMode()
+OperationMode open_heat::heating::RadiatorValve::getMode()
 {
   return mode_;
 }
 
 const char* open_heat::heating::RadiatorValve::modeToCharArray(
-  const open_heat::heating::RadiatorValve::Mode mode)
+  const OperationMode mode)
 {
-  if (mode == heating::RadiatorValve::HEAT) {
+  if (mode == HEAT) {
     return "heat";
-  } else if (mode == heating::RadiatorValve::OFF) {
+  } else if (mode == OFF) {
     return "off";
   } else {
     return "unknown";

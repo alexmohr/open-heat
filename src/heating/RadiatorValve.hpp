@@ -14,7 +14,6 @@ namespace heating {
 
 class RadiatorValve {
   public:
-  enum Mode { HEAT, OFF, UNKNOWN };
 
   RadiatorValve(sensors::ITemperatureSensor& tempSensor, Filesystem& filesystem);
 
@@ -22,9 +21,9 @@ class RadiatorValve {
   void setup();
   float getConfiguredTemp() const;
   void setConfiguredTemp(float temp);
-  void setMode(Mode mode);
-  Mode getMode();
-  static const char* modeToCharArray(Mode mode);
+  void setMode(OperationMode mode);
+  OperationMode getMode();
+  static const char* modeToCharArray(OperationMode mode);
 
   private:
   static void openValve(unsigned short rotateTime);
@@ -33,7 +32,7 @@ class RadiatorValve {
   void updateConfig();
 
   Filesystem& filesystem_;
-  Mode mode_{OFF};
+  OperationMode mode_{OFF};
 
   static constexpr int VALVE_COMPLETE_CLOSE_MILLIS = 5000;
   sensors::ITemperatureSensor& tempSensor_;

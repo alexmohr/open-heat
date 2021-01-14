@@ -104,9 +104,7 @@ void setup()
   open_heat::Logger::setLogLevel(open_heat::Logger::TRACE);
 
   setupPins();
-
-
-
+  
   filesystem_.setup();
   tempSensor_->setup();
 

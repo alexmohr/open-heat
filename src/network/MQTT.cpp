@@ -65,11 +65,11 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
     auto setTemp = valve_->getConfiguredTemp();
     publish(getConfiguredTempTopic_, String(setTemp));
   } else if (topic == setModeTopic_) {
-    heating::RadiatorValve::Mode mode;
+    OperationMode mode;
     if (payload == "heat") {
-      mode = heating::RadiatorValve::HEAT;
+      mode = HEAT;
     } else if (payload == "off") {
-      mode = heating::RadiatorValve::OFF;
+      mode = OFF;
     } else {
       Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
       return;

@@ -53,6 +53,8 @@ typedef struct UpdateSettings {
   char Password[UPDATE_MAX_PW_LEN]{};
 } UpdateSettings;
 
+enum OperationMode { HEAT, OFF, UNKNOWN };
+
 typedef struct Config {
   WiFi_Credentials WifiCredentials[NUM_WIFI_CREDENTIALS]{{"", ""}, {"", ""}};
   WiFi_STA_IPConfig StaticIp;
@@ -60,6 +62,7 @@ typedef struct Config {
   UpdateSettings Update;
   char Hostname[HOST_NAME_MAX_LEN]{};
   float SetTemperature;
+  OperationMode Mode;
 
 } Config;
 
