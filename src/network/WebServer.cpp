@@ -245,9 +245,9 @@ bool WebServer::updateField(
 
 void WebServer::togglePost(AsyncWebServerRequest* pRequest)
 {
-  auto newMode = valve_.getMode() == heating::RadiatorValve::Mode::OFF
-    ? heating::RadiatorValve::Mode::HEAT
-    : heating::RadiatorValve::Mode::OFF;
+  auto newMode = valve_.getMode() == OFF
+    ? HEAT
+    : OFF;
   valve_.setMode(newMode);
 
   pRequest->send(HTTP_OK, CONTENT_TYPE_HTML, HTML_REDIRECT_NOW);
@@ -285,7 +285,7 @@ String WebServer::indexHTMLProcessor(const String& var)
 
   // Mode
   else if (var == F("TURN_ON_OFF")) {
-    if (valve_.getMode() == heating::RadiatorValve::HEAT) {
+    if (valve_.getMode() ==HEAT) {
       return F("Turn off");
     } else {
       return F("Turn on");
