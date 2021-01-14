@@ -45,6 +45,8 @@ class RadiatorValve {
 
   unsigned long nextCheckMillis_{0};
   static constexpr unsigned long checkIntervalMillis_ = 2 * 60 * 1000;
+  static constexpr  uint8_t maxRotateNoChange_{3};
+  uint8_t  currentRotateNoChange_{0};
 
   /**
     When deciding about valve movements, the regulation algorithm tries to
@@ -54,7 +56,7 @@ class RadiatorValve {
     Unit:  1
     Range: 1, 2, 4, 8 or 16
   */
-  static constexpr uint8 PREDICTION_STEEPNESS = 1;
+  static constexpr uint8_t PREDICTION_STEEPNESS = 1;
 };
 } // namespace heating
 } // namespace open_heat
