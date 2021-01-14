@@ -52,7 +52,7 @@ void open_heat::heating::RadiatorValve::loop()
 
 
   // 0.5 works; 0.3 both works
-  const auto openHysteresis = 0.2f;
+  const auto openHysteresis = 0.3f;
   const auto closeHysteresis = 0.3f;
   short openTime = 400;
   const short closeTime = openTime / 2;
@@ -81,7 +81,7 @@ void open_heat::heating::RadiatorValve::loop()
 
   // Act according to the prediction.
   if (predictTemp < (setTemp_ - openHysteresis)) {
-    if (temperatureChange < minTemperatureChange) {
+    if (temperatureChange < minTemperatureChange && currentRotateNoChange_ < maxRotateNoChange_) {
 
       const float diff = 1;
       if (setTemp_ - predictTemp > diff && setTemp_ - temp > diff ) {
@@ -91,6 +91,7 @@ void open_heat::heating::RadiatorValve::loop()
       }
 
       openValve(openTime);
+      currentRotateNoChange_++;
       // wait longer after opening the valve,
       // this should prevent over heating but also increases time to heat.
       additionalWaitTime = checkIntervalMillis_;
@@ -101,9 +102,11 @@ void open_heat::heating::RadiatorValve::loop()
         lastTemp_,
         temp,
         temperatureChange);
+      currentRotateNoChange_  = 0;
     }
 
   } else if (predictTemp > (setTemp_ + closeHysteresis)) {
+    currentRotateNoChange_  = 0;
     if (temperatureChange >= -minTemperatureChange) {
       closeValve(closeTime);
     } else {
