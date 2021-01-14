@@ -28,12 +28,9 @@ void open_heat::heating::RadiatorValve::setup()
 
 void open_heat::heating::RadiatorValve::loop()
 {
-  if (mode_ != HEAT) {
-    if (turnOff_) {
-      closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
-      turnOff_ = false;
-    }
-    return;
+  if (turnOff_) {
+    closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
+    turnOff_ = false;
   }
 
   if (millis() < nextCheckMillis_) {
@@ -41,10 +38,21 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   const auto temp = tempSensor_.getTemperature();
+  float predictTemp = temp + PREDICTION_STEEPNESS * ((int16_t)temp - (int16_t)lastTemp_);
+  Logger::log(
+    Logger::DEBUG, "Predicted temp %.2f in %lu ms", predictTemp, checkIntervalMillis_);
+
+  if (mode_ != HEAT) {
+    lastTemp_ = temp;
+    nextCheckMillis_ = millis() + checkIntervalMillis_;
+    return;
+  }
+
+
 
   // 0.5 works; 0.3 both works
-  const auto openHysteresis = 0.3f;
-  const auto closeHysteresis = 0.15f;
+  const auto openHysteresis = 0.2f;
+  const auto closeHysteresis = 0.3f;
   short openTime = 400;
   const short closeTime = openTime / 2;
 
@@ -59,9 +67,6 @@ void open_heat::heating::RadiatorValve::loop()
     temp,
     predictionError);
 
-  float predictTemp = temp + PREDICTION_STEEPNESS * ((int16_t)temp - (int16_t)lastTemp_);
-  Logger::log(
-    Logger::DEBUG, "Predicted temp %.2f in %lu ms", predictTemp, checkIntervalMillis_);
 
   if (0 == predictTemp) {
     nextCheckMillis_ = millis() + checkIntervalMillis_ + additionalWaitTime;
