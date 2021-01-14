@@ -17,11 +17,8 @@
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" beforeDir="false" afterPath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,11 +76,6 @@
     <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-eqiva" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-eqiva" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">

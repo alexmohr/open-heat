@@ -54,7 +54,7 @@ class RadiatorValve {
     Unit:  1
     Range: 1, 2, 4, 8 or 16
   */
-  static constexpr uint8 PREDICTION_STEEPNESS = 4;
+  static constexpr uint8 PREDICTION_STEEPNESS = 1;
 };
 } // namespace heating
 } // namespace open_heat
