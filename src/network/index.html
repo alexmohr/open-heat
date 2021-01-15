@@ -40,6 +40,11 @@
             font-weight: 500;
         }
 
+        a:visited {
+            text-decoration: none;
+            color: #E0E0E0;
+        }
+
         a {
             text-decoration: none;
         }
@@ -269,12 +274,12 @@
                 <input id="mqttPassword" class="inputLarge" name="mqttPassword"
                        value="%MQTT_PW%">
 
-                <h3>Pins</h3>
-                <label for="motorGround">Motor Ground</label>
+                <h3>Motor Pins</h3>
+                <label for="motorGround">Ground</label>
                 <input id="motorGround" class="inputLarge" name="motorGround"
                        value="%PIN_MOTOR_GROUND%">
 
-                <label for="motorVIN">Motor Power</label>
+                <label for="motorVIN">Power</label>
                 <input id="motorVIN" class="inputLarge" name="motorVIN"
                        value="%PIN_MOTOR_VIN%">
 

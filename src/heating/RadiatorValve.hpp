@@ -29,9 +29,9 @@ class RadiatorValve {
   void registerModeChangedHandler(const std::function<void(OperationMode)>& handler);
 
   private:
-  static void openValve(unsigned short rotateTime);
-  static void closeValve(unsigned short rotateTime);
-  static void setPinsLow();
+  void openValve(unsigned short rotateTime);
+  void closeValve(unsigned short rotateTime);
+  void setPinsLow();
   void updateConfig();
 
   Filesystem& filesystem_;
