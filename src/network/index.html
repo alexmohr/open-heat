@@ -13,7 +13,7 @@
             const logEvents = new EventSource('/logEvents');
 
 
-            logEvents.addEventListener('message', function(e) {
+            logEvents.addEventListener('message', function (e) {
                 const div = document.getElementById('logDiv');
                 const paragraph = document.createElement("p");
                 const text = document.createTextNode(e.data);
@@ -111,9 +111,10 @@
 
         .btn {
             background: #303F9F;
-            color:#EEEEEE;
+            color: #EEEEEE;
             border-radius: 4px;
         }
+
         .btnLarge {
             width: 262px;
         }
@@ -191,9 +192,11 @@
         .logInfo {
             color: #2E7D32;
         }
+
         .logDebug {
             color: #757575;
         }
+
         .logError {
             color: #b71c1c;
         }
@@ -219,18 +222,20 @@
         </div>
         <div class="content">
             <label for="currentTemp">Measured</label>
-            <input class="inputSmall" readonly="readonly" id="currentTemp" value="%CURRENT_TEMP%">
+            <input class="inputSmall" readonly="readonly" id="currentTemp"
+                   value="%CURRENT_TEMP%">
             <span class="input-group-text">°C</span><br>
 
             <form method='POST' action='/' enctype='multipart/form-data'>
                 <label for="setTemp">Set</label>
-                <input class="inputSmall" id="setTemp" name="setTemp" type="number" value="%SET_TEMP%">
+                <input class="inputSmall" id="setTemp" name="setTemp"
+                       type="number" value="%SET_TEMP%">
                 <span class="input-group-text">°C</span>
-                <input type='submit' value='Confirm' class="btn" >
+                <input type='submit' value='Confirm' class="btn">
             </form>
             <form method='POST' action='/toggle' enctype='multipart/form-data'>
                 <label></label>
-                <input type='submit' value='%TURN_ON_OFF%' class="btn btnLarge" >
+                <input type='submit' value='%TURN_ON_OFF%' class="btn btnLarge">
             </form>
         </div>
     </div>
@@ -242,25 +247,41 @@
             <h3>Network</h3>
             <form method='POST' action='/' enctype='multipart/form-data'>
                 <label for="netHost">Hostname</label>
-                <input id="netHost" class="inputLarge" name="netHost" value="%HOSTNAME%"><br>
+                <input id="netHost" class="inputLarge" name="netHost"
+                       value="%HOSTNAME%"><br>
 
-            <h3>MQTT</h3>
+                <h3>MQTT</h3>
                 <label for="mqttHost">Host</label>
-                <input id="mqttHost" class="inputMedium" name="mqttHost" value="%MQTT_HOST%"> :
-                <input size="3" id="mqttPort" class="inputSmall" name="mqttPort" value="%MQTT_PORT%"><br>
+                <input id="mqttHost" class="inputMedium" name="mqttHost"
+                       value="%MQTT_HOST%"> :
+                <input size="3" id="mqttPort" class="inputSmall" name="mqttPort"
+                       value="%MQTT_PORT%"><br>
 
                 <label for="mqttTopic">Topic</label>
-                <input id="mqttTopic" class="inputLarge" name="mqttTopic" value="%MQTT_TOPIC%"><br>
+                <input id="mqttTopic" class="inputLarge" name="mqttTopic"
+                       value="%MQTT_TOPIC%"><br>
 
                 <label for="mqttUsername">Username</label>
-                <input id="mqttUsername" class="inputLarge" name="mqttUsername" value="%MQTT_USER%"><br>
+                <input id="mqttUsername" class="inputLarge" name="mqttUsername"
+                       value="%MQTT_USER%"><br>
 
                 <label for="mqttPassword">Password</label>
-                <input id="mqttPassword" class="inputLarge" name="mqttPassword" value="%MQTT_PW%">
+                <input id="mqttPassword" class="inputLarge" name="mqttPassword"
+                       value="%MQTT_PW%">
+
+                <h3>Pins</h3>
+                <label for="motorGround">Motor Ground</label>
+                <input id="motorGround" class="inputLarge" name="motorGround"
+                       value="%PIN_MOTOR_GROUND%">
+
+                <label for="motorVIN">Motor Power</label>
+                <input id="motorVIN" class="inputLarge" name="motorVIN"
+                       value="%PIN_MOTOR_VIN%">
 
                 <br>
                 <br>
-                <input type='submit' value='Update settings'  class="btn btnLarge" >
+                <input type='submit' value='Update settings'
+                       class="btn btnLarge">
             </form>
 
         </div>
@@ -273,15 +294,17 @@
 
         <div class="content">
             <h3>Firmware update</h3>
-            <form method='POST' action='/installUpdate' enctype='multipart/form-data'>
-                <input type='file' class="input inputLarge" accept='.bin,.bin.gz' name='firmware' >
-                <input type='submit'  value='Update' class="btn" >
+            <form method='POST' action='/installUpdate'
+                  enctype='multipart/form-data'>
+                <input type='file' class="input inputLarge"
+                       accept='.bin,.bin.gz' name='firmware'>
+                <input type='submit' value='Update' class="btn">
             </form>
             <br>
-<!--            <h3>Control</h3>-->
-<!--            <form method='GET' action='/restart' enctype='multipart/form-data'>-->
-<!--                <input type='submit' value='Restart' class="btn" >-->
-<!--            </form>-->
+            <!--            <h3>Control</h3>-->
+            <!--            <form method='GET' action='/restart' enctype='multipart/form-data'>-->
+            <!--                <input type='submit' value='Restart' class="btn" >-->
+            <!--            </form>-->
         </div>
 
 
