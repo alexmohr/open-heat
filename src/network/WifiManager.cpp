@@ -133,13 +133,19 @@ void WifiManager::updateSettings(Config& config)
   strcpy(config.MQTT.Topic, paramMqttTopic_.getValue());
   strcpy(config.MQTT.Username, paramMqttUsername_.getValue());
   strcpy(config.MQTT.Password, paramMqttPassword_.getValue());
+  auto newPort = static_cast<unsigned short>(std::strtol(paramMqttPortString_.getValue(), nullptr, 10));
+  config.MQTT.Port = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
 
   // Update
   strcpy(config.Update.Username, paramUpdateUsername_.getValue());
   strcpy(config.Update.Password, paramUpdatePassword_.getValue());
 
-  auto newPort = static_cast<unsigned short>(std::strtol(paramMqttPortString_.getValue(), nullptr, 10));
-  config.MQTT.Port = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
+  // Pins
+  auto pin = static_cast<int8>(std::strtol(paramMotorGround_.getValue(), nullptr, 10));
+  config.Pins.MotorGround = pin == 0 ? DEFAULT_MOTOR_GROUND : pin;
+
+  pin = static_cast<int8>(std::strtol(paramMotorVin_.getValue(), nullptr, 10));
+  config.Pins.MotorVin = pin == 0 ? DEFAULT_MOTOR_VIN : pin;
 
   filesystem_->persistConfig();
 }
@@ -323,6 +329,16 @@ void WifiManager::initAdditionalParams()
   paramUpdatePassword_.getWMParam_Data(paramData);
   strcpy(paramData._value, config.Update.Password);
   paramUpdatePassword_.setWMParam_Data(paramData);
+
+  // Pins
+  paramMotorVin_.getWMParam_Data(paramData);
+  strcpy(paramData._value, String(config.Pins.MotorVin).c_str());
+  paramMotorVin_.setWMParam_Data(paramData);
+
+  paramMotorGround_.getWMParam_Data(paramData);
+  strcpy(paramData._value, String(config.Pins.MotorGround).c_str());
+  paramMotorGround_.setWMParam_Data(paramData);
+
 }
 
 } // namespace network

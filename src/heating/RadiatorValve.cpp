@@ -172,9 +172,11 @@ void open_heat::heating::RadiatorValve::updateConfig()
 
 void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
 {
+  const auto& config = filesystem_.getConfig().Pins;
+
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Closing valve for %ims", rotateTime);
-  digitalWrite(MOTOR_VIN, LOW);
-  digitalWrite(MOTOR_GROUND, HIGH);
+  digitalWrite(config.MotorVin, LOW);
+  digitalWrite(config.MotorGround, HIGH);
 
   delay(rotateTime);
 
@@ -183,9 +185,11 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
 
 void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
 {
+  const auto& config = filesystem_.getConfig().Pins;
+
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Opening valve for %ims", rotateTime);
-  digitalWrite(MOTOR_GROUND, LOW);
-  digitalWrite(MOTOR_VIN, HIGH);
+  digitalWrite(config.MotorGround, LOW);
+  digitalWrite(config.MotorVin, HIGH);
 
   delay(rotateTime);
 
@@ -194,8 +198,10 @@ void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
 
 void open_heat::heating::RadiatorValve::setPinsLow()
 {
-  digitalWrite(MOTOR_GROUND, LOW);
-  digitalWrite(MOTOR_VIN, LOW);
+  const auto& config = filesystem_.getConfig().Pins;
+
+  digitalWrite(config.MotorVin, LOW);
+  digitalWrite(config.MotorGround, LOW);
 }
 
 void open_heat::heating::RadiatorValve::setMode(OperationMode mode)

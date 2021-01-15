@@ -28,6 +28,11 @@ static constexpr uint8_t UPDATE_MAX_PW_LEN = 64;
 
 static constexpr uint8_t HOST_NAME_MAX_LEN = 32;
 
+static constexpr uint8_t DEFAULT_MOTOR_GROUND = D5;
+static constexpr uint8_t DEFAULT_MOTOR_VIN = D6;
+
+
+
 static constexpr const char* DEFAULT_HOST_NAME = "OpenHeat";
 
 typedef struct {
@@ -53,17 +58,22 @@ typedef struct UpdateSettings {
   char Password[UPDATE_MAX_PW_LEN]{};
 } UpdateSettings;
 
+typedef struct PinSettings {
+  int8 MotorGround{D5};
+  int8 MotorVin{D6};
+} PinSettings;
+
 enum OperationMode { HEAT, OFF, UNKNOWN };
 
 typedef struct Config {
   WiFi_Credentials WifiCredentials[NUM_WIFI_CREDENTIALS]{{"", ""}, {"", ""}};
   WiFi_STA_IPConfig StaticIp;
-  MQTTSettings MQTT;
-  UpdateSettings Update;
+  MQTTSettings MQTT{};
+  UpdateSettings Update{};
   char Hostname[HOST_NAME_MAX_LEN]{};
   float SetTemperature;
   OperationMode Mode;
-
+  PinSettings Pins{};
 } Config;
 
 #endif // WIFIMANAGERCONFIG_HPP_
