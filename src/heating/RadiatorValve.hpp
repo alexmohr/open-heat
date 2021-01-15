@@ -25,6 +25,9 @@ class RadiatorValve {
   OperationMode getMode();
   static const char* modeToCharArray(OperationMode mode);
 
+  void registerSetTempChangedHandler(const std::function<void(float)>& handler);
+  void registerModeChangedHandler(const std::function<void(OperationMode)>& handler);
+
   private:
   static void openValve(unsigned short rotateTime);
   static void closeValve(unsigned short rotateTime);
@@ -44,8 +47,11 @@ class RadiatorValve {
 
   unsigned long nextCheckMillis_{0};
   static constexpr unsigned long checkIntervalMillis_ = 2 * 60 * 1000;
-  static constexpr  uint8_t maxRotateNoChange_{3};
+  static constexpr  uint8_t maxRotateNoChange_{4};
   uint8_t  currentRotateNoChange_{0};
+
+  std::vector<std::function<void(OperationMode)>> opModeChangedHandler_{};
+  std::vector<std::function<void(float)>> setTempChangedHandler_{};
 
   /**
     When deciding about valve movements, the regulation algorithm tries to
@@ -53,9 +59,8 @@ class RadiatorValve {
     value says how far to extrapolate. Larger values make regulation more
     aggressive, smaller values make it less aggressive.
     Unit:  1
-    Range: 1, 2, 4, 8 or 16
   */
-  static constexpr uint8_t PREDICTION_STEEPNESS = 1;
+  static constexpr float PREDICTION_STEEPNESS = 1;
 };
 } // namespace heating
 } // namespace open_heat

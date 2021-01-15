@@ -7,7 +7,6 @@
 #include <Arduino.h>
 #include <Logger.hpp>
 
-
 open_heat::heating::RadiatorValve::RadiatorValve(
   open_heat::sensors::ITemperatureSensor& tempSensor,
   open_heat::Filesystem& filesystem) :
@@ -26,7 +25,6 @@ void open_heat::heating::RadiatorValve::setup()
   // closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
 }
 
-
 void open_heat::heating::RadiatorValve::loop()
 {
   if (turnOff_) {
@@ -39,9 +37,14 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   const auto temp = tempSensor_.getTemperature();
-  float predictTemp = temp + PREDICTION_STEEPNESS * ((int16_t)temp - (int16_t)lastTemp_);
+  float predictPart = PREDICTION_STEEPNESS * (temp - lastTemp_);
+  float predictTemp = temp + predictPart;
   Logger::log(
-    Logger::DEBUG, "Predicted temp %.2f in %lu ms", predictTemp, checkIntervalMillis_);
+    Logger::DEBUG,
+    "Predicted temp %.2f in %lu ms, predict part: %.2f",
+    predictTemp,
+    checkIntervalMillis_,
+    predictPart);
 
   if (mode_ != HEAT) {
     lastTemp_ = temp;
@@ -49,11 +52,9 @@ void open_heat::heating::RadiatorValve::loop()
     return;
   }
 
-
-
   // 0.5 works; 0.3 both works
-  const auto openHysteresis = 0.3f;
-  const auto closeHysteresis = 0.3f;
+  const auto openHysteresis = 0.2f;
+  const auto closeHysteresis = 0.2f;
   short openTime = 400;
   const short closeTime = openTime / 2;
 
@@ -68,7 +69,6 @@ void open_heat::heating::RadiatorValve::loop()
     temp,
     predictionError);
 
-
   if (0 == predictTemp) {
     nextCheckMillis_ = millis() + checkIntervalMillis_ + additionalWaitTime;
     lastPredictTemp_ = predictTemp;
@@ -81,20 +81,23 @@ void open_heat::heating::RadiatorValve::loop()
 
   // Act according to the prediction.
   if (predictTemp < (setTemp_ - openHysteresis)) {
-    if (temperatureChange < minTemperatureChange && currentRotateNoChange_ < maxRotateNoChange_) {
+    if (
+      temperatureChange < minTemperatureChange
+      && currentRotateNoChange_ < maxRotateNoChange_) {
 
-      const float diff = 1;
-      if (setTemp_ - predictTemp > diff && setTemp_ - temp > diff ) {
-        openTime *= 3;
-        Logger::log(
-          Logger::DEBUG, "3x open time due to large temp difference");
+      const float lageTempDiff = 1.5;
+      if (
+        setTemp_ - predictTemp > lageTempDiff && setTemp_ - temp > lageTempDiff
+        && currentRotateNoChange_ == 0) {
+        openTime *= 4;
+        Logger::log(Logger::DEBUG, "4x open time due to large temp difference");
       }
 
       openValve(openTime);
       currentRotateNoChange_++;
       // wait longer after opening the valve,
       // this should prevent over heating but also increases time to heat.
-      additionalWaitTime = checkIntervalMillis_;
+      additionalWaitTime += checkIntervalMillis_;
     } else {
       Logger::log(
         Logger::INFO,
@@ -102,11 +105,11 @@ void open_heat::heating::RadiatorValve::loop()
         lastTemp_,
         temp,
         temperatureChange);
-      currentRotateNoChange_  = 0;
+      currentRotateNoChange_ = 0;
     }
 
   } else if (predictTemp > (setTemp_ + closeHysteresis)) {
-    currentRotateNoChange_  = 0;
+    currentRotateNoChange_ = 0;
     if (temperatureChange >= -minTemperatureChange) {
       closeValve(closeTime);
     } else {
@@ -119,7 +122,7 @@ void open_heat::heating::RadiatorValve::loop()
     }
 
   } else {
-    if ((temp - lastTemp_) > 0.1 && std::abs(temp - setTemp_) < 0.33) {
+    if ((temp - lastTemp_) > 0.2 && std::abs(temp - setTemp_) < 0.2) {
       // temp is rising and near limit. close valve a bit to prevent spikes
       closeValve(closeTime);
       Logger::log(Logger::WARNING, "Spike prevention!");
@@ -133,7 +136,6 @@ void open_heat::heating::RadiatorValve::loop()
 
   nextCheckMillis_ = millis() + checkIntervalMillis_ + additionalWaitTime;
 }
-
 
 float open_heat::heating::RadiatorValve::getConfiguredTemp() const
 {
@@ -155,6 +157,10 @@ void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
   nextCheckMillis_ = 0;
 
   updateConfig();
+
+  for (const auto& handler: setTempChangedHandler_) {
+    handler(setTemp_);
+  }
 }
 
 void open_heat::heating::RadiatorValve::updateConfig()
@@ -201,14 +207,17 @@ void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
   auto& config = filesystem_.getConfig();
   config.Mode = mode_;
   filesystem_.persistConfig();
+
+  for (const auto& handler: opModeChangedHandler_) {
+    handler(mode_);
+  }
 }
 OperationMode open_heat::heating::RadiatorValve::getMode()
 {
   return mode_;
 }
 
-const char* open_heat::heating::RadiatorValve::modeToCharArray(
-  const OperationMode mode)
+const char* open_heat::heating::RadiatorValve::modeToCharArray(const OperationMode mode)
 {
   if (mode == HEAT) {
     return "heat";
@@ -217,4 +226,15 @@ const char* open_heat::heating::RadiatorValve::modeToCharArray(
   } else {
     return "unknown";
   }
+}
+void open_heat::heating::RadiatorValve::registerSetTempChangedHandler(
+  const std::function<void(float)>& handler)
+{
+  setTempChangedHandler_.push_back(handler);
+}
+
+void open_heat::heating::RadiatorValve::registerModeChangedHandler(
+  const std::function<void(OperationMode)>& handler)
+{
+  opModeChangedHandler_.push_back(handler);
 }

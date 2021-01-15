@@ -25,6 +25,16 @@ void open_heat::network::MQTT::setup()
 {
   connect();
 
+  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
+
+  valve_->registerModeChangedHandler([this](OperationMode mode){
+    mqttClient_.publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(mode));
+  });
+
+  valve_->registerSetTempChangedHandler([this](float temp){
+    mqttClient_.publish(getConfiguredTempTopic_, String(temp));
+  });
+
   Logger::addPrinter(
     [this](Logger::Level level, const char* module, const char* message) {
       mqttLogPrinter(level, module, message);
@@ -138,9 +148,8 @@ void open_heat::network::MQTT::connect()
 
   logTopic_ = config_->MQTT.Topic;
   logTopic_ += "log";
-
-  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 }
+
 void open_heat::network::MQTT::mqttLogPrinter(
   open_heat::Logger::Level level,
   const char* module,

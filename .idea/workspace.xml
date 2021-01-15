@@ -17,11 +17,10 @@
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -61,7 +60,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../ESPAsync_WiFiManager_debug/CMakeLists.txt" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../daimler_github/scripts/mttf/mttf-request" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
@@ -134,6 +133,9 @@
       <workItem from="1610389631155" duration="12974000" />
       <workItem from="1610523024284" duration="23598000" />
       <workItem from="1610579959151" duration="356000" />
+      <workItem from="1610699674619" duration="33000" />
+      <workItem from="1610711327054" duration="7409000" />
+      <workItem from="1610728673426" duration="2841000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -268,7 +270,14 @@
       <option name="project" value="LOCAL" />
       <updated>1610575226281</updated>
     </task>
-    <option name="localTasksCounter" value="20" />
+    <task id="LOCAL-00020" summary="fix build">
+      <created>1610666356042</created>
+      <option name="number" value="00020" />
+      <option name="presentableId" value="LOCAL-00020" />
+      <option name="project" value="LOCAL" />
+      <updated>1610666356042</updated>
+    </task>
+    <option name="localTasksCounter" value="21" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -305,7 +314,8 @@
     <MESSAGE value="Add mqtt log topic." />
     <MESSAGE value="Changed regulator and add mode support to mqtt and web ui" />
     <MESSAGE value="greatly improved regulation algorithm" />
-    <option name="LAST_COMMIT_MESSAGE" value="greatly improved regulation algorithm" />
+    <MESSAGE value="fix build" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix build" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
