@@ -53,10 +53,13 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   // 0.5 works; 0.3 both works
-  const auto openHysteresis = 0.2f;
+  const auto openHysteresis = 0.35f;
   const auto closeHysteresis = 0.2f;
-  short openTime = 400;
-  const short closeTime = openTime / 2;
+//  short openTime = 400;
+//  const short closeTime = openTime / 2;
+    short openTime = 250;
+    const short closeTime = 200;
+
 
   // If valve was opened waiting time is increased
   unsigned long additionalWaitTime = 0;
@@ -77,7 +80,7 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   const float temperatureChange = temp - lastTemp_;
-  const float minTemperatureChange = 0.06;
+  const float minTemperatureChange = 0.08;
 
   // Act according to the prediction.
   if (predictTemp < (setTemp_ - openHysteresis)) {
@@ -122,13 +125,13 @@ void open_heat::heating::RadiatorValve::loop()
     }
 
   } else {
-    if ((temp - lastTemp_) > 0.2 && std::abs(temp - setTemp_) < 0.2) {
+  /*  if ((temp - lastTemp_) > 0.2 && std::abs(temp - setTemp_) < 0.2) {
       // temp is rising and near limit. close valve a bit to prevent spikes
       closeValve(closeTime);
       Logger::log(Logger::WARNING, "Spike prevention!");
     } else {
       Logger::log(Logger::DEBUG, "Valve not changed");
-    }
+    }*/
   }
 
   lastPredictTemp_ = predictTemp;
@@ -172,11 +175,11 @@ void open_heat::heating::RadiatorValve::updateConfig()
 
 void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
 {
-  const auto& config = filesystem_.getConfig().Pins;
+  const auto& config = filesystem_.getConfig().MotorPins;
 
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Closing valve for %ims", rotateTime);
-  digitalWrite(config.MotorVin, LOW);
-  digitalWrite(config.MotorGround, HIGH);
+  digitalWrite(config.Vin, LOW);
+  digitalWrite(config.Ground, HIGH);
 
   delay(rotateTime);
 
@@ -185,11 +188,11 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
 
 void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
 {
-  const auto& config = filesystem_.getConfig().Pins;
+  const auto& config = filesystem_.getConfig().MotorPins;
 
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Opening valve for %ims", rotateTime);
-  digitalWrite(config.MotorGround, LOW);
-  digitalWrite(config.MotorVin, HIGH);
+  digitalWrite(config.Ground, LOW);
+  digitalWrite(config.Vin, HIGH);
 
   delay(rotateTime);
 
@@ -198,10 +201,10 @@ void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
 
 void open_heat::heating::RadiatorValve::setPinsLow()
 {
-  const auto& config = filesystem_.getConfig().Pins;
+  const auto& config = filesystem_.getConfig().MotorPins;
 
-  digitalWrite(config.MotorVin, LOW);
-  digitalWrite(config.MotorGround, LOW);
+  digitalWrite(config.Vin, LOW);
+  digitalWrite(config.Ground, LOW);
 }
 
 void open_heat::heating::RadiatorValve::setMode(OperationMode mode)

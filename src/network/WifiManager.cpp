@@ -140,12 +140,19 @@ void WifiManager::updateSettings(Config& config)
   strcpy(config.Update.Username, paramUpdateUsername_.getValue());
   strcpy(config.Update.Password, paramUpdatePassword_.getValue());
 
-  // Pins
+  // MotorPins
   auto pin = static_cast<int8>(std::strtol(paramMotorGround_.getValue(), nullptr, 10));
-  config.Pins.MotorGround = pin == 0 ? DEFAULT_MOTOR_GROUND : pin;
+  config.MotorPins.Ground = pin;
 
   pin = static_cast<int8>(std::strtol(paramMotorVin_.getValue(), nullptr, 10));
-  config.Pins.MotorVin = pin == 0 ? DEFAULT_MOTOR_VIN : pin;
+  config.MotorPins.Vin = pin;
+
+  // Window Pins
+  pin = static_cast<int8>(std::strtol(paramWindowGround_.getValue(), nullptr, 10));
+  config.WindowPins.Ground = pin;
+
+  pin = static_cast<int8>(std::strtol(paramWindowVin_.getValue(), nullptr, 10));
+  config.WindowPins.Vin = pin;
 
   filesystem_->persistConfig();
 }
@@ -330,15 +337,23 @@ void WifiManager::initAdditionalParams()
   strcpy(paramData._value, config.Update.Password);
   paramUpdatePassword_.setWMParam_Data(paramData);
 
-  // Pins
+  // MotorPins
   paramMotorVin_.getWMParam_Data(paramData);
-  strcpy(paramData._value, String(config.Pins.MotorVin).c_str());
+  strcpy(paramData._value, String(config.MotorPins.Vin).c_str());
   paramMotorVin_.setWMParam_Data(paramData);
 
   paramMotorGround_.getWMParam_Data(paramData);
-  strcpy(paramData._value, String(config.Pins.MotorGround).c_str());
+  strcpy(paramData._value, String(config.MotorPins.Ground).c_str());
   paramMotorGround_.setWMParam_Data(paramData);
 
+  // Window pins
+  paramMotorVin_.getWMParam_Data(paramData);
+  strcpy(paramData._value, String(config.WindowPins.Vin).c_str());
+  paramMotorVin_.setWMParam_Data(paramData);
+
+  paramWindowGround_.getWMParam_Data(paramData);
+  strcpy(paramData._value, String(config.WindowPins.Ground).c_str());
+  paramWindowGround_.setWMParam_Data(paramData);
 }
 
 } // namespace network

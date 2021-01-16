@@ -60,7 +60,7 @@ class RadiatorValve {
     aggressive, smaller values make it less aggressive.
     Unit:  1
   */
-  static constexpr float PREDICTION_STEEPNESS = 1;
+  static constexpr float PREDICTION_STEEPNESS = 2;
 };
 } // namespace heating
 } // namespace open_heat

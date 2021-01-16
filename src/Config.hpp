@@ -31,6 +31,9 @@ static constexpr uint8_t HOST_NAME_MAX_LEN = 32;
 static constexpr uint8_t DEFAULT_MOTOR_GROUND = D5;
 static constexpr uint8_t DEFAULT_MOTOR_VIN = D6;
 
+static constexpr int8_t DEFAULT_WINDOW_GROUND = -1;
+static constexpr int8_t DEFAULT_WINDOW_VIN = -1;
+
 
 
 static constexpr const char* DEFAULT_HOST_NAME = "OpenHeat";
@@ -59,8 +62,8 @@ typedef struct UpdateSettings {
 } UpdateSettings;
 
 typedef struct PinSettings {
-  int8 MotorGround{D5};
-  int8 MotorVin{D6};
+  int8 Ground{D5};
+  int8 Vin{D6};
 } PinSettings;
 
 enum OperationMode { HEAT, OFF, UNKNOWN };
@@ -71,9 +74,11 @@ typedef struct Config {
   MQTTSettings MQTT{};
   UpdateSettings Update{};
   char Hostname[HOST_NAME_MAX_LEN]{};
-  float SetTemperature;
-  OperationMode Mode;
-  PinSettings Pins{};
+  float SetTemperature{18};
+  OperationMode Mode{OFF};
+  PinSettings MotorPins{};
+  PinSettings WindowPins{};
 } Config;
+
 
 #endif // WIFIMANAGERCONFIG_HPP_

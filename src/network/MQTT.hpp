@@ -65,6 +65,8 @@ class MQTT {
   // publish every minute
   unsigned long checkIntervalMillis_ = 1 * 60 * 1000;
 
+  bool configValid_{true};
+
   static Config* config_;
 };
 } // namespace network
