@@ -272,20 +272,29 @@
 
                 <label for="mqttPassword">Password</label>
                 <input id="mqttPassword" class="inputLarge" name="mqttPassword"
-                       value="%MQTT_PW%">
+                       value="%MQTT_PW%"><br>
 
                 <h3>Motor Pins</h3>
                 <label for="motorGround">Ground</label>
                 <input id="motorGround" class="inputLarge" name="motorGround"
-                       value="%PIN_MOTOR_GROUND%">
+                       value="%PIN_MOTOR_GROUND%"><br>
 
                 <label for="motorVIN">Power</label>
                 <input id="motorVIN" class="inputLarge" name="motorVIN"
-                       value="%PIN_MOTOR_VIN%">
+                       value="%PIN_MOTOR_VIN%"><br>
+
+                <h3>Window Pins</h3>
+                <label for="windowGround">Ground</label>
+                <input id="windowGround" class="inputLarge" name="windowGround"
+                       value="%PIN_WINDOW_GROUND%"><br>
+
+                <label for="windowVin">Power</label>
+                <input id="windowVin" class="inputLarge" name="windowVIN"
+                       value="%PIN_WINDOW_VIN%"><br>
 
                 <br>
                 <br>
-                <input type='submit' value='Update settings'
+                <input type='submit' value="Update settings & Reboot"
                        class="btn btnLarge">
             </form>
 

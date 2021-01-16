@@ -109,17 +109,29 @@ class WifiManager {
 
   ESPAsync_WMParameter paramMotorGround_{
     "MotorGround",
-    "Motor Ground",
+    "Ground",
     String(DEFAULT_MOTOR_GROUND).c_str(),
     sizeof(int8)};
 
   ESPAsync_WMParameter paramMotorVin_{
     "MotorGround",
-    "Motor Vin",
+    "Vin",
     String(DEFAULT_MOTOR_VIN).c_str(),
     sizeof(int8)};
 
-  ESPAsync_WMParameter* additionalParameters_[10] = {
+  ESPAsync_WMParameter paramWindowGround_{
+    "WindowGround",
+    "Ground",
+    String(DEFAULT_WINDOW_GROUND).c_str(),
+    sizeof(int8)};
+
+  ESPAsync_WMParameter paramWindowVin_{
+    "WindowVin",
+    "WindowVin",
+    String(DEFAULT_WINDOW_VIN).c_str(),
+    sizeof(int8)};
+
+  ESPAsync_WMParameter* additionalParameters_[12] = {
     &paramHostname_,
     &paramMqttServer_,
     &paramMqttPortString_,
@@ -130,6 +142,8 @@ class WifiManager {
     &paramUpdatePassword_,
     &paramMotorGround_,
     &paramMotorVin_,
+    &paramWindowGround_,
+    &paramWindowVin_,
   };
 
 // Use USE_DHCP_IP == true for dynamic DHCP IP, false to use static IP which you

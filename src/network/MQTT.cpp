@@ -100,8 +100,12 @@ void open_heat::network::MQTT::publish(const String& topic, const String& messag
 
 void open_heat::network::MQTT::connect()
 {
-  if (strlen(config_->MQTT.Server) == 0 || config_->MQTT.Port == 0) {
-    Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
+  if ((strlen(config_->MQTT.Server) == 0 || config_->MQTT.Port == 0 )){
+    if (configValid_) {
+        Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
+    }
+
+    configValid_ = false;
     return;
   }
 
@@ -118,11 +122,6 @@ void open_heat::network::MQTT::connect()
   }
 
   if (!mqttClient_.connect(config_->Hostname, username, password)) {
-    Logger::log(
-      Logger::DEBUG,
-      "Failed to connect to mqtt in setup, check your config: server %s:%i",
-      config_->MQTT.Server,
-      config_->MQTT.Port);
     return;
   }
 
