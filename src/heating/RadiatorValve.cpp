@@ -22,13 +22,13 @@ void open_heat::heating::RadiatorValve::setup()
   lastTemp_ = tempSensor_.getTemperature();
   mode_ = config.Mode;
 
-  // closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
+  // closeValve(VALVE_FULL_ROTATE_TIME);
 }
 
 void open_heat::heating::RadiatorValve::loop()
 {
   if (turnOff_) {
-    closeValve(VALVE_COMPLETE_CLOSE_MILLIS);
+    closeValve(VALVE_FULL_ROTATE_TIME);
     turnOff_ = false;
   }
 
@@ -53,7 +53,7 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   // 0.5 works; 0.3 both works
-  const auto openHysteresis = 0.35f;
+  const auto openHysteresis = 0.4f;
   const auto closeHysteresis = 0.2f;
 //  short openTime = 400;
 //  const short closeTime = openTime / 2;
@@ -88,19 +88,20 @@ void open_heat::heating::RadiatorValve::loop()
       temperatureChange < minTemperatureChange
       && currentRotateNoChange_ < maxRotateNoChange_) {
 
-      const float lageTempDiff = 1.5;
+      const float lageTempDiff = 1;
       if (
         setTemp_ - predictTemp > lageTempDiff && setTemp_ - temp > lageTempDiff
-        && currentRotateNoChange_ == 0) {
-        openTime *= 4;
-        Logger::log(Logger::DEBUG, "4x open time due to large temp difference");
+        && currentRotateNoChange_ < 2) {
+        openTime *= 10;
+      } else if (setTemp_ - predictTemp - openHysteresis >= 0.5) {
+       openTime = 500;
       }
 
       openValve(openTime);
       currentRotateNoChange_++;
       // wait longer after opening the valve,
       // this should prevent over heating but also increases time to heat.
-      additionalWaitTime += checkIntervalMillis_;
+     // additionalWaitTime += checkIntervalMillis_/2;
     } else {
       Logger::log(
         Logger::INFO,
@@ -246,4 +247,8 @@ void open_heat::heating::RadiatorValve::registerModeChangedHandler(
   const std::function<void(OperationMode)>& handler)
 {
   opModeChangedHandler_.push_back(handler);
+}
+void open_heat::heating::RadiatorValve::openFully()
+{
+  openValve(VALVE_FULL_ROTATE_TIME);
 }

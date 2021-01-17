@@ -34,6 +34,7 @@ class WebServer {
   void loop();
 
   static void installUpdateHandlePost(AsyncWebServerRequest* request, Config& config);
+  void fullOpenHandlePost(AsyncWebServerRequest* request);
 
   AsyncWebServer& getWebServer();
 
@@ -64,7 +65,7 @@ class WebServer {
   void rootHandlePost(AsyncWebServerRequest* pRequest);
   void updateSetTemp(const AsyncWebServerRequest* request);
   void togglePost(AsyncWebServerRequest* pRequest);
-  void updateConfig(AsyncWebServerRequest* request);
+  bool updateConfig(AsyncWebServerRequest* request);
 
   String indexHTMLProcessor(const String& var);
   void setupEvents();
@@ -72,6 +73,7 @@ class WebServer {
     const open_heat::Logger::Level& level,
     const char* module,
     const char* message);
+  static void reset(AsyncWebServerRequest* request, AsyncResponseStream* response);
 };
 
 } // namespace network
