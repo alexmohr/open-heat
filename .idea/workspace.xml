@@ -16,15 +16,13 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -85,6 +83,11 @@
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -136,7 +139,9 @@
       <workItem from="1610699674619" duration="33000" />
       <workItem from="1610711327054" duration="7409000" />
       <workItem from="1610728673426" duration="16265000" />
-      <workItem from="1610797657446" duration="16305000" />
+      <workItem from="1610797657446" duration="16775000" />
+      <workItem from="1610880641423" duration="5643000" />
+      <workItem from="1610895385923" duration="3207000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -292,7 +297,14 @@
       <option name="project" value="LOCAL" />
       <updated>1610748338843</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="add pin config.">
+      <created>1610836162804</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1610836162804</updated>
+    </task>
+    <option name="localTasksCounter" value="24" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -332,7 +344,8 @@
     <MESSAGE value="fix build" />
     <MESSAGE value="Updated algorithm, state and temp changes from web ui are now published via mqtt" />
     <MESSAGE value="add pin configuration" />
-    <option name="LAST_COMMIT_MESSAGE" value="add pin configuration" />
+    <MESSAGE value="add pin config." />
+    <option name="LAST_COMMIT_MESSAGE" value="add pin config." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
