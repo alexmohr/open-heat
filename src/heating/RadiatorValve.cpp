@@ -53,7 +53,7 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   // 0.5 works; 0.3 both works
-  const auto openHysteresis = 0.4f;
+  const auto openHysteresis = 0.3f;
   const auto closeHysteresis = 0.2f;
 //  short openTime = 400;
 //  const short closeTime = openTime / 2;
