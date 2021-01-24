@@ -74,6 +74,7 @@ void open_heat::network::WebServer::setup()
   setupEvents();
 
   asyncWebServer_.begin();
+  Logger::log(Logger::DEBUG, "Web server ready");
 }
 
 void WebServer::setupEvents()

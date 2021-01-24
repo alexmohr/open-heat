@@ -24,6 +24,7 @@ DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 #if TEMP_SENSOR == BME280
 #include <heating/RadiatorValve.hpp>
 #include <sensors/BME280.hpp>
+#include <sensors/WindowSensor.hpp>
 open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
 #elif TEMP_SENSOR == TP100
 #include <sensors/TP100.hpp>
@@ -38,7 +39,7 @@ open_heat::Filesystem filesystem_;
 open_heat::heating::RadiatorValve valve_(*tempSensor_, filesystem_);
 open_heat::network::MQTT mqtt_(filesystem_, *tempSensor_, &valve_);
 open_heat::network::WebServer webServer_(filesystem_, *tempSensor_, valve_);
-
+open_heat::sensors::WindowSensor windowSensor_(&filesystem_,& valve_);
 
 open_heat::network::WifiManager wifiManager_(
   wifiCheckInterval,
@@ -46,26 +47,6 @@ open_heat::network::WifiManager wifiManager_(
   webServer_.getWebServer(),
   &dnsServer_,
   &drd_);
-//
-//typedef struct {
-//  uint32_t namesz;
-//  uint32_t descsz;
-//  uint32_t type;
-//  uint8_t data[];
-//} ElfNoteSection_t;
-//
-//extern const ElfNoteSection_t g_note_build_id;
-//
-//void print_build_id(void) {
-//  const uint8_t *build_id_data = &g_note_build_id.data[g_note_build_id.namesz];
-//
-//  printf("Build ID: ");
-//  for (int i = 0; i < g_note_build_id.descsz; ++i) {
-//    printf("%02x", build_id_data[i]);
-//  }
-//  printf("\n");
-//}
-
 
 void waitForSerialPort()
 {
@@ -80,10 +61,6 @@ void setupPins()
   // set led pin as output
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LED_OFF);
-
-  // Todo make these pins configurable
-  pinMode(D5, OUTPUT);
-  pinMode(D6, OUTPUT);
 }
 
 void logVersions()
@@ -113,6 +90,7 @@ void setup()
   valve_.setup();
   mqtt_.setup();
   webServer_.setup();
+  windowSensor_.setup();
 
   logVersions();
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Setup done");
@@ -128,4 +106,5 @@ void loop()
   wifiManager_.loop();
   valve_.loop();
   mqtt_.loop();
+  windowSensor_.loop();
 }
