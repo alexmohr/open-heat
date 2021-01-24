@@ -15,18 +15,12 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="add window switch">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -145,7 +139,7 @@
       <workItem from="1611078033262" duration="3765000" />
       <workItem from="1611130014582" duration="969000" />
       <workItem from="1611161777783" duration="27000" />
-      <workItem from="1611507558845" duration="10446000" />
+      <workItem from="1611507558845" duration="13620000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -308,7 +302,14 @@
       <option name="project" value="LOCAL" />
       <updated>1610836162804</updated>
     </task>
-    <option name="localTasksCounter" value="24" />
+    <task id="LOCAL-00024" summary="add window switch">
+      <created>1611518606651</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1611518606651</updated>
+    </task>
+    <option name="localTasksCounter" value="25" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -349,7 +350,8 @@
     <MESSAGE value="Updated algorithm, state and temp changes from web ui are now published via mqtt" />
     <MESSAGE value="add pin configuration" />
     <MESSAGE value="add pin config." />
-    <option name="LAST_COMMIT_MESSAGE" value="add pin config." />
+    <MESSAGE value="add window switch" />
+    <option name="LAST_COMMIT_MESSAGE" value="add window switch" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

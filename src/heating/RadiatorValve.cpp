@@ -31,6 +31,11 @@ void open_heat::heating::RadiatorValve::loop()
   if (turnOff_) {
     closeValve(VALVE_FULL_ROTATE_TIME);
     turnOff_ = false;
+    return;
+  } else if (openFully_) {
+    openValve(VALVE_FULL_ROTATE_TIME);
+    openFully_ = false;
+    return;
   }
 
   if (millis() < nextCheckMillis_) {
@@ -203,8 +208,11 @@ void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
   Logger::log(Logger::INFO, "Valve, new mode: %s", modeToCharArray(mode));
   mode_ = mode;
 
-  if (mode_ != HEAT) {
+  if (mode_ == OFF) {
     turnOff_ = true;
+  } else if (mode_ == FULL_OPEN) {
+    openFully_ = true;
+    mode_ = HEAT;
   }
 
   if (isWindowOpen_) {
@@ -244,10 +252,6 @@ void open_heat::heating::RadiatorValve::registerModeChangedHandler(
   const std::function<void(OperationMode)>& handler)
 {
   opModeChangedHandler_.push_back(handler);
-}
-void open_heat::heating::RadiatorValve::openFully()
-{
-  openValve(VALVE_FULL_ROTATE_TIME);
 }
 
 void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
