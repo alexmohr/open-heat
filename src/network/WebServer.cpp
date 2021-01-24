@@ -146,11 +146,10 @@ void WebServer::reset(AsyncWebServerRequest* request, AsyncResponseStream* respo
 
 void WebServer::fullOpenHandlePost(AsyncWebServerRequest* request)
 {
-  valve_.openFully();
+  valve_.setMode(FULL_OPEN);
 
   AsyncResponseStream* response = request->beginResponseStream(CONTENT_TYPE_HTML);
   response->printf(HTML_REDIRECT_15, "succeeded");
-  reset(request, response);
   request->send(response);
 }
 
@@ -309,7 +308,7 @@ bool WebServer::updateField(
 
 void WebServer::togglePost(AsyncWebServerRequest* pRequest)
 {
-  auto newMode = valve_.getMode() == OFF ? HEAT : OFF;
+  auto newMode = valve_.getMode() != HEAT ? HEAT : OFF;
   valve_.setMode(newMode);
 
   pRequest->send(HTTP_OK, CONTENT_TYPE_HTML, HTML_REDIRECT_NOW);

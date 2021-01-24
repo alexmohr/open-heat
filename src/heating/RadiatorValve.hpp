@@ -28,8 +28,6 @@ class RadiatorValve {
   void registerSetTempChangedHandler(const std::function<void(float)>& handler);
   void registerModeChangedHandler(const std::function<void(OperationMode)>& handler);
 
-  void openFully();
-
   void setWindowState(bool isOpen);
 
   private:
@@ -41,13 +39,14 @@ class RadiatorValve {
   Filesystem& filesystem_;
   OperationMode mode_{OFF};
 
-  static constexpr int VALVE_FULL_ROTATE_TIME = 10000;
+  static constexpr int VALVE_FULL_ROTATE_TIME = 20000;
   sensors::ITemperatureSensor& tempSensor_;
   float setTemp_;
   float lastTemp_{0};
   float lastPredictTemp_{0};
 
   bool turnOff_{false};
+  bool openFully_{false};
 
   unsigned long nextCheckMillis_{0};
   static constexpr unsigned long checkIntervalMillis_ = 2.5 * 60 * 1000;

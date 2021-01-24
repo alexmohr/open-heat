@@ -67,7 +67,7 @@ typedef struct PinSettings {
   int8 Vin{};
 } PinSettings;
 
-enum OperationMode { HEAT, OFF, UNKNOWN };
+enum OperationMode { HEAT, OFF, FULL_OPEN, UNKNOWN };
 
 typedef struct Config {
   WiFi_Credentials WifiCredentials[NUM_WIFI_CREDENTIALS]{{"", ""}, {"", ""}};
