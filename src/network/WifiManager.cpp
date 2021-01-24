@@ -347,9 +347,9 @@ void WifiManager::initAdditionalParams()
   paramMotorGround_.setWMParam_Data(paramData);
 
   // Window pins
-  paramMotorVin_.getWMParam_Data(paramData);
+  paramWindowVin_.getWMParam_Data(paramData);
   strcpy(paramData._value, String(config.WindowPins.Vin).c_str());
-  paramMotorVin_.setWMParam_Data(paramData);
+  paramWindowVin_.setWMParam_Data(paramData);
 
   paramWindowGround_.getWMParam_Data(paramData);
   strcpy(paramData._value, String(config.WindowPins.Ground).c_str());

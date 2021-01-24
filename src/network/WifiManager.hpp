@@ -97,7 +97,7 @@ class WifiManager {
 
   ESPAsync_WMParameter paramUpdatePassword_{
     "UpdatePassword",
-    "UpdateUser Password",
+    "Update Password",
     "",
     UPDATE_MAX_PW_LEN};
 
@@ -109,25 +109,25 @@ class WifiManager {
 
   ESPAsync_WMParameter paramMotorGround_{
     "MotorGround",
-    "Ground",
+    "Motor Ground",
     String(DEFAULT_MOTOR_GROUND).c_str(),
     sizeof(int8)};
 
   ESPAsync_WMParameter paramMotorVin_{
-    "MotorGround",
-    "Vin",
+    "MotorVin",
+    "Motor Vin",
     String(DEFAULT_MOTOR_VIN).c_str(),
     sizeof(int8)};
 
   ESPAsync_WMParameter paramWindowGround_{
     "WindowGround",
-    "Ground",
+    "Window Ground",
     String(DEFAULT_WINDOW_GROUND).c_str(),
     sizeof(int8)};
 
   ESPAsync_WMParameter paramWindowVin_{
     "WindowVin",
-    "WindowVin",
+    "Window Vin",
     String(DEFAULT_WINDOW_VIN).c_str(),
     sizeof(int8)};
 

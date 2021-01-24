@@ -22,7 +22,8 @@ void open_heat::heating::RadiatorValve::setup()
   lastTemp_ = tempSensor_.getTemperature();
   mode_ = config.Mode;
 
-  // closeValve(VALVE_FULL_ROTATE_TIME);
+  pinMode(config.MotorPins.Vin, OUTPUT);
+  pinMode(config.MotorPins.Ground, OUTPUT);
 }
 
 void open_heat::heating::RadiatorValve::loop()
@@ -55,11 +56,8 @@ void open_heat::heating::RadiatorValve::loop()
   // 0.5 works; 0.3 both works
   const auto openHysteresis = 0.3f;
   const auto closeHysteresis = 0.2f;
-//  short openTime = 400;
-//  const short closeTime = openTime / 2;
-    short openTime = 250;
-    const short closeTime = 200;
-
+  short openTime = 250;
+  const short closeTime = 200;
 
   // If valve was opened waiting time is increased
   unsigned long additionalWaitTime = 0;
@@ -94,14 +92,11 @@ void open_heat::heating::RadiatorValve::loop()
         && currentRotateNoChange_ < 2) {
         openTime *= 10;
       } else if (setTemp_ - predictTemp - openHysteresis >= 0.5) {
-       openTime = 500;
+        openTime = 700;
       }
 
       openValve(openTime);
       currentRotateNoChange_++;
-      // wait longer after opening the valve,
-      // this should prevent over heating but also increases time to heat.
-     // additionalWaitTime += checkIntervalMillis_/2;
     } else {
       Logger::log(
         Logger::INFO,
@@ -124,15 +119,6 @@ void open_heat::heating::RadiatorValve::loop()
         temp,
         temperatureChange);
     }
-
-  } else {
-  /*  if ((temp - lastTemp_) > 0.2 && std::abs(temp - setTemp_) < 0.2) {
-      // temp is rising and near limit. close valve a bit to prevent spikes
-      closeValve(closeTime);
-      Logger::log(Logger::WARNING, "Spike prevention!");
-    } else {
-      Logger::log(Logger::DEBUG, "Valve not changed");
-    }*/
   }
 
   lastPredictTemp_ = predictTemp;
@@ -162,7 +148,7 @@ void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
 
   updateConfig();
 
-  for (const auto& handler: setTempChangedHandler_) {
+  for (const auto& handler : setTempChangedHandler_) {
     handler(setTemp_);
   }
 }
@@ -210,15 +196,26 @@ void open_heat::heating::RadiatorValve::setPinsLow()
 
 void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
 {
+  if (mode == mode_) {
+    return;
+  }
+
+  Logger::log(Logger::INFO, "Valve, new mode: %s", modeToCharArray(mode));
   mode_ = mode;
+
   if (mode_ != HEAT) {
     turnOff_ = true;
   }
+
+  if (isWindowOpen_) {
+    restoreMode_ = false;
+  }
+
   auto& config = filesystem_.getConfig();
   config.Mode = mode_;
   filesystem_.persistConfig();
 
-  for (const auto& handler: opModeChangedHandler_) {
+  for (const auto& handler : opModeChangedHandler_) {
     handler(mode_);
   }
 }
@@ -251,4 +248,25 @@ void open_heat::heating::RadiatorValve::registerModeChangedHandler(
 void open_heat::heating::RadiatorValve::openFully()
 {
   openValve(VALVE_FULL_ROTATE_TIME);
+}
+
+void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
+{
+  if (isOpen) {
+    Logger::log(Logger::DEBUG, "Storing mode, window open");
+    lastMode_ = mode_;
+    setMode(OFF);
+    restoreMode_ = true;
+  } else {
+    if (restoreMode_) {
+      Logger::log(Logger::DEBUG, "Restoring mode, window closed");
+      nextCheckMillis_ += sleepMillisAfterWindowClose_;
+      setMode(lastMode_);
+    } else {
+      Logger::log(
+        Logger::DEBUG, "Mode changed while window was open, not enabled old mode");
+    }
+  }
+
+  isWindowOpen_ = isOpen;
 }

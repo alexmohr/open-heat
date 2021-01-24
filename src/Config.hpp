@@ -16,7 +16,7 @@ static constexpr uint8_t PASS_MAX_LEN = 64;
 
 static constexpr uint16_t MQTT_DEFAULT_PORT = 1883;
 static constexpr uint8_t MQTT_SERVER_NAME_MAX_SIZE = 32;
-static constexpr uint8_t MQTT_PORT_STR_MAX_SIZE = 6;
+static constexpr uint8_t MQTT_PORT_STR_MAX_SIZE = 00000;
 static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 255;
 static constexpr uint8_t MQTT_USERNAME_MAX_SIZE = 64;
 static constexpr uint8_t MQTT_PASSWORD_MAX_SIZE = 64;
@@ -31,6 +31,7 @@ static constexpr uint8_t HOST_NAME_MAX_LEN = 32;
 static constexpr uint8_t DEFAULT_MOTOR_GROUND = D5;
 static constexpr uint8_t DEFAULT_MOTOR_VIN = D6;
 
+// On devboard defaults are D8 and D7
 static constexpr int8_t DEFAULT_WINDOW_GROUND = -1;
 static constexpr int8_t DEFAULT_WINDOW_VIN = -1;
 
@@ -62,8 +63,8 @@ typedef struct UpdateSettings {
 } UpdateSettings;
 
 typedef struct PinSettings {
-  int8 Ground{D5};
-  int8 Vin{D6};
+  int8 Ground{};
+  int8 Vin{};
 } PinSettings;
 
 enum OperationMode { HEAT, OFF, UNKNOWN };

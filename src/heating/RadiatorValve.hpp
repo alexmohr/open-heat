@@ -30,6 +30,8 @@ class RadiatorValve {
 
   void openFully();
 
+  void setWindowState(bool isOpen);
+
   private:
   void openValve(unsigned short rotateTime);
   void closeValve(unsigned short rotateTime);
@@ -54,6 +56,12 @@ class RadiatorValve {
 
   std::vector<std::function<void(OperationMode)>> opModeChangedHandler_{};
   std::vector<std::function<void(float)>> setTempChangedHandler_{};
+
+  OperationMode lastMode_;
+  bool restoreMode_ = false;
+  bool isWindowOpen_ = false;
+  // Wait 3 minutes before heating again after window opened
+  const unsigned long sleepMillisAfterWindowClose_{3 * 60 * 1000};
 
   /**
     When deciding about valve movements, the regulation algorithm tries to

@@ -16,14 +16,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +66,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../daimler_github/scripts/mttf/mttf-request" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
@@ -81,16 +84,6 @@
     <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
@@ -142,6 +135,17 @@
       <workItem from="1610797657446" duration="16775000" />
       <workItem from="1610880641423" duration="5643000" />
       <workItem from="1610895385923" duration="3207000" />
+      <workItem from="1610961848542" duration="15000" />
+      <workItem from="1610961878888" duration="1457000" />
+      <workItem from="1610966678024" duration="45000" />
+      <workItem from="1610966965220" duration="366000" />
+      <workItem from="1610968274404" duration="22000" />
+      <workItem from="1610992668664" duration="1276000" />
+      <workItem from="1611041836430" duration="47000" />
+      <workItem from="1611078033262" duration="3765000" />
+      <workItem from="1611130014582" duration="969000" />
+      <workItem from="1611161777783" duration="27000" />
+      <workItem from="1611507558845" duration="10446000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
