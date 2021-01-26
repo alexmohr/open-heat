@@ -256,6 +256,12 @@ void open_heat::heating::RadiatorValve::registerModeChangedHandler(
 
 void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
 {
+  if (isOpen == isWindowOpen_) {
+    Logger::log(Logger::DEBUG, "Window mode %i already set", isOpen);
+    return;
+  }
+
+
   if (isOpen) {
     Logger::log(Logger::DEBUG, "Storing mode, window open");
     lastMode_ = mode_;
@@ -272,5 +278,15 @@ void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
     }
   }
 
+  for (const auto &stateHandler : windowStateHandler_) {
+    stateHandler(isOpen);
+  }
+
   isWindowOpen_ = isOpen;
+}
+
+void open_heat::heating::RadiatorValve::registerWindowChangeHandler(
+  const std::function<void(bool)>& handler)
+{
+  windowStateHandler_.push_back(handler);
 }

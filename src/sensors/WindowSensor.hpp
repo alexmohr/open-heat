@@ -30,6 +30,8 @@ class WindowSensor {
   static unsigned long lastChangeMillis_;
 
   bool isSetUp{false};
+  static bool isOpen_;
+  static bool validate_;
 };
 
 } // namespace sensors

@@ -57,6 +57,8 @@ class MQTT {
 
   static String getMeasuredTempTopic_;
 
+  static String windowStateTopic_;
+
   static String logTopic_;
 
   WiFiClient wiFiClient_;

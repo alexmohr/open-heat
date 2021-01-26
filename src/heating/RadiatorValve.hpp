@@ -27,6 +27,7 @@ class RadiatorValve {
 
   void registerSetTempChangedHandler(const std::function<void(float)>& handler);
   void registerModeChangedHandler(const std::function<void(OperationMode)>& handler);
+  void registerWindowChangeHandler(const std::function<void(bool)>& handler);
 
   void setWindowState(bool isOpen);
 
@@ -54,6 +55,7 @@ class RadiatorValve {
   uint8_t  currentRotateNoChange_{0};
 
   std::vector<std::function<void(OperationMode)>> opModeChangedHandler_{};
+  std::vector<std::function<void(bool)>> windowStateHandler_{};
   std::vector<std::function<void(float)>> setTempChangedHandler_{};
 
   OperationMode lastMode_;
