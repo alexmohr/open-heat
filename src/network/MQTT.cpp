@@ -17,6 +17,8 @@ String open_heat::network::MQTT::setConfiguredTempTopic_;
 String open_heat::network::MQTT::getConfiguredTempTopic_;
 String open_heat::network::MQTT::getMeasuredTempTopic_;
 
+String open_heat::network::MQTT::windowStateTopic_;
+
 String open_heat::network::MQTT::logTopic_;
 
 String logBuffer_;
@@ -33,6 +35,10 @@ void open_heat::network::MQTT::setup()
 
   valve_->registerSetTempChangedHandler([this](float temp){
     mqttClient_.publish(getConfiguredTempTopic_, String(temp));
+  });
+
+  valve_->registerWindowChangeHandler([this](bool state){
+    mqttClient_.publish(windowStateTopic_, String(state));
   });
 
   Logger::addPrinter(
@@ -144,6 +150,11 @@ void open_heat::network::MQTT::connect()
   setModeTopic_ += "mode/set";
   mqttClient_.subscribe(setModeTopic_);
   Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", setModeTopic_.c_str());
+
+  windowStateTopic_ = config_->MQTT.Topic;
+  windowStateTopic_ += "window/get";
+  mqttClient_.subscribe(windowStateTopic_);
+  Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", windowStateTopic_.c_str());
 
   logTopic_ = config_->MQTT.Topic;
   logTopic_ += "log";

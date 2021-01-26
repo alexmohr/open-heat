@@ -15,12 +15,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="add window switch">
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="fix: crash on full open">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -60,7 +62,7 @@
     <property name="WebServerToolWindowPanel.toolwindow.show.size" value="false" />
     <property name="cf.advertisement.text.overridden" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../mohalex/trace-icc-service-APRICOT-34243" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
@@ -139,7 +141,13 @@
       <workItem from="1611078033262" duration="3765000" />
       <workItem from="1611130014582" duration="969000" />
       <workItem from="1611161777783" duration="27000" />
-      <workItem from="1611507558845" duration="13620000" />
+      <workItem from="1611507558845" duration="14228000" />
+      <workItem from="1611570728986" duration="767000" />
+      <workItem from="1611575515779" duration="58000" />
+      <workItem from="1611588846644" duration="1054000" />
+      <workItem from="1611590403166" duration="76000" />
+      <workItem from="1611683550692" duration="1935000" />
+      <workItem from="1611691976702" duration="1070000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -309,7 +317,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611518606651</updated>
     </task>
-    <option name="localTasksCounter" value="25" />
+    <task id="LOCAL-00025" summary="fix: crash on full open">
+      <created>1611525305074</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1611525305074</updated>
+    </task>
+    <option name="localTasksCounter" value="26" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -351,7 +366,8 @@
     <MESSAGE value="add pin configuration" />
     <MESSAGE value="add pin config." />
     <MESSAGE value="add window switch" />
-    <option name="LAST_COMMIT_MESSAGE" value="add window switch" />
+    <MESSAGE value="fix: crash on full open" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix: crash on full open" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -360,6 +376,11 @@
           <url>file://$PROJECT_DIR$/.pio/libdeps/nodemcuv2/Adafruit BME280 Library/Adafruit_BME280.cpp</url>
           <line>81</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/src/sensors/WindowSensor.cpp</url>
+          <line>52</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

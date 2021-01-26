@@ -10,6 +10,8 @@ namespace sensors {
 
 Filesystem* WindowSensor::filesystem_ = nullptr;
 heating::RadiatorValve* WindowSensor::valve_ = nullptr;
+bool WindowSensor::validate_ = false;
+bool WindowSensor::isOpen_ = false;
 
 //unsigned int WindowSensor::minMillisBetweenEvents_{500};
 unsigned long WindowSensor::lastChangeMillis_;
@@ -41,8 +43,8 @@ void WindowSensor::setup()
   pinMode(config.WindowPins.Vin, INPUT_PULLUP);
 
   isSetUp = true;
-  const auto isOpen =  digitalRead(config.WindowPins.Vin) == HIGH;
-  valve_->setWindowState(isOpen);
+  isOpen_ =  digitalRead(config.WindowPins.Vin) == HIGH;
+  valve_->setWindowState(isOpen_);
 
   attachInterrupt(
     digitalPinToInterrupt(config.WindowPins.Vin), sensorChangedInterrupt, CHANGE);
@@ -50,23 +52,36 @@ void WindowSensor::setup()
 
 void WindowSensor::loop()
 {
+  if (!validate_) {
+    return;
+  }
+
+  delay(250);
+  const auto& config = filesystem_->getConfig();
+  bool stateNow = digitalRead(config.WindowPins.Vin) == HIGH;
+  if (stateNow == isOpen_) {
+    valve_->setWindowState(isOpen_);
+  } else {
+    Logger::log(Logger::INFO, "Window switch state changed ignored");
+  }
+
+  validate_ = false;
 }
 
 void ICACHE_RAM_ATTR WindowSensor::sensorChangedInterrupt()
 {
   const auto& config = filesystem_->getConfig();
-  const auto isOpen =  digitalRead(config.WindowPins.Vin) == HIGH;
-  Logger::log(Logger::DEBUG, "Window switch changed, new state: %i", isOpen);
+  isOpen_ = digitalRead(config.WindowPins.Vin) == HIGH;
+
+  Logger::log(Logger::DEBUG, "Window switch changed, new state: %i", isOpen_);
 
   const auto now = millis();
   if (now - lastChangeMillis_  < minMillisBetweenEvents_) {
-    Logger::log(Logger::DEBUG, "Ignored window event, due to too little time between events", isOpen);
+    Logger::log(Logger::DEBUG, "Ignored window event, due to too little time between events", isOpen_);
     return;
   }
 
-  lastChangeMillis_ = now;
-
-  valve_->setWindowState(isOpen);
+  validate_ = true;
 }
 
 } // namespace sensors
