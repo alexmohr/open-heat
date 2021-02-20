@@ -51,8 +51,8 @@ class RadiatorValve {
 
   unsigned long nextCheckMillis_{0};
   static constexpr unsigned long checkIntervalMillis_ = 2.5 * 60 * 1000;
-  static constexpr  uint8_t maxRotateNoChange_{8};
-  uint8_t  currentRotateNoChange_{0};
+  //static constexpr  uint8_t maxRotateNoChange_{100};
+//  uint8_t  currentRotateNoChange_{0};
 
   std::vector<std::function<void(OperationMode)>> opModeChangedHandler_{};
   std::vector<std::function<void(bool)>> windowStateHandler_{};
