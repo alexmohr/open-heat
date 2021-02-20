@@ -61,8 +61,8 @@ void open_heat::heating::RadiatorValve::loop()
   // 0.5 works; 0.3 both works
   const auto openHysteresis = 0.3f;
   const auto closeHysteresis = 0.2f;
-  short openTime = 250;
-  const short closeTime = 200;
+  short openTime = 350;
+  short closeTime = 200;
 
   // If valve was opened waiting time is increased
   unsigned long additionalWaitTime = 0;
@@ -83,25 +83,32 @@ void open_heat::heating::RadiatorValve::loop()
   }
 
   const float temperatureChange = temp - lastTemp_;
-  const float minTemperatureChange = 0.08;
+  const float minTemperatureChange = 0.2;
+
+  const float lageTempDiff = 1;
 
   // Act according to the prediction.
   if (predictTemp < (setTemp_ - openHysteresis)) {
     if (
-      temperatureChange < minTemperatureChange
-      && currentRotateNoChange_ < maxRotateNoChange_) {
+      temperatureChange < minTemperatureChange) {
 
-      const float lageTempDiff = 1;
+      const auto predictDiff = setTemp_ - predictTemp - openHysteresis;
+      Logger::log(Logger::INFO,"Open predict diff: %f", predictDiff);
+
       if (
-        setTemp_ - predictTemp > lageTempDiff && setTemp_ - temp > lageTempDiff
-        && currentRotateNoChange_ < 2) {
+        setTemp_ - predictTemp > lageTempDiff && setTemp_ - temp > lageTempDiff) {
         openTime *= 10;
-      } else if (setTemp_ - predictTemp - openHysteresis >= 0.5) {
-        openTime = 700;
+      } else if (predictDiff >= 2) {
+        openTime = 3000;
+      } else if (predictDiff >= 1.5) {
+        openTime = 2500;
+      } else if (predictDiff >= 1) {
+        openTime = 1500;
+      } else if (predictDiff >= 0.5) {
+        openTime = 1000;
       }
 
       openValve(openTime);
-      currentRotateNoChange_++;
     } else {
       Logger::log(
         Logger::INFO,
@@ -109,12 +116,21 @@ void open_heat::heating::RadiatorValve::loop()
         lastTemp_,
         temp,
         temperatureChange);
-      currentRotateNoChange_ = 0;
     }
 
   } else if (predictTemp > (setTemp_ + closeHysteresis)) {
-    currentRotateNoChange_ = 0;
+   // currentRotateNoChange_ = 0;
     if (temperatureChange >= -minTemperatureChange) {
+
+      const auto predictDiff = setTemp_ - predictTemp - closeHysteresis;
+      Logger::log(Logger::INFO,"Close predict diff: %f", predictDiff);
+      if (predictDiff <= 1) {
+        closeTime = 600;
+      }
+      else if (predictDiff <= 0.5) {
+        closeTime = 300;
+      }
+
       closeValve(closeTime);
     } else {
       Logger::log(

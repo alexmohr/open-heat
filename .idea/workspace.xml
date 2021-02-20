@@ -19,10 +19,6 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -147,7 +143,21 @@
       <workItem from="1611588846644" duration="1054000" />
       <workItem from="1611590403166" duration="76000" />
       <workItem from="1611683550692" duration="1935000" />
-      <workItem from="1611691976702" duration="1070000" />
+      <workItem from="1611691976702" duration="2242000" />
+      <workItem from="1611732297299" duration="11000" />
+      <workItem from="1612625004760" duration="1684000" />
+      <workItem from="1612724954131" duration="1146000" />
+      <workItem from="1612768733318" duration="47000" />
+      <workItem from="1612804437330" duration="2363000" />
+      <workItem from="1612856602192" duration="14000" />
+      <workItem from="1613070165019" duration="3867000" />
+      <workItem from="1613115971885" duration="2931000" />
+      <workItem from="1613131998591" duration="194000" />
+      <workItem from="1613140282043" duration="679000" />
+      <workItem from="1613145268182" duration="2331000" />
+      <workItem from="1613218117431" duration="709000" />
+      <workItem from="1613372522063" duration="1000" />
+      <workItem from="1613372561695" duration="96000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -324,7 +334,14 @@
       <option name="project" value="LOCAL" />
       <updated>1611525305074</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="publish window state via mqtt">
+      <created>1611693123177</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1611693123177</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -367,7 +384,8 @@
     <MESSAGE value="add pin config." />
     <MESSAGE value="add window switch" />
     <MESSAGE value="fix: crash on full open" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: crash on full open" />
+    <MESSAGE value="publish window state via mqtt" />
+    <option name="LAST_COMMIT_MESSAGE" value="publish window state via mqtt" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
