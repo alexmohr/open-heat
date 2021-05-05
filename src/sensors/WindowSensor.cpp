@@ -67,7 +67,6 @@ void WindowSensor::loop()
 
   validate_ = false;
 }
-
 void ICACHE_RAM_ATTR WindowSensor::sensorChangedInterrupt()
 {
   const auto& config = filesystem_->getConfig();

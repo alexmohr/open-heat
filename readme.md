@@ -26,6 +26,12 @@ To build run
 platformio -c clion run --target release -e nodemcuv2
 ```
 
+## Setup
+Connect to the WiFi OpenHeatESP... with password "OpenHeat".
+Open 192.168.4.1 in your browser and start configuration. 
+Save config and the ESP will reboot and connect to your Wifi.
+
+
 ## Updating
 Download the latest firmware from releases and upload it on the web-ui.
 Make sure to download the correct version, otherwise your MCU has to be flashed via USB again.

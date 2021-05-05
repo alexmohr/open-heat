@@ -35,7 +35,10 @@ Logger::Logger() = default;
 
 void Logger::setup()
 {
-  getInstance().loggerOutputFunctions_.push_back(LoggerOutputFunction(defaultLog));
+  if (Serial) {
+    getInstance().loggerOutputFunctions_.emplace_back(defaultLog);
+  }
+
 }
 
 void Logger::log(Level level, const char* format, ...)

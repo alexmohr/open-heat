@@ -47,22 +47,25 @@ void open_heat::network::MQTT::setup()
     });
 }
 
-void open_heat::network::MQTT::loop()
+unsigned long open_heat::network::MQTT::loop()
 {
+  wifi_.checkWifi();
+
   mqttClient_.loop();
 
   if (!mqttClient_.connected()) {
-    connect();
+    setup();
   }
 
   if (millis() < nextCheckMillis_) {
-    return;
+    return nextCheckMillis_;
   }
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
   publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(valve_->getMode()));
   nextCheckMillis_ = millis() + checkIntervalMillis_;
+  return nextCheckMillis_;
 }
 
 void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& payload)
@@ -74,7 +77,7 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
     payload.c_str());
 
   if (topic == setConfiguredTempTopic_) {
-    auto newTemp = std::strtod(payload.c_str(), nullptr);
+    auto newTemp = static_cast<float>(std::strtod(payload.c_str(), nullptr));
     valve_->setConfiguredTemp(newTemp);
     publish(getConfiguredTempTopic_, String(newTemp));
   } else if (topic == getConfiguredTempTopic_) {
@@ -115,7 +118,9 @@ void open_heat::network::MQTT::connect()
     return;
   }
 
+  mqttClient_.setTimeout(std::chrono::milliseconds(std::chrono::minutes(3)).count());
   mqttClient_.begin(config_->MQTT.Server, config_->MQTT.Port, wiFiClient_);
+  // Large timeout to allow large sleeps
   const char* username = nullptr;
   const char* password = nullptr;
 

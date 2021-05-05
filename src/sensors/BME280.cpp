@@ -12,7 +12,7 @@ open_heat::sensors::BME280::BME280()
 
 float open_heat::sensors::BME280::getTemperature()
 {
-return bme_.readTemperature();
+  return bme_.readTemperature();
 }
 void open_heat::sensors::BME280::setup()
 {

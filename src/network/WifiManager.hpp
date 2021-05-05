@@ -16,20 +16,19 @@ namespace network {
 class WifiManager {
   public:
   WifiManager(
-    std::chrono::milliseconds checkInterval,
     Filesystem* filesystem,
     AsyncWebServer& webServer,
     DNSServer* dnsServer,
     DoubleResetDetector* drd) :
-      checkInterval_(checkInterval),
       webServer_(webServer),
       dnsServer_(dnsServer),
       wifiMulti_(WIFI_MULTI()),
       drd_{drd},
       filesystem_(filesystem){};
 
-  void loop();
+  unsigned long loop();
   void setup();
+  void checkWifi();
 
   private:
   bool showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager);
@@ -39,7 +38,7 @@ class WifiManager {
 
   bool loadAPsFromConfig();
 
-  void checkWifi();
+
   uint8_t connectMultiWiFi();
 
   void initSTAIPConfigStruct(WiFi_STA_IPConfig& ipConfig);
@@ -48,10 +47,9 @@ class WifiManager {
   static void clearSettings(Config& config);
   void updateSettings(Config& config);
 
-  const std::chrono::milliseconds checkInterval_;
+  const std::chrono::milliseconds checkInterval_{std::chrono::minutes (2)};
   ulong nextWifiCheckMillis_ = 0;
   unsigned char reconnectCount_ = 0;
-  unsigned char maxReconnects_ = 50;
 
   AsyncWebServer& webServer_;
   DNSServer* dnsServer_{};
