@@ -18,6 +18,8 @@ class Filesystem {
 
       void persistConfig();
 
+      void format();
+
  private:
   void listFiles();
   void initConfig();

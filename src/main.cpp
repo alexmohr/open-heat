@@ -15,9 +15,6 @@
 #include <sensors/ITemperatureSensor.hpp>
 
 
-static constexpr std::chrono::milliseconds wifiCheckInterval(5000);
-
-
 DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 
@@ -35,18 +32,17 @@ open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::TP
 
 open_heat::Filesystem filesystem_;
 
-
 open_heat::heating::RadiatorValve valve_(*tempSensor_, filesystem_);
-open_heat::network::MQTT mqtt_(filesystem_, *tempSensor_, &valve_);
 open_heat::network::WebServer webServer_(filesystem_, *tempSensor_, valve_);
-open_heat::sensors::WindowSensor windowSensor_(&filesystem_,& valve_);
+open_heat::sensors::WindowSensor windowSensor_(&filesystem_, &valve_);
 
 open_heat::network::WifiManager wifiManager_(
-  wifiCheckInterval,
   &filesystem_,
   webServer_.getWebServer(),
   &dnsServer_,
   &drd_);
+
+open_heat::network::MQTT mqtt_(filesystem_, wifiManager_, *tempSensor_, &valve_);
 
 void waitForSerialPort()
 {
@@ -74,14 +70,14 @@ void logVersions()
 
 void setup()
 {
-  Serial.begin(MONITOR_SPEED);
-  waitForSerialPort();
+  /*Serial.begin(MONITOR_SPEED);
+  Serial.setTimeout(2000);
+  waitForSerialPort();*/
 
   open_heat::Logger::setup();
-  open_heat::Logger::setLogLevel(open_heat::Logger::TRACE);
+  open_heat::Logger::setLogLevel(open_heat::Logger::FATAL);
 
   setupPins();
-  
   filesystem_.setup();
   tempSensor_->setup();
 
@@ -93,18 +89,52 @@ void setup()
   windowSensor_.setup();
 
   logVersions();
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Setup done");
+
+  open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 }
 
 void loop()
 {
+  wifi_set_sleep_type(NONE_SLEEP_T);
+
   // Call the double reset detector loop method every so often,
   // so that it can recognise when the timeout expires.
   // You can also call drd.stop() when you wish to no longer
   // consider the next reset as a double reset.
   drd_.loop();
-  wifiManager_.loop();
-  valve_.loop();
-  mqtt_.loop();
+
   windowSensor_.loop();
+  //const auto wifiSleep = wifiManager_.loop();
+  const auto valveSleep = valve_.loop();
+  const auto mqttSleep = mqtt_.loop();
+
+  auto nextCheckMillis = std::min(mqttSleep, valveSleep);
+
+
+  if (millis() < 10 * 1000) {
+    delay(100);
+    return;
+  }
+
+  drd_.stop();
+
+
+  open_heat::Logger::log(
+    open_heat::Logger::DEBUG,
+    "Sleep times: valveSleep %lu, mqttSleep %lu",
+    valveSleep - millis(),
+    mqttSleep - millis());
+
+
+  /*const unsigned long maxSleep = 300 * 1000;
+  const auto idleTime = std::min(nextCheckMillis - millis(), maxSleep);*/
+  const auto idleTime = nextCheckMillis - millis();
+
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", idleTime);
+
+  wifi_set_sleep_type(MODEM_SLEEP_T);
+  WiFi.forceSleepBegin();
+  delay(idleTime);
+  WiFi.forceSleepWake();
+
 }

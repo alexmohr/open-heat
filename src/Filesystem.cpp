@@ -108,5 +108,9 @@ bool Filesystem::isConfigValid()
 
   return true;
 }
+void Filesystem::format()
+{
+  filesystem->format();
+}
 
 } // namespace open_heat

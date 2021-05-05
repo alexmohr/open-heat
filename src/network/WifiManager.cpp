@@ -12,8 +12,6 @@ namespace network {
 
 void WifiManager::setup()
 {
-  digitalWrite(LED_BUILTIN, LED_ON);
-
   auto &config = filesystem_->getConfig();
   ESPAsync_WiFiManager espWifiManager(&webServer_, dnsServer_, config.Hostname);
 
@@ -26,14 +24,14 @@ void WifiManager::setup()
 
   if (startConfigPortal || connectMultiWiFi() != WL_CONNECTED) {
     // Starts an access point
+    digitalWrite(LED_BUILTIN, LED_ON);
     while (!showConfigurationPortal(&espWifiManager)) {
       Logger::log(Logger::WARNING, "Configuration did not yield valid wifi, retrying");
     }
+    digitalWrite(LED_BUILTIN, LED_OFF);
   }
 
   checkWifi();
-
-  digitalWrite(LED_BUILTIN, LED_OFF);
 }
 
 bool WifiManager::loadAPsFromConfig()
@@ -204,14 +202,15 @@ void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) co
   }
 }
 
-void WifiManager::loop()
+unsigned long WifiManager::loop()
 {
   // Check WiFi periodically.
   if ( millis() < nextWifiCheckMillis_)
-    return;
+    return nextWifiCheckMillis_;
 
   checkWifi();
   nextWifiCheckMillis_ = millis() + checkInterval_.count();
+  return nextWifiCheckMillis_;
 }
 
 void WifiManager::checkWifi()

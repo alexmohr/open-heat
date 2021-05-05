@@ -17,7 +17,7 @@ class RadiatorValve {
 
   RadiatorValve(sensors::ITemperatureSensor& tempSensor, Filesystem& filesystem);
 
-  void loop();
+  unsigned long loop();
   void setup();
   float getConfiguredTemp() const;
   void setConfiguredTemp(float temp);
@@ -45,6 +45,7 @@ class RadiatorValve {
   float setTemp_;
   float lastTemp_{0};
   float lastPredictTemp_{0};
+  int currentRotateTime_{-VALVE_FULL_ROTATE_TIME / 2};
 
   bool turnOff_{false};
   bool openFully_{false};

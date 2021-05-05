@@ -26,20 +26,22 @@ void open_heat::heating::RadiatorValve::setup()
   pinMode(config.MotorPins.Ground, OUTPUT);
 }
 
-void open_heat::heating::RadiatorValve::loop()
+unsigned long open_heat::heating::RadiatorValve::loop()
 {
   if (turnOff_) {
     closeValve(VALVE_FULL_ROTATE_TIME);
     turnOff_ = false;
-    return;
+    nextCheckMillis_ = millis() + checkIntervalMillis_;
+    return nextCheckMillis_;
   } else if (openFully_) {
     openValve(VALVE_FULL_ROTATE_TIME);
     openFully_ = false;
-    return;
+    nextCheckMillis_ = millis() + checkIntervalMillis_;
+    return nextCheckMillis_;
   }
 
   if (millis() < nextCheckMillis_) {
-    return;
+    return nextCheckMillis_;
   }
 
   const auto temp = tempSensor_.getTemperature();
@@ -54,8 +56,8 @@ void open_heat::heating::RadiatorValve::loop()
 
   if (mode_ != HEAT) {
     lastTemp_ = temp;
-    nextCheckMillis_ = millis() + checkIntervalMillis_;
-    return;
+    nextCheckMillis_ = millis() + checkIntervalMillis_ * 10;
+    return nextCheckMillis_;
   }
 
   // 0.5 works; 0.3 both works
@@ -79,7 +81,7 @@ void open_heat::heating::RadiatorValve::loop()
     nextCheckMillis_ = millis() + checkIntervalMillis_ + additionalWaitTime;
     lastPredictTemp_ = predictTemp;
     lastTemp_ = temp;
-    return;
+    return nextCheckMillis_;
   }
 
   const float temperatureChange = temp - lastTemp_;
@@ -89,14 +91,12 @@ void open_heat::heating::RadiatorValve::loop()
 
   // Act according to the prediction.
   if (predictTemp < (setTemp_ - openHysteresis)) {
-    if (
-      temperatureChange < minTemperatureChange) {
+    if (temperatureChange < minTemperatureChange) {
 
       const auto predictDiff = setTemp_ - predictTemp - openHysteresis;
-      Logger::log(Logger::INFO,"Open predict diff: %f", predictDiff);
+      Logger::log(Logger::INFO, "Open predict diff: %f", predictDiff);
 
-      if (
-        setTemp_ - predictTemp > lageTempDiff && setTemp_ - temp > lageTempDiff) {
+      if (setTemp_ - predictTemp > lageTempDiff && setTemp_ - temp > lageTempDiff) {
         openTime *= 10;
       } else if (predictDiff >= 2) {
         openTime = 3000;
@@ -119,15 +119,13 @@ void open_heat::heating::RadiatorValve::loop()
     }
 
   } else if (predictTemp > (setTemp_ + closeHysteresis)) {
-   // currentRotateNoChange_ = 0;
     if (temperatureChange >= -minTemperatureChange) {
 
       const auto predictDiff = setTemp_ - predictTemp - closeHysteresis;
-      Logger::log(Logger::INFO,"Close predict diff: %f", predictDiff);
+      Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
       if (predictDiff <= 1) {
         closeTime = 600;
-      }
-      else if (predictDiff <= 0.5) {
+      } else if (predictDiff <= 0.5) {
         closeTime = 300;
       }
 
@@ -145,7 +143,12 @@ void open_heat::heating::RadiatorValve::loop()
   lastPredictTemp_ = predictTemp;
   lastTemp_ = temp;
 
+  if (std::abs(currentRotateTime_) >= VALVE_FULL_ROTATE_TIME) {
+    additionalWaitTime = 30 * 1000;
+  }
+
   nextCheckMillis_ = millis() + checkIntervalMillis_ + additionalWaitTime;
+  return nextCheckMillis_;
 }
 
 float open_heat::heating::RadiatorValve::getConfiguredTemp() const
@@ -183,9 +186,20 @@ void open_heat::heating::RadiatorValve::updateConfig()
 
 void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
 {
+  if (currentRotateTime_ <= -VALVE_FULL_ROTATE_TIME) {
+    open_heat::Logger::log(open_heat::Logger::DEBUG, "Valve already fully closed");
+    return;
+  }
+
+  currentRotateTime_ -= rotateTime;
+
   const auto& config = filesystem_.getConfig().MotorPins;
 
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Closing valve for %ims", rotateTime);
+  open_heat::Logger::log(
+    open_heat::Logger::DEBUG,
+    "Closing valve for %ims, currentRotateTime: %ims",
+    rotateTime,
+    currentRotateTime_);
   digitalWrite(config.Vin, LOW);
   digitalWrite(config.Ground, HIGH);
 
@@ -196,9 +210,21 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
 
 void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
 {
+  if (currentRotateTime_ >= VALVE_FULL_ROTATE_TIME) {
+    open_heat::Logger::log(open_heat::Logger::DEBUG, "Valve already fully open");
+    return;
+  }
+
+  currentRotateTime_ += rotateTime;
+
   const auto& config = filesystem_.getConfig().MotorPins;
 
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Opening valve for %ims", rotateTime);
+  open_heat::Logger::log(
+    open_heat::Logger::DEBUG,
+    "Opening valve for %ims, currentRotateTime: %ims",
+    rotateTime,
+    currentRotateTime_);
+
   digitalWrite(config.Ground, LOW);
   digitalWrite(config.Vin, HIGH);
 
@@ -224,11 +250,17 @@ void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
   Logger::log(Logger::INFO, "Valve, new mode: %s", modeToCharArray(mode));
   mode_ = mode;
 
-  if (mode_ == OFF) {
+  switch (mode) {
+  case OFF:
     turnOff_ = true;
-  } else if (mode_ == FULL_OPEN) {
+    break;
+  case FULL_OPEN:
     openFully_ = true;
     mode_ = HEAT;
+  case HEAT:
+    nextCheckMillis_ = millis() + checkIntervalMillis_;
+  default:
+    break;
   }
 
   if (isWindowOpen_) {
@@ -277,7 +309,6 @@ void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
     return;
   }
 
-
   if (isOpen) {
     Logger::log(Logger::DEBUG, "Storing mode, window open");
     lastMode_ = mode_;
@@ -294,7 +325,7 @@ void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
     }
   }
 
-  for (const auto &stateHandler : windowStateHandler_) {
+  for (const auto& stateHandler : windowStateHandler_) {
     stateHandler(isOpen);
   }
 

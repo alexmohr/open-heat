@@ -6,6 +6,7 @@
 #ifndef OPEN_EQIVA_MQTT_CUH
 #define OPEN_EQIVA_MQTT_CUH
 
+#include "WifiManager.hpp"
 #include <Filesystem.hpp>
 #include <Logger.hpp>
 #include <MQTT.h>
@@ -19,9 +20,10 @@ class MQTT {
   public:
   explicit MQTT(
     Filesystem& filesystem,
+    WifiManager& wifi,
     sensors::ITemperatureSensor& tempSensor,
     heating::RadiatorValve* valve) :
-      filesystem_(filesystem), tempSensor_(tempSensor)
+      filesystem_(filesystem), wifi_(wifi), tempSensor_(tempSensor)
   {
     config_ = &filesystem_.getConfig();
     valve_ = valve;
@@ -29,7 +31,7 @@ class MQTT {
 
   public:
   void setup();
-  void loop();
+  unsigned long loop();
 
   private:
   void connect();
@@ -43,6 +45,8 @@ class MQTT {
 
   private:
   Filesystem& filesystem_;
+  WifiManager& wifi_;
+
   sensors::ITemperatureSensor& tempSensor_;
   static heating::RadiatorValve* valve_;
 
@@ -65,7 +69,7 @@ class MQTT {
 
   unsigned long nextCheckMillis_ = 0;
   // publish every minute
-  unsigned long checkIntervalMillis_ = 1 * 60 * 1000;
+  unsigned long checkIntervalMillis_ = 2 * 60 * 1000;
 
   bool configValid_{true};
 
