@@ -16,7 +16,7 @@ void WifiManager::setup()
   ESPAsync_WiFiManager espWifiManager(&webServer_, dnsServer_, config.Hostname);
 
   // Check if any config is valid.
-  bool startConfigPortal = !loadAPsFromConfig();
+  auto startConfigPortal = !loadAPsFromConfig();
   if (drd_->detectDoubleReset()) {
     Logger::log(Logger::WARNING, ">>> Detected double reset <<<");
     startConfigPortal = true;
@@ -36,12 +36,12 @@ void WifiManager::setup()
 
 bool WifiManager::loadAPsFromConfig()
 {
-  bool anyConfigValid = false;
+  auto anyConfigValid = false;
   for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
     // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
     auto& config = filesystem_->getConfig();
     if (
-      (String(config.WifiCredentials[i].wifi_ssid) == "")
+      (std::string(config.WifiCredentials[i].wifi_ssid).empty())
       || (strlen(config.WifiCredentials[i].wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
       Logger::log(Logger::DEBUG, "Wifi config in slot %i is invalid", i);
       continue;

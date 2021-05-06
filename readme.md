@@ -105,6 +105,12 @@ Subscribe to topic `$TOPIC/log`
 ### Browser
 Logs are displayed in the web ui at the bottom of the page.
 
+## Code analysis
+````
+cmake .. -DCMAKE_BUILD_TYPE=nodemcuv2 --CMAKE_EXPORT_COMPILE_COMMANDS=YES ..
+~/dev/public/llvm-project/build/bin/scan-build make
+````
+
 ## Installation
 
 ## Contributions
