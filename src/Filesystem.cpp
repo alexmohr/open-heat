@@ -95,6 +95,12 @@ void Filesystem::initConfig()
     strcpy(config_.Hostname, DEFAULT_HOST_NAME);
   }
 
+  const auto topic = std::string(config_.MQTT.Topic);
+  if (topic.size() > 1 && topic[topic.size() -1 ] != '/') {
+    strcpy(config_.MQTT.Topic, (topic + "/").c_str());
+
+  }
+
   Logger::log(Logger::DEBUG, "Successfully loaded config");
 }
 

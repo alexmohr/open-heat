@@ -12,12 +12,22 @@ open_heat::sensors::BME280::BME280()
 
 float open_heat::sensors::BME280::getTemperature()
 {
-  return bme_.readTemperature();
+  wake();
+  const auto temp = bme_.readTemperature();
+  sleep();
+  return temp;
 }
 void open_heat::sensors::BME280::setup()
 {
   bme_.begin(BME280_ADDRESS_ALTERNATE);
+  sleep();
 }
 void open_heat::sensors::BME280::loop()
 {
+}
+void open_heat::sensors::BME280::sleep() {
+  bme_.setSampling(Adafruit_BME280::MODE_SLEEP);
+}
+void open_heat::sensors::BME280::wake() {
+  bme_.setSampling(Adafruit_BME280::MODE_NORMAL);
 }
