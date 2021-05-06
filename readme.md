@@ -4,7 +4,7 @@
 This projects provides a firmware for an ESP8266 to control radiator valves.
 
 ## Status 
-Early alpha
+Early beta
 
 ## Hardware
   * ESP8266
@@ -17,7 +17,13 @@ Early alpha
     Using this requires less intricate soldering.
 
 ### Pin configuration
-Currently set via `platformio.ini`, will be added to configuration later.
+Pins can be configured via the webinterface.
+The current defaults are:
+
+| Function | Ground  | VIN     |
+|----------|---------|---------|
+| Motor    | D5 (14) | D6 (12) |
+| Window   | D8 (15) | D7 (13) |
 
 ## Building
 Run `init.sh` to properly initialize the project. 
@@ -35,6 +41,14 @@ Save config and the ESP will reboot and connect to your Wifi.
 ## Updating
 Download the latest firmware from releases and upload it on the web-ui.
 Make sure to download the correct version, otherwise your MCU has to be flashed via USB again.
+
+The initial configuration allows the configuration of a user name and password 
+for update purposes. 
+This is to improve security a bit and not anyone in your network can flash a new firmware. 
+For security purposes this data only can be changed in the configuration mode 
+and not via the webinterface. 
+To enable the configuration mode again restart your device twice in 10s. 
+
 
 ## MQTT 
 The heater can be controlled via mqtt and integrated into home assistant.
@@ -58,15 +72,35 @@ climate:
     current_temperature_topic: "living_room/front/temperature/measured/get"
     mode_command_topic: "living_room/front/mode/set"
     mode_state_topic: "living_room/front/mode/get"
-
+    retain: true
 ```
+
+### Debugging
+All commands must be sent with retain flag to allow the device to read the value 
+as soon as it comes out of sleep
+
+* Enable debugging and web interface, WARNING this consumes a lot more power is 
+not intended to be used for battery operation:
+  ``` 
+  mosquitto_pub -h hassbian -t "$TOPIC/debug/enable" -m "true" -r
+  ```
+* Set log level
+    ```
+     mosquitto_pub -h hassbian -t "$TOPIC/debug/loglevel" -m "$LEVEL" -r   
+    ```
+  Level can be a value between 0 (highest log level = all logs) and 5 (lowest log level = only fatal errors)
+
+* Receive logs
+    ```
+    mosquitto_sub -h hassbian -t "$TOPIC/log"
+    ```
 
 ## Receiving logs 
 ### Serial
 ``platformio -c clion device monitor -e nodemcuv2 -f esp8266_exception_decoder``
 
 ### MQTT 
-Subscribe to topic `$CONFIGURED_TOPIC/log`
+Subscribe to topic `$TOPIC/log`
 
 ### Browser
 Logs are displayed in the web ui at the bottom of the page.

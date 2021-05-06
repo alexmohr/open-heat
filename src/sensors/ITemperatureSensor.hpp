@@ -22,6 +22,8 @@ class ITemperatureSensor {
   virtual float getTemperature() = 0;
   virtual void setup() = 0;
   virtual void loop() = 0;
+  virtual void sleep() = 0;
+  virtual void wake() = 0;
 };
 
 }

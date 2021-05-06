@@ -68,14 +68,26 @@ void logVersions()
     open_heat::Logger::DEBUG, "WifiManager Version: %s", ESP_ASYNC_WIFIMANAGER_VERSION);
 }
 
+void setSleepType(const Config& config)
+{
+  if (
+    (config.WindowPins.Ground == 0 && config.WindowPins.Vin == 0)
+    || valve_.getMode() == OFF) {
+    wifi_set_sleep_type(LIGHT_SLEEP_T);
+  } else {
+    wifi_set_sleep_type(MODEM_SLEEP_T);
+  }
+}
+
 void setup()
 {
-  /*Serial.begin(MONITOR_SPEED);
+/*
+  Serial.begin(MONITOR_SPEED);
   Serial.setTimeout(2000);
-  waitForSerialPort();*/
-
+  waitForSerialPort();
+*/
   open_heat::Logger::setup();
-  open_heat::Logger::setLogLevel(open_heat::Logger::FATAL);
+  open_heat::Logger::setLogLevel(open_heat::Logger::DEBUG);
 
   setupPins();
   filesystem_.setup();
@@ -108,9 +120,6 @@ void loop()
   const auto valveSleep = valve_.loop();
   const auto mqttSleep = mqtt_.loop();
 
-  auto nextCheckMillis = std::min(mqttSleep, valveSleep);
-
-
   if (millis() < 10 * 1000) {
     delay(100);
     return;
@@ -118,6 +127,11 @@ void loop()
 
   drd_.stop();
 
+  // do not sleep if debug is enabled.
+  if (open_heat::network::MQTT::debug()) {
+    delay(100);
+    return;
+  }
 
   open_heat::Logger::log(
     open_heat::Logger::DEBUG,
@@ -125,16 +139,32 @@ void loop()
     valveSleep - millis(),
     mqttSleep - millis());
 
-
-  /*const unsigned long maxSleep = 300 * 1000;
-  const auto idleTime = std::min(nextCheckMillis - millis(), maxSleep);*/
-  const auto idleTime = nextCheckMillis - millis();
+  const auto minSleepTime = 1000;
+  unsigned long idleTime;
+  auto nextCheckMillis = std::min(mqttSleep, valveSleep);
+  if (nextCheckMillis < (millis() + minSleepTime)) {
+    open_heat::Logger::log(
+      open_heat::Logger::DEBUG,
+      "Minimal sleep or underflow prevented, sleep set to %ul ms", minSleepTime);
+    idleTime = minSleepTime;
+  } else {
+    idleTime = nextCheckMillis - millis();
+  }
 
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", idleTime);
 
-  wifi_set_sleep_type(MODEM_SLEEP_T);
+  const auto& config = filesystem_.getConfig();
+  setSleepType(config);
+
+  // Wait one second before forcing sleep to send messages.
+  delay(1000);
+  if (idleTime == minSleepTime) {
+    return;
+  }
+
   WiFi.forceSleepBegin();
   delay(idleTime);
   WiFi.forceSleepWake();
-
 }
+
+

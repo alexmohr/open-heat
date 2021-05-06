@@ -203,14 +203,14 @@ void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) co
 }
 
 unsigned long WifiManager::loop()
-{
+{/*
   // Check WiFi periodically.
   if ( millis() < nextWifiCheckMillis_)
     return nextWifiCheckMillis_;
 
   checkWifi();
   nextWifiCheckMillis_ = millis() + checkInterval_.count();
-  return nextWifiCheckMillis_;
+  return nextWifiCheckMillis_;*/
 }
 
 void WifiManager::checkWifi()

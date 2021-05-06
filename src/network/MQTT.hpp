@@ -33,6 +33,8 @@ class MQTT {
   void setup();
   unsigned long loop();
 
+  static bool debug() ;
+
   private:
   void connect();
   static void publish(const String& topic, const String& message);
@@ -61,6 +63,9 @@ class MQTT {
 
   static String getMeasuredTempTopic_;
 
+  static String debugEnableTopic_;
+  static String debugLogLevel_;
+
   static String windowStateTopic_;
 
   static String logTopic_;
@@ -69,11 +74,19 @@ class MQTT {
 
   unsigned long nextCheckMillis_ = 0;
   // publish every minute
-  unsigned long checkIntervalMillis_ = 2 * 60 * 1000;
+  unsigned long checkIntervalMillis_ = 3 * 60 * 1000;
 
   bool configValid_{true};
+  bool loggerAdded_{false};
+  static bool debugEnabled_;
 
   static Config* config_;
+  static void handleSetConfigTemp(const String& payload);
+  static void handleGetConfigTemp();
+  static void handleSetMode(const String& payload);
+  static void handleDebug(const String& payload);
+  static void subscribe(const String& topic);
+  static void handleLogLevel(const String& payload);
 };
 } // namespace network
 } // namespace open_heat

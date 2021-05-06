@@ -17,11 +17,15 @@ String open_heat::network::MQTT::setConfiguredTempTopic_;
 String open_heat::network::MQTT::getConfiguredTempTopic_;
 String open_heat::network::MQTT::getMeasuredTempTopic_;
 
+String open_heat::network::MQTT::debugEnableTopic_;
+String open_heat::network::MQTT::debugLogLevel_;
+
 String open_heat::network::MQTT::windowStateTopic_;
 
 String open_heat::network::MQTT::logTopic_;
 
 String logBuffer_;
+bool open_heat::network::MQTT::debugEnabled_ = false;
 
 void open_heat::network::MQTT::setup()
 {
@@ -33,32 +37,31 @@ void open_heat::network::MQTT::setup()
     mqttClient_.publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(mode));
   });
 
-  valve_->registerSetTempChangedHandler([this](float temp){
-    mqttClient_.publish(getConfiguredTempTopic_, String(temp));
-  });
+  valve_->registerSetTempChangedHandler(
+    [this](float temp) { mqttClient_.publish(getConfiguredTempTopic_, String(temp)); });
 
-  valve_->registerWindowChangeHandler([this](bool state){
-    mqttClient_.publish(windowStateTopic_, String(state));
-  });
+  valve_->registerWindowChangeHandler(
+    [this](bool state) { mqttClient_.publish(windowStateTopic_, String(state)); });
 
-  Logger::addPrinter(
-    [this](Logger::Level level, const char* module, const char* message) {
+  if (!loggerAdded_) {
+    Logger::addPrinter([](Logger::Level level, const char* module, const char* message) {
       mqttLogPrinter(level, module, message);
     });
+    loggerAdded_ = true;
+  }
 }
 
 unsigned long open_heat::network::MQTT::loop()
 {
-  wifi_.checkWifi();
+  if (millis() < nextCheckMillis_) {
+    return nextCheckMillis_;
+  }
 
+  wifi_.checkWifi();
   mqttClient_.loop();
 
   if (!mqttClient_.connected()) {
-    setup();
-  }
-
-  if (millis() < nextCheckMillis_) {
-    return nextCheckMillis_;
+    connect();
   }
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
@@ -72,30 +75,69 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
 {
   Logger::log(
     Logger::DEBUG,
-    "Received message in topic: %s, msg: %s",
+    "Received message in topic: %s, msg: '%s'",
     topic.c_str(),
     payload.c_str());
 
   if (topic == setConfiguredTempTopic_) {
-    auto newTemp = static_cast<float>(std::strtod(payload.c_str(), nullptr));
-    valve_->setConfiguredTemp(newTemp);
-    publish(getConfiguredTempTopic_, String(newTemp));
+    handleSetConfigTemp(payload);
   } else if (topic == getConfiguredTempTopic_) {
-    auto setTemp = valve_->getConfiguredTemp();
-    publish(getConfiguredTempTopic_, String(setTemp));
+    handleGetConfigTemp();
   } else if (topic == setModeTopic_) {
-    OperationMode mode;
-    if (payload == "heat") {
-      mode = HEAT;
-    } else if (payload == "off") {
-      mode = OFF;
-    } else {
-      Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
-      return;
-    }
-    valve_->setMode(mode);
-    publish(getModeTopic_, payload);
+    handleSetMode(payload);
+  } else if (topic == debugEnableTopic_) {
+    handleDebug(payload);
+  } else if (topic == debugLogLevel_) {
+    handleLogLevel(payload);
   }
+}
+void open_heat::network::MQTT::handleLogLevel(const String& payload)
+{
+  std::stringstream  ss(payload.c_str());
+  int level;
+  if (!(ss >> level)) {
+    Logger::log(
+      Logger::DEBUG,
+      "Log level is invalid: %s", payload.c_str());
+    return;
+  }
+
+  Logger::setLogLevel(static_cast<Logger::Level>(level));
+}
+void open_heat::network::MQTT::handleDebug(const String& payload)
+{
+  if (payload == "true") {
+    debugEnabled_ = true;
+  } else if (payload == "false") {
+    debugEnabled_ = false;
+  }
+}
+
+void open_heat::network::MQTT::handleSetMode(const String& payload)
+{
+  OperationMode mode;
+  if (payload == "heat") {
+    mode = HEAT;
+  } else if (payload == "off") {
+    mode = OFF;
+  } else {
+    Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
+    return;
+  }
+  valve_->setMode(mode);
+  publish(getModeTopic_, payload);
+}
+
+void open_heat::network::MQTT::handleGetConfigTemp()
+{
+  const auto setTemp = valve_->getConfiguredTemp();
+  publish(getConfiguredTempTopic_, String(setTemp));
+}
+void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
+{
+  const auto newTemp = static_cast<float>(strtod(payload.c_str(), nullptr));
+  valve_->setConfiguredTemp(newTemp);
+  publish(getConfiguredTempTopic_, String(newTemp));
 }
 
 void open_heat::network::MQTT::publish(const String& topic, const String& message)
@@ -136,6 +178,9 @@ void open_heat::network::MQTT::connect()
     return;
   }
 
+  logTopic_ = config_->MQTT.Topic;
+  logTopic_ += "log";
+
   setConfiguredTempTopic_ = config_->MQTT.Topic;
   setConfiguredTempTopic_ += "temperature/target/set";
   mqttClient_.subscribe(setConfiguredTempTopic_);
@@ -153,16 +198,29 @@ void open_heat::network::MQTT::connect()
 
   setModeTopic_ = config_->MQTT.Topic;
   setModeTopic_ += "mode/set";
-  mqttClient_.subscribe(setModeTopic_);
-  Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", setModeTopic_.c_str());
+  subscribe(setModeTopic_);
+
+  debugEnableTopic_ = config_->MQTT.Topic;
+  debugEnableTopic_ += "debug/enable";
+  subscribe(debugEnableTopic_);
+
+  debugLogLevel_ = config_->MQTT.Topic;
+  debugLogLevel_ += "debug/loglevel";
+  subscribe(debugLogLevel_);
 
   windowStateTopic_ = config_->MQTT.Topic;
   windowStateTopic_ += "window/get";
-  mqttClient_.subscribe(windowStateTopic_);
-  Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", windowStateTopic_.c_str());
+  subscribe(windowStateTopic_);
+}
 
-  logTopic_ = config_->MQTT.Topic;
-  logTopic_ += "log";
+void open_heat::network::MQTT::subscribe(const String& topic)
+{
+  if (mqttClient_.subscribe(topic)) {
+    Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", topic.c_str());
+  } else {
+    Logger::log(Logger::ERROR, "MQTT failed to subscribe to topic: %s", topic.c_str());
+  }
+
 }
 
 void open_heat::network::MQTT::mqttLogPrinter(
@@ -182,4 +240,9 @@ void open_heat::network::MQTT::mqttLogPrinter(
   logBuffer_ += message;
   // do not use publish method, because it also logs.
   mqttClient_.publish(logTopic_, logBuffer_);
+}
+
+bool open_heat::network::MQTT::debug()
+{
+  return debugEnabled_;
 }

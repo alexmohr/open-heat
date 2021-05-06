@@ -45,8 +45,8 @@ unsigned long open_heat::heating::RadiatorValve::loop()
   }
 
   const auto temp = tempSensor_.getTemperature();
-  float predictPart = PREDICTION_STEEPNESS * (temp - lastTemp_);
-  float predictTemp = temp + predictPart;
+  const float predictPart = PREDICTION_STEEPNESS * (temp - lastTemp_);
+  const float predictTemp = temp + predictPart;
   Logger::log(
     Logger::DEBUG,
     "Predicted temp %.2f in %lu ms, predict part: %.2f",
@@ -56,11 +56,10 @@ unsigned long open_heat::heating::RadiatorValve::loop()
 
   if (mode_ != HEAT) {
     lastTemp_ = temp;
-    nextCheckMillis_ = millis() + checkIntervalMillis_ * 10;
+    nextCheckMillis_ = std::numeric_limits<unsigned long>::max();
     return nextCheckMillis_;
   }
 
-  // 0.5 works; 0.3 both works
   const auto openHysteresis = 0.3f;
   const auto closeHysteresis = 0.2f;
   short openTime = 350;
@@ -258,7 +257,7 @@ void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
     openFully_ = true;
     mode_ = HEAT;
   case HEAT:
-    nextCheckMillis_ = millis() + checkIntervalMillis_;
+    nextCheckMillis_ = millis();
   default:
     break;
   }

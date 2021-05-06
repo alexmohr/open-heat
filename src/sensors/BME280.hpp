@@ -15,15 +15,15 @@ class BME280 : public ITemperatureSensor {
   BME280();
 
   public: // ITemperatureSensor
-      float getTemperature() override;
+  float getTemperature() override;
   void setup() override;
   void loop() override;
+  void sleep() override;
+  void wake() override;
 
   private:
   // use I2C interface
   Adafruit_BME280 bme_;
-
-
 
   /*  Adafruit_Sensor* bme_pressure = bme.getPressureSensor();
     Adafruit_Sensor* bme_humidity = bme.getHumiditySensor();
