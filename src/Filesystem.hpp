@@ -11,16 +11,16 @@
 
 namespace open_heat {
 class Filesystem {
- public:
-     void setup();
-      Config& getConfig();
-      void clearConfig();
+  public:
+  void setup();
+  Config& getConfig();
+  void clearConfig();
 
-      void persistConfig();
+  void persistConfig();
 
-      void format();
+  void format();
 
- private:
+  private:
   void listFiles();
   void initConfig();
   static bool isConfigValid();
@@ -30,8 +30,6 @@ class Filesystem {
   Config config_{};
   FS* filesystem = &FileFS;
 };
-}
+} // namespace open_heat
 
-
-
-#endif //FILESYSTEM_HPP_
+#endif // FILESYSTEM_HPP_

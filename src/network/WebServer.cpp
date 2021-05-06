@@ -7,6 +7,7 @@
 #include "hardware/HAL.hpp"
 #include <Config.hpp>
 #include <Logger.hpp>
+#include <cstring>
 
 namespace open_heat {
 namespace network {
@@ -60,10 +61,10 @@ void open_heat::network::WebServer::setup()
   asyncWebServer_.on(
     installUpdatePath,
     HTTP_POST,
-    [this, &config](AsyncWebServerRequest* request) {
+    [&config](AsyncWebServerRequest* request) {
       installUpdateHandlePost(request, config);
     },
-    [this](
+    [](
       AsyncWebServerRequest* request,
       const String& filename,
       size_t index,
@@ -97,7 +98,7 @@ void WebServer::eventsLogPrinter(
   logBuffer_ = LOG_LEVEL_STRINGS[level];
   logBuffer_ += F(" ");
 
-  if (strlen(module) > 0) {
+  if (std::strlen(module) > 0) {
     logBuffer_ += F(": ");
     logBuffer_ += module;
     logBuffer_ += F(": ");
@@ -116,16 +117,17 @@ AsyncWebServer& open_heat::network::WebServer::getWebServer()
   return asyncWebServer_;
 }
 
-void WebServer::installUpdateHandlePost(AsyncWebServerRequest* request, Config& config)
+void WebServer::installUpdateHandlePost(
+  AsyncWebServerRequest *const request, Config& config)
 {
-  if (strlen(config.Update.Username) > 0 && strlen(config.Update.Password) > 0) {
+  if (std::strlen(config.Update.Username) > 0 && std::strlen(config.Update.Password) > 0) {
     if (!request->authenticate(config.Update.Username, config.Update.Password)) {
       return request->requestAuthentication();
     }
   }
 
-  bool updateSuccess = !Update.hasError();
-  AsyncResponseStream* response = request->beginResponseStream(CONTENT_TYPE_HTML);
+  const bool updateSuccess = !Update.hasError();
+  AsyncResponseStream* const response = request->beginResponseStream(CONTENT_TYPE_HTML);
   response->printf(HTML_REDIRECT_15, updateSuccess ? "succeeded" : "failed");
 
   if (updateSuccess) {
@@ -135,7 +137,7 @@ void WebServer::installUpdateHandlePost(AsyncWebServerRequest* request, Config& 
   request->send(response);
 }
 
-void WebServer::reset(AsyncWebServerRequest* request, AsyncResponseStream* response)
+void WebServer::reset(AsyncWebServerRequest* const request, AsyncResponseStream* const response)
 {
   response->addHeader("Connection", "close");
   request->onDisconnect([]() {
@@ -144,15 +146,14 @@ void WebServer::reset(AsyncWebServerRequest* request, AsyncResponseStream* respo
   });
 }
 
-void WebServer::fullOpenHandlePost(AsyncWebServerRequest* request)
+void WebServer::fullOpenHandlePost(AsyncWebServerRequest* const request)
 {
   valve_.setMode(FULL_OPEN);
 
-  AsyncResponseStream* response = request->beginResponseStream(CONTENT_TYPE_HTML);
+  AsyncResponseStream* const response = request->beginResponseStream(CONTENT_TYPE_HTML);
   response->printf(HTML_REDIRECT_15, "succeeded");
   request->send(response);
 }
-
 
 void WebServer::installUpdateHandleUpload(
   const String& filename,
@@ -186,17 +187,17 @@ void WebServer::installUpdateHandleUpload(
   }
 }
 
-void WebServer::rootHandleGet(AsyncWebServerRequest* request)
+void WebServer::rootHandleGet(AsyncWebServerRequest* const request)
 {
   request->send_P(HTTP_OK, CONTENT_TYPE_HTML, HTML_INDEX, [this](const String& data) {
     return indexHTMLProcessor(data);
   });
 }
 
-void WebServer::rootHandlePost(AsyncWebServerRequest* request)
+void WebServer::rootHandlePost(AsyncWebServerRequest* const request)
 {
   updateSetTemp(request);
-  auto needReset = updateConfig(request);
+  const auto needReset = updateConfig(request);
   if (needReset) {
     AsyncResponseStream* response = request->beginResponseStream(CONTENT_TYPE_HTML);
     response->printf(HTML_REDIRECT_15, "succeeded");
@@ -207,10 +208,9 @@ void WebServer::rootHandlePost(AsyncWebServerRequest* request)
       return indexHTMLProcessor(data);
     });
   }
-
 }
 
-bool WebServer::updateConfig(AsyncWebServerRequest* request)
+bool WebServer::updateConfig(AsyncWebServerRequest* const request)
 {
   auto& config = filesystem_.getConfig();
   bool updateConfig = false;
@@ -242,23 +242,23 @@ bool WebServer::updateConfig(AsyncWebServerRequest* request)
     String mqttBaseTopic = config.MQTT.Topic;
     if (!mqttBaseTopic.endsWith("/")) {
       mqttBaseTopic += "/";
-      strcpy(config.MQTT.Topic, mqttBaseTopic.c_str());
+      std::strcpy(config.MQTT.Topic, mqttBaseTopic.c_str());
     }
 
-    if (strlen(portBuf) > 0) {
+    if (std::strlen(portBuf) > 0) {
       config.MQTT.Port = static_cast<unsigned short>(std::strtol(portBuf, nullptr, 10));
     }
-    if (strlen(motorVinBuf) > 0) {
+    if (std::strlen(motorVinBuf) > 0) {
       config.MotorPins.Vin = static_cast<int8>(std::strtol(motorVinBuf, nullptr, 10));
     }
-    if (strlen(motorGroundBuf) > 0) {
+    if (std::strlen(motorGroundBuf) > 0) {
       config.MotorPins.Ground
         = static_cast<int8>(std::strtol(motorGroundBuf, nullptr, 10));
     }
-    if (strlen(windowVinBuf) > 0) {
+    if (std::strlen(windowVinBuf) > 0) {
       config.WindowPins.Vin = static_cast<int8>(std::strtol(windowVinBuf, nullptr, 10));
     }
-    if (strlen(windowGroundBuf) > 0) {
+    if (std::strlen(windowGroundBuf) > 0) {
       config.WindowPins.Ground
         = static_cast<int8>(std::strtol(windowGroundBuf, nullptr, 10));
     }
@@ -269,12 +269,12 @@ bool WebServer::updateConfig(AsyncWebServerRequest* request)
   return updateConfig;
 }
 
-void WebServer::updateSetTemp(const AsyncWebServerRequest* request)
+void WebServer::updateSetTemp(const AsyncWebServerRequest* const request)
 {
   static const char* paramSetTemp = "setTemp";
-  bool isPost = request->method() == HTTP_POST;
+  const bool isPost = request->method() == HTTP_POST;
   if (request->hasParam(paramSetTemp, isPost)) {
-    AsyncWebParameter* param = request->getParam(paramSetTemp, isPost);
+    const AsyncWebParameter* const param = request->getParam(paramSetTemp, isPost);
     const auto newTemp = static_cast<float>(strtod(param->value().c_str(), nullptr));
     valve_.setConfiguredTemp(newTemp);
   } else {
@@ -286,17 +286,17 @@ bool WebServer::updateField(
   AsyncWebServerRequest* request,
   const char* paramName,
   char* field,
-  int fieldLen)
+  size_t fieldLen)
 {
-  bool isPost = request->method() == HTTP_POST;
+  const bool isPost = request->method() == HTTP_POST;
   if (!request->hasParam(paramName, isPost)) {
     Logger::log(open_heat::Logger::DEBUG, "updatingField, param not found %s", paramName);
     return false;
   }
 
-  AsyncWebParameter* param = request->getParam(paramName, isPost);
-  memset(field, 0, fieldLen);
-  strcpy(field, param->value().c_str());
+  const AsyncWebParameter* const param = request->getParam(paramName, isPost);
+  std::memset(field, 0, fieldLen);
+  std::strcpy(field, param->value().c_str());
   Logger::log(
     Logger::DEBUG,
     "Updating field %s (len: %i), new value %s",
@@ -306,9 +306,9 @@ bool WebServer::updateField(
   return true;
 }
 
-void WebServer::togglePost(AsyncWebServerRequest* pRequest)
+void WebServer::togglePost(AsyncWebServerRequest* const pRequest)
 {
-  auto newMode = valve_.getMode() != HEAT ? HEAT : OFF;
+  const auto newMode = valve_.getMode() != HEAT ? HEAT : OFF;
   valve_.setMode(newMode);
 
   pRequest->send(HTTP_OK, CONTENT_TYPE_HTML, HTML_REDIRECT_NOW);

@@ -5,6 +5,7 @@
 
 #include "Filesystem.hpp"
 #include "Logger.hpp"
+#include <cstring>
 
 namespace open_heat {
 void Filesystem::setup()
@@ -32,7 +33,6 @@ void Filesystem::setup()
   } else {
     clearConfig();
   }
-
 }
 
 void Filesystem::listFiles()
@@ -91,14 +91,13 @@ void Filesystem::initConfig()
   file.readBytes((char*)&config_, sizeof(Config));
 
   file.close();
-  if (0 == strlen(config_.Hostname)) {
-    strcpy(config_.Hostname, DEFAULT_HOST_NAME);
+  if (0 == std::strlen(config_.Hostname)) {
+    std::strcpy(config_.Hostname, DEFAULT_HOST_NAME);
   }
 
   const auto topic = std::string(config_.MQTT.Topic);
-  if (topic.size() > 1 && topic[topic.size() -1 ] != '/') {
-    strcpy(config_.MQTT.Topic, (topic + "/").c_str());
-
+  if (topic.size() > 1 && topic[topic.size() - 1] != '/') {
+    std::strcpy(config_.MQTT.Topic, (topic + "/").c_str());
   }
 
   Logger::log(Logger::DEBUG, "Successfully loaded config");
@@ -106,9 +105,10 @@ void Filesystem::initConfig()
 
 bool Filesystem::isConfigValid()
 {
-  File file = FileFS.open(configFile_, "r");
-  if (file.size() != sizeof (Config)) {
-    Logger::log(Logger::ERROR, "Config layout changed, invalidating and new config necessary");
+  const File file = FileFS.open(configFile_, "r");
+  if (file.size() != sizeof(Config)) {
+    Logger::log(
+      Logger::ERROR, "Config layout changed, invalidating and new config necessary");
     return false;
   }
 

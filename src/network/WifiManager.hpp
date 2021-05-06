@@ -26,7 +26,6 @@ class WifiManager {
       drd_{drd},
       filesystem_(filesystem){};
 
-  unsigned long loop();
   void setup();
   void checkWifi();
 
@@ -38,7 +37,6 @@ class WifiManager {
 
   bool loadAPsFromConfig();
 
-
   uint8_t connectMultiWiFi();
 
   void initSTAIPConfigStruct(WiFi_STA_IPConfig& ipConfig);
@@ -47,8 +45,7 @@ class WifiManager {
   static void clearSettings(Config& config);
   void updateSettings(Config& config);
 
-  const std::chrono::milliseconds checkInterval_{std::chrono::minutes (2)};
-  ulong nextWifiCheckMillis_ = 0;
+  const std::chrono::milliseconds checkInterval_{std::chrono::minutes(2)};
   unsigned char reconnectCount_ = 0;
 
   AsyncWebServer& webServer_;

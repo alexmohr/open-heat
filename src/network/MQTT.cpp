@@ -5,6 +5,7 @@
 
 #include "MQTT.hpp"
 #include <Logger.hpp>
+#include <cstring>
 
 Config* open_heat::network::MQTT::config_;
 open_heat::heating::RadiatorValve* open_heat::network::MQTT::valve_;
@@ -33,7 +34,7 @@ void open_heat::network::MQTT::setup()
 
   mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 
-  valve_->registerModeChangedHandler([this](OperationMode mode){
+  valve_->registerModeChangedHandler([this](OperationMode mode) {
     mqttClient_.publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(mode));
   });
 
@@ -93,12 +94,10 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
 }
 void open_heat::network::MQTT::handleLogLevel(const String& payload)
 {
-  std::stringstream  ss(payload.c_str());
+  std::stringstream ss(payload.c_str());
   int level;
   if (!(ss >> level)) {
-    Logger::log(
-      Logger::DEBUG,
-      "Log level is invalid: %s", payload.c_str());
+    Logger::log(Logger::DEBUG, "Log level is invalid: %s", payload.c_str());
     return;
   }
 
@@ -151,26 +150,27 @@ void open_heat::network::MQTT::publish(const String& topic, const String& messag
 
 void open_heat::network::MQTT::connect()
 {
-  if ((strlen(config_->MQTT.Server) == 0 || config_->MQTT.Port == 0 )){
+  if ((std::strlen(config_->MQTT.Server) == 0 || config_->MQTT.Port == 0)) {
     if (configValid_) {
-        Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
+      Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
     }
 
     configValid_ = false;
     return;
   }
 
-  mqttClient_.setTimeout(std::chrono::milliseconds(std::chrono::minutes(3)).count());
+  mqttClient_.setTimeout(
+    static_cast<int>(std::chrono::milliseconds(std::chrono::minutes(3)).count()));
   mqttClient_.begin(config_->MQTT.Server, config_->MQTT.Port, wiFiClient_);
   // Large timeout to allow large sleeps
   const char* username = nullptr;
   const char* password = nullptr;
 
-  if (strlen(config_->MQTT.Username) > 0) {
+  if (std::strlen(config_->MQTT.Username) > 0) {
     username = config_->MQTT.Username;
   }
 
-  if (strlen(config_->MQTT.Password) > 0) {
+  if (std::strlen(config_->MQTT.Password) > 0) {
     password = config_->MQTT.Password;
   }
 
@@ -220,7 +220,6 @@ void open_heat::network::MQTT::subscribe(const String& topic)
   } else {
     Logger::log(Logger::ERROR, "MQTT failed to subscribe to topic: %s", topic.c_str());
   }
-
 }
 
 void open_heat::network::MQTT::mqttLogPrinter(
@@ -231,7 +230,7 @@ void open_heat::network::MQTT::mqttLogPrinter(
   logBuffer_ = LOG_LEVEL_STRINGS[level];
   logBuffer_ += F(" ");
 
-  if (strlen(module) > 0) {
+  if (std::strlen(module) > 0) {
     logBuffer_ += F(": ");
     logBuffer_ += module;
     logBuffer_ += F(": ");

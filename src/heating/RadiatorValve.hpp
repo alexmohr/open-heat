@@ -14,7 +14,6 @@ namespace heating {
 
 class RadiatorValve {
   public:
-
   RadiatorValve(sensors::ITemperatureSensor& tempSensor, Filesystem& filesystem);
 
   unsigned long loop();
@@ -51,7 +50,8 @@ class RadiatorValve {
   bool openFully_{false};
 
   unsigned long nextCheckMillis_{0};
-  static constexpr unsigned long checkIntervalMillis_ = 2.5 * 60 * 1000;
+  static constexpr unsigned long checkIntervalMillis_
+    = static_cast<unsigned long>(2.5 * 60 * 1000);
 
   std::vector<std::function<void(OperationMode)>> opModeChangedHandler_{};
   std::vector<std::function<void(bool)>> windowStateHandler_{};

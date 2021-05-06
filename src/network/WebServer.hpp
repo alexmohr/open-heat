@@ -25,7 +25,7 @@ class WebServer {
       tempSensor_(tempSensor),
       valve_(valve),
       asyncWebServer_(AsyncWebServer(80)),
-          logEvents_(AsyncEventSource("/logEvents"))
+      logEvents_(AsyncEventSource("/logEvents"))
   {
   }
 
@@ -33,7 +33,8 @@ class WebServer {
   void setup();
   void loop();
 
-  static void installUpdateHandlePost(AsyncWebServerRequest* request, Config& config);
+  static void installUpdateHandlePost(
+    AsyncWebServerRequest *request, Config& config);
   void fullOpenHandlePost(AsyncWebServerRequest* request);
 
   AsyncWebServer& getWebServer();
@@ -60,7 +61,7 @@ class WebServer {
     AsyncWebServerRequest* request,
     const char* paramName,
     char* field,
-    int fieldLen);
+    size_t fieldLen);
   void rootHandleGet(AsyncWebServerRequest* request);
   void rootHandlePost(AsyncWebServerRequest* pRequest);
   void updateSetTemp(const AsyncWebServerRequest* request);

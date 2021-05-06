@@ -5,11 +5,6 @@
 
 #include "BME280.hpp"
 
-open_heat::sensors::BME280::BME280()
-{
-
-}
-
 float open_heat::sensors::BME280::getTemperature()
 {
   wake();
@@ -25,9 +20,11 @@ void open_heat::sensors::BME280::setup()
 void open_heat::sensors::BME280::loop()
 {
 }
-void open_heat::sensors::BME280::sleep() {
+void open_heat::sensors::BME280::sleep()
+{
   bme_.setSampling(Adafruit_BME280::MODE_SLEEP);
 }
-void open_heat::sensors::BME280::wake() {
+void open_heat::sensors::BME280::wake()
+{
   bme_.setSampling(Adafruit_BME280::MODE_NORMAL);
 }

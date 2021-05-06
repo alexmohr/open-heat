@@ -9,11 +9,10 @@
 #error This code is intended to run on the ESP8266 platform! Please check your Tools->Board setting.
 #endif
 
-
 #include <FS.h>
 
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-//needed for library
+#include <ESP8266WiFi.h> //https://github.com/esp8266/Arduino
+// needed for library
 #include <DNSServer.h>
 #include <LittleFS.h>
 
@@ -23,24 +22,21 @@
 
 #define WIFI_MULTI ESP8266WiFiMulti
 
-#define ESP_getChipId()   (ESP.getChipId())
+#define ESP_getChipId() (ESP.getChipId())
 
 static constexpr uint8_t LED_ON = LOW;
 static constexpr uint8_t LED_OFF = HIGH;
 
-
 // Filesystem
 #include <LittleFS.h>
 
-#define FileFS        LittleFS
-#define FS_Name       "LittleFS"
+#define FileFS LittleFS
+#define FS_Name "LittleFS"
 
 // Double reset detector
-#define ESP_DRD_USE_LITTLEFS    true
-#define ESP_DRD_USE_SPIFFS      false
-
+#define ESP_DRD_USE_LITTLEFS true
+#define ESP_DRD_USE_SPIFFS false
 
 // For ESP8266, this better be 2200 to enable connect the 1st time
-#define WIFI_MULTI_1ST_CONNECT_WAITING_MS       2200L
+#define WIFI_MULTI_1ST_CONNECT_WAITING_MS 2200L
 #endif
-

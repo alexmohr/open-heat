@@ -5,6 +5,7 @@
 
 #include "WifiManager.hpp"
 #include <Logger.hpp>
+#include <cstring>
 #include <string>
 
 namespace open_heat {
@@ -12,7 +13,7 @@ namespace network {
 
 void WifiManager::setup()
 {
-  auto &config = filesystem_->getConfig();
+  const auto& config = filesystem_->getConfig();
   ESPAsync_WiFiManager espWifiManager(&webServer_, dnsServer_, config.Hostname);
 
   // Check if any config is valid.
@@ -41,8 +42,8 @@ bool WifiManager::loadAPsFromConfig()
     // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
     auto& config = filesystem_->getConfig();
     if (
-      (std::string(config.WifiCredentials[i].wifi_ssid).empty())
-      || (strlen(config.WifiCredentials[i].wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
+      (std::strlen(config.WifiCredentials[i].wifi_ssid) == 0)
+      || (std::strlen(config.WifiCredentials[i].wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
       Logger::log(Logger::DEBUG, "Wifi config in slot %i is invalid", i);
       continue;
     }
@@ -83,19 +84,19 @@ bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
   }
 
   // SSID and PW for Config Portal
-  String ssid = "OpenHeat_ESP_" + String(ESP_getChipId(), HEX);
+  const String ssid = "OpenHeat_ESP_" + String(ESP_getChipId(), HEX);
   const char* password = "OpenHeat";
 
   espWifiManager->setConfigPortalChannel(0);
   espWifiManager->setConfigPortalTimeout(0);
-  auto& config = filesystem_->getConfig();
+  const auto& config = filesystem_->getConfig();
 
   wifiMulti_.cleanAPlist();
   espWifiManager->startConfigPortal(ssid.c_str(), password);
 
   for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
-    String tempSSID = espWifiManager->getSSID(i);
-    String tempPW = espWifiManager->getPW(i);
+    const String tempSSID = espWifiManager->getSSID(i);
+    const String tempPW = espWifiManager->getPW(i);
 
     // Re-insert old config if user did not enter new credentials
     if (tempSSID.isEmpty() && tempPW.isEmpty()) {
@@ -124,19 +125,20 @@ void WifiManager::updateConfig(ESPAsync_WiFiManager* espWifiManager)
 void WifiManager::updateSettings(Config& config)
 {
   // Host
-  strcpy(config.Hostname, paramHostname_.getValue());
+  std::strcpy(config.Hostname, paramHostname_.getValue());
 
   // MQTT
-  strcpy(config.MQTT.Server, paramMqttServer_.getValue());
-  strcpy(config.MQTT.Topic, paramMqttTopic_.getValue());
-  strcpy(config.MQTT.Username, paramMqttUsername_.getValue());
-  strcpy(config.MQTT.Password, paramMqttPassword_.getValue());
-  auto newPort = static_cast<unsigned short>(std::strtol(paramMqttPortString_.getValue(), nullptr, 10));
+  std::strcpy(config.MQTT.Server, paramMqttServer_.getValue());
+  std::strcpy(config.MQTT.Topic, paramMqttTopic_.getValue());
+  std::strcpy(config.MQTT.Username, paramMqttUsername_.getValue());
+  std::strcpy(config.MQTT.Password, paramMqttPassword_.getValue());
+  const auto newPort = static_cast<unsigned short>(
+    std::strtol(paramMqttPortString_.getValue(), nullptr, 10));
   config.MQTT.Port = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
 
   // Update
-  strcpy(config.Update.Username, paramUpdateUsername_.getValue());
-  strcpy(config.Update.Password, paramUpdatePassword_.getValue());
+  std::strcpy(config.Update.Username, paramUpdateUsername_.getValue());
+  std::strcpy(config.Update.Password, paramUpdatePassword_.getValue());
 
   // MotorPins
   auto pin = static_cast<int8>(std::strtol(paramMotorGround_.getValue(), nullptr, 10));
@@ -155,20 +157,20 @@ void WifiManager::updateSettings(Config& config)
   filesystem_->persistConfig();
 }
 
-void WifiManager::clearSettings( Config& config)
+void WifiManager::clearSettings(Config& config)
 {
   // Clear settings - Host
-  memset(&config.Hostname, 0, sizeof(config.Hostname));
+  std::memset(&config.Hostname, 0, sizeof(config.Hostname));
 
   // Clear settings - MQTT
-  memset(&config.MQTT.Server, 0, sizeof(config.MQTT.Server));
-  memset(&config.MQTT.Topic, 0, sizeof(config.MQTT.Topic));
-  memset(&config.MQTT.Username, 0, sizeof(config.MQTT.Username));
-  memset(&config.MQTT.Password, 0, sizeof(config.MQTT.Password));
+  std::memset(&config.MQTT.Server, 0, sizeof(config.MQTT.Server));
+  std::memset(&config.MQTT.Topic, 0, sizeof(config.MQTT.Topic));
+  std::memset(&config.MQTT.Username, 0, sizeof(config.MQTT.Username));
+  std::memset(&config.MQTT.Password, 0, sizeof(config.MQTT.Password));
 
   // Clear settings - Update
-  memset(&config.Update.Username, 0, sizeof(config.Update.Username));
-  memset(&config.Update.Password, 0, sizeof(config.Update.Password));
+  std::memset(&config.Update.Username, 0, sizeof(config.Update.Username));
+  std::memset(&config.Update.Password, 0, sizeof(config.Update.Password));
 }
 
 void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) const
@@ -189,9 +191,9 @@ void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) co
       (ssidLen <= SSID_MAX_LEN) && (pwLen <= PASS_MAX_LEN) && (ssidLen > 0)
       && (pwLen >= MIN_AP_PASSWORD_SIZE)) {
 
-      memset(&config.WifiCredentials[i], 0, sizeof(WiFi_Credentials));
-      strcpy((config.WifiCredentials[i].wifi_ssid), tempSSID.c_str());
-      strcpy((config.WifiCredentials[i].wifi_pw), tempPW.c_str());
+      std::memset(&config.WifiCredentials[i], 0, sizeof(WiFi_Credentials));
+      std::strcpy((config.WifiCredentials[i].wifi_ssid), tempSSID.c_str());
+      std::strcpy((config.WifiCredentials[i].wifi_pw), tempPW.c_str());
     }
     Logger::log(
       Logger::DEBUG,
@@ -202,23 +204,11 @@ void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) co
   }
 }
 
-unsigned long WifiManager::loop()
-{/*
-  // Check WiFi periodically.
-  if ( millis() < nextWifiCheckMillis_)
-    return nextWifiCheckMillis_;
-
-  checkWifi();
-  nextWifiCheckMillis_ = millis() + checkInterval_.count();
-  return nextWifiCheckMillis_;*/
-}
-
 void WifiManager::checkWifi()
 {
-  if (WiFi.status() == WL_CONNECTED){
+  if (WiFi.status() == WL_CONNECTED) {
     return;
   }
-
 
   Logger::log(Logger::WARNING, "WIFi disconnected, reconnecting...");
   if (connectMultiWiFi() == WL_CONNECTED) {
@@ -260,7 +250,8 @@ uint8_t WifiManager::connectMultiWiFi()
     delay(WIFI_MULTI_CONNECT_WAITING_MS);
   }
 
-  auto connectTime = (i * WIFI_MULTI_CONNECT_WAITING_MS) + WIFI_MULTI_1ST_CONNECT_WAITING_MS;
+  auto connectTime
+    = (i * WIFI_MULTI_CONNECT_WAITING_MS) + WIFI_MULTI_1ST_CONNECT_WAITING_MS;
 
   if (status == WL_CONNECTED) {
     //@formatter:off
@@ -303,55 +294,55 @@ void WifiManager::initAdditionalParams()
 
   // Host
   paramHostname_.getWMParam_Data(paramData);
-  strcpy(paramData._value, config.Hostname);
+  std::strcpy(paramData._value, config.Hostname);
   paramHostname_.setWMParam_Data(paramData);
 
   // MQTT
   paramMqttServer_.getWMParam_Data(paramData);
-  strcpy(paramData._value, config.MQTT.Server);
+  std::strcpy(paramData._value, config.MQTT.Server);
   paramMqttServer_.setWMParam_Data(paramData);
 
   paramMqttPortString_.getWMParam_Data(paramData);
-  strcpy(paramData._value, String(config.MQTT.Port).c_str());
+  std::strcpy(paramData._value, String(config.MQTT.Port).c_str());
   paramMqttPortString_.setWMParam_Data(paramData);
 
   paramMqttTopic_.getWMParam_Data(paramData);
-  strcpy(paramData._value, config.MQTT.Topic);
+  std::strcpy(paramData._value, config.MQTT.Topic);
   paramMqttTopic_.setWMParam_Data(paramData);
 
   paramMqttUsername_.getWMParam_Data(paramData);
-  strcpy(paramData._value, config.MQTT.Username);
+  std::strcpy(paramData._value, config.MQTT.Username);
   paramMqttUsername_.setWMParam_Data(paramData);
 
   paramMqttPassword_.getWMParam_Data(paramData);
-  strcpy(paramData._value, config.MQTT.Password);
+  std::strcpy(paramData._value, config.MQTT.Password);
   paramMqttPassword_.setWMParam_Data(paramData);
 
   // Update
   paramUpdateUsername_.getWMParam_Data(paramData);
-  strcpy(paramData._value, config.Update.Username);
+  std::strcpy(paramData._value, config.Update.Username);
   paramUpdateUsername_.setWMParam_Data(paramData);
 
   paramUpdatePassword_.getWMParam_Data(paramData);
-  strcpy(paramData._value, config.Update.Password);
+  std::strcpy(paramData._value, config.Update.Password);
   paramUpdatePassword_.setWMParam_Data(paramData);
 
   // MotorPins
   paramMotorVin_.getWMParam_Data(paramData);
-  strcpy(paramData._value, String(config.MotorPins.Vin).c_str());
+  std::strcpy(paramData._value, String(config.MotorPins.Vin).c_str());
   paramMotorVin_.setWMParam_Data(paramData);
 
   paramMotorGround_.getWMParam_Data(paramData);
-  strcpy(paramData._value, String(config.MotorPins.Ground).c_str());
+  std::strcpy(paramData._value, String(config.MotorPins.Ground).c_str());
   paramMotorGround_.setWMParam_Data(paramData);
 
   // Window pins
   paramWindowVin_.getWMParam_Data(paramData);
-  strcpy(paramData._value, String(config.WindowPins.Vin).c_str());
+  std::strcpy(paramData._value, String(config.WindowPins.Vin).c_str());
   paramWindowVin_.setWMParam_Data(paramData);
 
   paramWindowGround_.getWMParam_Data(paramData);
-  strcpy(paramData._value, String(config.WindowPins.Ground).c_str());
+  std::strcpy(paramData._value, String(config.WindowPins.Ground).c_str());
   paramWindowGround_.setWMParam_Data(paramData);
 }
 

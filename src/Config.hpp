@@ -35,8 +35,6 @@ static constexpr uint8_t DEFAULT_MOTOR_VIN = D5;
 static constexpr int8_t DEFAULT_WINDOW_GROUND = -1;
 static constexpr int8_t DEFAULT_WINDOW_VIN = -1;
 
-
-
 static constexpr const char* DEFAULT_HOST_NAME = "OpenHeat";
 
 typedef struct {
@@ -62,6 +60,7 @@ typedef struct UpdateSettings {
   char Password[UPDATE_MAX_PW_LEN]{};
 } UpdateSettings;
 
+// pins are signed to indicate unused with < 0
 typedef struct PinSettings {
   int8 Ground{};
   int8 Vin{};
@@ -80,6 +79,5 @@ typedef struct Config {
   PinSettings MotorPins{};
   PinSettings WindowPins{};
 } Config;
-
 
 #endif // WIFIMANAGERCONFIG_HPP_

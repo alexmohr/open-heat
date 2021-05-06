@@ -16,8 +16,7 @@ class WindowSensor {
   WindowSensor(Filesystem* filesystem, heating::RadiatorValve* valve);
 
   void setup();
-  void loop();
-
+  static void loop();
 
   private:
   static void sensorChangedInterrupt();

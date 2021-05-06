@@ -13,9 +13,8 @@ heating::RadiatorValve* WindowSensor::valve_ = nullptr;
 bool WindowSensor::validate_ = false;
 bool WindowSensor::isOpen_ = false;
 
-//unsigned int WindowSensor::minMillisBetweenEvents_{500};
+// unsigned int WindowSensor::minMillisBetweenEvents_{500};
 unsigned long WindowSensor::lastChangeMillis_;
-
 
 WindowSensor::WindowSensor(Filesystem* filesystem, heating::RadiatorValve* valve)
 {
@@ -37,34 +36,33 @@ void WindowSensor::setup()
     config.WindowPins.Ground,
     config.WindowPins.Vin);
 
-  pinMode(config.WindowPins.Ground, INPUT);
-  digitalWrite(config.WindowPins.Ground, LOW);
+  pinMode(static_cast<uint8_t>(config.WindowPins.Ground), INPUT);
+  digitalWrite(static_cast<uint8_t>(config.WindowPins.Ground), LOW);
 
-  pinMode(config.WindowPins.Vin, INPUT_PULLUP);
+  pinMode(static_cast<uint8_t>(config.WindowPins.Vin), INPUT_PULLUP);
 
   isSetUp = true;
-  isOpen_ =  digitalRead(config.WindowPins.Vin) == HIGH;
+  isOpen_ = digitalRead(static_cast<uint8_t>(config.WindowPins.Vin)) == HIGH;
   valve_->setWindowState(isOpen_);
 
   if (valve_->getMode() == HEAT) {
     attachInterrupt(
-      digitalPinToInterrupt(config.WindowPins.Vin), sensorChangedInterrupt, CHANGE);
+      static_cast<uint8_t>(digitalPinToInterrupt(config.WindowPins.Vin)),
+      sensorChangedInterrupt,
+      CHANGE);
   }
 
   // Deatch interrupt when operation mode is not HEAT
-  valve_->registerModeChangedHandler([](const OperationMode mode) {
-    const auto &config = filesystem_->getConfig();
+  valve_->registerModeChangedHandler([&config](const OperationMode mode) {
     if (mode == HEAT) {
       attachInterrupt(
-        digitalPinToInterrupt(config.WindowPins.Vin), sensorChangedInterrupt, CHANGE);
+        static_cast<uint8_t>(digitalPinToInterrupt(config.WindowPins.Vin)),
+        sensorChangedInterrupt,
+        CHANGE);
     } else {
-      detachInterrupt(config.WindowPins.Vin);
+      detachInterrupt(static_cast<uint8_t>(digitalPinToInterrupt(config.WindowPins.Vin)));
     }
   });
-
-
-
-
 }
 
 void WindowSensor::loop()
@@ -75,7 +73,7 @@ void WindowSensor::loop()
 
   delay(250);
   const auto& config = filesystem_->getConfig();
-  bool stateNow = digitalRead(config.WindowPins.Vin) == HIGH;
+  const auto stateNow = digitalRead(static_cast<uint8_t>(config.WindowPins.Vin)) == HIGH;
   if (stateNow == isOpen_) {
     valve_->setWindowState(isOpen_);
   } else {
@@ -87,13 +85,16 @@ void WindowSensor::loop()
 void ICACHE_RAM_ATTR WindowSensor::sensorChangedInterrupt()
 {
   const auto& config = filesystem_->getConfig();
-  isOpen_ = digitalRead(config.WindowPins.Vin) == HIGH;
+  isOpen_ = digitalRead(static_cast<uint8_t>(config.WindowPins.Vin)) == HIGH;
 
   Logger::log(Logger::DEBUG, "Window switch changed, new state: %i", isOpen_);
 
   const auto now = millis();
-  if (now - lastChangeMillis_  < minMillisBetweenEvents_) {
-    Logger::log(Logger::DEBUG, "Ignored window event, due to too little time between events", isOpen_);
+  if (now - lastChangeMillis_ < minMillisBetweenEvents_) {
+    Logger::log(
+      Logger::DEBUG,
+      "Ignored window event, due to too little time between events",
+      isOpen_);
     return;
   }
 
