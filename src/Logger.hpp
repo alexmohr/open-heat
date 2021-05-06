@@ -34,23 +34,19 @@ static constexpr const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
   LEVEL_OFF,
 };
 
-
 class Logger {
-public:
-  enum Level
-  {
-   TRACE = 0,
-   DEBUG,
-   INFO,
-   WARNING,
-   ERROR,
-   FATAL,
+  public:
+  enum Level {
+    TRACE = 0,
+    DEBUG,
+    INFO,
+    WARNING,
+    ERROR,
+    FATAL,
   };
 
-
-  typedef std::function<void(Level level,
-                                       const char* module,
-                                       const char* message)> LoggerOutputFunction;
+  typedef std::function<void(Level level, const char* module, const char* message)>
+    LoggerOutputFunction;
 
   static void setup();
 
@@ -63,21 +59,20 @@ public:
 
   static String formatBytes(size_t bytes);
 
-  static void addPrinter(LoggerOutputFunction outFun);
+  static void addPrinter(const LoggerOutputFunction& outFun);
 
- private:
-   Logger();
-   Logger(const Logger &);
-  void operator = (const Logger &);
+  private:
+  Logger();
+  Logger(const Logger&);
+  void operator=(const Logger&);
 
-  static Logger & getInstance();
+  static Logger& getInstance();
   static void defaultLog(Level level, const char* module, const char* message);
 
   std::vector<LoggerOutputFunction> loggerOutputFunctions_;
 
   Level level_{Level::DEBUG};
 };
-}
-
+} // namespace open_heat
 
 #endif // LOGGER_HPP_

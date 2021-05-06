@@ -12,7 +12,7 @@ namespace open_heat {
 namespace sensors {
 class BME280 : public ITemperatureSensor {
   public:
-  BME280();
+  BME280() = default;
 
   public: // ITemperatureSensor
   float getTemperature() override;

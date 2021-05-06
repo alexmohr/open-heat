@@ -26,7 +26,7 @@
 
 #define ESP_getChipId() ((uint32_t)ESP.getEfuseMac())
 
-static constexpr uint8_t LED_BUILTIN = 2;
+// static constexpr uint8_t LED_BUILTIN = 2;
 static constexpr uint8_t LED_ON = HIGH;
 static constexpr uint8_t LED_OFF = LOW;
 

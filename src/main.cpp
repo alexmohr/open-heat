@@ -14,7 +14,6 @@
 
 #include <sensors/ITemperatureSensor.hpp>
 
-
 DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 
@@ -81,11 +80,11 @@ void setSleepType(const Config& config)
 
 void setup()
 {
-/*
-  Serial.begin(MONITOR_SPEED);
-  Serial.setTimeout(2000);
-  waitForSerialPort();
-*/
+  /*
+    Serial.begin(MONITOR_SPEED);
+    Serial.setTimeout(2000);
+    waitForSerialPort();
+  */
   open_heat::Logger::setup();
   open_heat::Logger::setLogLevel(open_heat::Logger::DEBUG);
 
@@ -115,8 +114,8 @@ void loop()
   // consider the next reset as a double reset.
   drd_.loop();
 
-  windowSensor_.loop();
-  //const auto wifiSleep = wifiManager_.loop();
+  open_heat::sensors::WindowSensor::loop();
+  // const auto wifiSleep = wifiManager_.loop();
   const auto valveSleep = valve_.loop();
   const auto mqttSleep = mqtt_.loop();
 
@@ -139,13 +138,14 @@ void loop()
     valveSleep - millis(),
     mqttSleep - millis());
 
-  const auto minSleepTime = 1000;
+  const auto minSleepTime = 1000UL;
   unsigned long idleTime;
   auto nextCheckMillis = std::min(mqttSleep, valveSleep);
   if (nextCheckMillis < (millis() + minSleepTime)) {
     open_heat::Logger::log(
       open_heat::Logger::DEBUG,
-      "Minimal sleep or underflow prevented, sleep set to %ul ms", minSleepTime);
+      "Minimal sleep or underflow prevented, sleep set to %ul ms",
+      minSleepTime);
     idleTime = minSleepTime;
   } else {
     idleTime = nextCheckMillis - millis();
@@ -166,5 +166,3 @@ void loop()
   delay(idleTime);
   WiFi.forceSleepWake();
 }
-
-

@@ -5,10 +5,9 @@
 #ifndef DOUBLERESETDETECTOR_HPP_
 #define DOUBLERESETDETECTOR_HPP_
 
-#define DOUBLERESETDETECTOR_DEBUG       false
+#define DOUBLERESETDETECTOR_DEBUG false
 
-#include <ESP_DoubleResetDetector.h>      //https://github.com/khoih-prog/ESP_DoubleResetDetector
-
+#include <ESP_DoubleResetDetector.h> //https://github.com/khoih-prog/ESP_DoubleResetDetector
 
 // Number of seconds after reset during which a
 // subsequent reset will be considered a double reset.
@@ -17,6 +16,4 @@
 // RTC Memory Address for the DoubleResetDetector to use
 #define DRD_ADDRESS 0
 
-
-
-#endif //DOUBLERESETDETECTOR_HPP_
+#endif // DOUBLERESETDETECTOR_HPP_
