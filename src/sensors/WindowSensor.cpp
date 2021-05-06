@@ -46,8 +46,25 @@ void WindowSensor::setup()
   isOpen_ =  digitalRead(config.WindowPins.Vin) == HIGH;
   valve_->setWindowState(isOpen_);
 
-  attachInterrupt(
-    digitalPinToInterrupt(config.WindowPins.Vin), sensorChangedInterrupt, CHANGE);
+  if (valve_->getMode() == HEAT) {
+    attachInterrupt(
+      digitalPinToInterrupt(config.WindowPins.Vin), sensorChangedInterrupt, CHANGE);
+  }
+
+  // Deatch interrupt when operation mode is not HEAT
+  valve_->registerModeChangedHandler([](const OperationMode mode) {
+    const auto &config = filesystem_->getConfig();
+    if (mode == HEAT) {
+      attachInterrupt(
+        digitalPinToInterrupt(config.WindowPins.Vin), sensorChangedInterrupt, CHANGE);
+    } else {
+      detachInterrupt(config.WindowPins.Vin);
+    }
+  });
+
+
+
+
 }
 
 void WindowSensor::loop()

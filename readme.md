@@ -22,7 +22,7 @@ The current defaults are:
 
 | Function | Ground  | VIN     |
 |----------|---------|---------|
-| Motor    | D5 (14) | D6 (12) |
+| Motor    | D6 (12) | D5 (14) |
 | Window   | D8 (15) | D7 (13) |
 
 ## Building

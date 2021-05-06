@@ -73,7 +73,6 @@ class MQTT {
   WiFiClient wiFiClient_;
 
   unsigned long nextCheckMillis_ = 0;
-  // publish every minute
   unsigned long checkIntervalMillis_ = 3 * 60 * 1000;
 
   bool configValid_{true};
