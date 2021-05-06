@@ -15,14 +15,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="improve power usage">
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="detach interupt handler in off mode.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -185,7 +180,7 @@
       <workItem from="1620199615335" duration="4873000" />
       <workItem from="1620211230252" duration="24215000" />
       <workItem from="1620282263046" duration="3338000" />
-      <workItem from="1620301004755" duration="10194000" />
+      <workItem from="1620301004755" duration="12164000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -390,7 +385,14 @@
       <option name="project" value="LOCAL" />
       <updated>1620315429723</updated>
     </task>
-    <option name="localTasksCounter" value="30" />
+    <task id="LOCAL-00030" summary="detach interupt handler in off mode.">
+      <created>1620329168311</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1620329168311</updated>
+    </task>
+    <option name="localTasksCounter" value="31" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -409,7 +411,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Fixed infinite recursion in logger" />
     <MESSAGE value="cleaned up filesystem" />
     <MESSAGE value="cleaned platformio.ini" />
     <MESSAGE value="added save, load and connect methods to manager" />
@@ -434,7 +435,8 @@
     <MESSAGE value="publish window state via mqtt" />
     <MESSAGE value="updated algorithm" />
     <MESSAGE value="improve power usage" />
-    <option name="LAST_COMMIT_MESSAGE" value="improve power usage" />
+    <MESSAGE value="detach interupt handler in off mode." />
+    <option name="LAST_COMMIT_MESSAGE" value="detach interupt handler in off mode." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
