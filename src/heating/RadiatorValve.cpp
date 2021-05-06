@@ -10,7 +10,10 @@
 open_heat::heating::RadiatorValve::RadiatorValve(
   open_heat::sensors::ITemperatureSensor& tempSensor,
   open_heat::Filesystem& filesystem) :
-    filesystem_(filesystem), tempSensor_(tempSensor), setTemp_(20)
+    filesystem_(filesystem),
+    tempSensor_(tempSensor),
+    setTemp_(20),
+    lastMode_(OperationMode::UNKNOWN)
 {
   setPinsLow();
 }

@@ -17,18 +17,12 @@
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="improve power usage">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Filesystem.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/BME280.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/BME280.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/BME280.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/BME280.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/ITemperatureSensor.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/WindowSensor.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -191,7 +185,7 @@
       <workItem from="1620199615335" duration="4873000" />
       <workItem from="1620211230252" duration="24215000" />
       <workItem from="1620282263046" duration="3338000" />
-      <workItem from="1620301004755" duration="4259000" />
+      <workItem from="1620301004755" duration="10194000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -389,7 +383,14 @@
       <option name="project" value="LOCAL" />
       <updated>1620216327015</updated>
     </task>
-    <option name="localTasksCounter" value="29" />
+    <task id="LOCAL-00029" summary="improve power usage">
+      <created>1620315429723</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1620315429723</updated>
+    </task>
+    <option name="localTasksCounter" value="30" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">

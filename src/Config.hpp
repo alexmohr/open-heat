@@ -28,8 +28,8 @@ static constexpr uint8_t UPDATE_MAX_PW_LEN = 64;
 
 static constexpr uint8_t HOST_NAME_MAX_LEN = 32;
 
-static constexpr uint8_t DEFAULT_MOTOR_GROUND = D5;
-static constexpr uint8_t DEFAULT_MOTOR_VIN = D6;
+static constexpr uint8_t DEFAULT_MOTOR_GROUND = D6;
+static constexpr uint8_t DEFAULT_MOTOR_VIN = D5;
 
 // On devboard defaults are D8 and D7
 static constexpr int8_t DEFAULT_WINDOW_GROUND = -1;

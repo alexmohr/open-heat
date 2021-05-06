@@ -41,8 +41,8 @@ void Filesystem::listFiles()
   Logger::log(Logger::DEBUG, "Opening / directory");
 
   while (dir.next()) {
-    String fileName = dir.fileName();
-    size_t fileSize = dir.fileSize();
+    const String fileName = dir.fileName();
+    const size_t fileSize = dir.fileSize();
     Logger::log(
       Logger::DEBUG,
       "FS File: %s, size: %s",
