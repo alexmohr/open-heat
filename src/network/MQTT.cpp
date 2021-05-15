@@ -30,6 +30,8 @@ bool open_heat::network::MQTT::debugEnabled_ = false;
 
 void open_heat::network::MQTT::setup()
 {
+  Logger::log(Logger::INFO, "Running MQTT setup");
+
   connect();
 
   mqttClient_.onMessage(&MQTT::messageReceivedCallback);
@@ -59,11 +61,11 @@ unsigned long open_heat::network::MQTT::loop()
   }
 
   wifi_.checkWifi();
-  mqttClient_.loop();
-
   if (!mqttClient_.connected()) {
     connect();
   }
+
+  mqttClient_.loop();
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
@@ -152,7 +154,8 @@ void open_heat::network::MQTT::connect()
 {
   if ((std::strlen(config_->MQTT.Server) == 0 || config_->MQTT.Port == 0)) {
     if (configValid_) {
-      Logger::log(Logger::DEBUG, "MQTT Server or port not set up");
+      Logger::log(Logger::ERROR, "MQTT Server or port not set up");
+      enableDebug();
     }
 
     configValid_ = false;
@@ -175,8 +178,20 @@ void open_heat::network::MQTT::connect()
   }
 
   if (!mqttClient_.connect(config_->Hostname, username, password)) {
+    Logger::log(
+      Logger::ERROR,
+      "Failed to connect to mqtt server host %s, user: %s, pw: %s",
+      config_->MQTT.Server,
+      config_->MQTT.Username,
+      config_->MQTT.Password);
     return;
   }
+
+  Logger::log(
+    Logger::INFO,
+    "MQTT topic: %s, topic len: %i",
+    config_->MQTT.Topic,
+    std::strlen(config_->MQTT.Topic));
 
   logTopic_ = config_->MQTT.Topic;
   logTopic_ += "log";
@@ -244,4 +259,9 @@ void open_heat::network::MQTT::mqttLogPrinter(
 bool open_heat::network::MQTT::debug()
 {
   return debugEnabled_;
+}
+
+void open_heat::network::MQTT::enableDebug()
+{
+  debugEnabled_ = true;
 }

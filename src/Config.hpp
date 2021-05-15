@@ -32,6 +32,8 @@ static constexpr uint8_t DEFAULT_MOTOR_GROUND = D6;
 static constexpr uint8_t DEFAULT_MOTOR_VIN = D5;
 
 // On devboard defaults are D8 and D7
+// PIN_D7 13
+// PIN_D8 15
 static constexpr int8_t DEFAULT_WINDOW_GROUND = -1;
 static constexpr int8_t DEFAULT_WINDOW_VIN = -1;
 
