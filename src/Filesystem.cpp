@@ -59,6 +59,10 @@ Config& Filesystem::getConfig()
 void Filesystem::clearConfig()
 {
   config_ = {};
+  std::memset(&config_.WifiCredentials, 0, sizeof(config_.WifiCredentials));
+  std::memset(&config_.MQTT, 0, sizeof(config_.MQTT));
+  std::memset(&config_.Update, 0, sizeof(config_.Update));
+
 }
 
 void Filesystem::persistConfig()

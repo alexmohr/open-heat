@@ -34,6 +34,7 @@ class MQTT {
   unsigned long loop();
 
   static bool debug();
+  static void enableDebug();
 
   private:
   void connect();

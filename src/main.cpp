@@ -21,6 +21,7 @@ DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 #include <heating/RadiatorValve.hpp>
 #include <sensors/BME280.hpp>
 #include <sensors/WindowSensor.hpp>
+#include <cstring>
 open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
 #elif TEMP_SENSOR == TP100
 #include <sensors/TP100.hpp>
@@ -43,8 +44,11 @@ open_heat::network::WifiManager wifiManager_(
 
 open_heat::network::MQTT mqtt_(filesystem_, wifiManager_, *tempSensor_, &valve_);
 
-void waitForSerialPort()
+void setupSerial()
 {
+  Serial.begin(MONITOR_SPEED);
+  Serial.setTimeout(2000);
+
   while (!Serial) {
     delay(200);
   }
@@ -67,26 +71,11 @@ void logVersions()
     open_heat::Logger::DEBUG, "WifiManager Version: %s", ESP_ASYNC_WIFIMANAGER_VERSION);
 }
 
-void setSleepType(const Config& config)
-{
-  if (
-    (config.WindowPins.Ground == 0 && config.WindowPins.Vin == 0)
-    || valve_.getMode() == OFF) {
-    wifi_set_sleep_type(LIGHT_SLEEP_T);
-  } else {
-    wifi_set_sleep_type(MODEM_SLEEP_T);
-  }
-}
-
 void setup()
 {
-  /*
-    Serial.begin(MONITOR_SPEED);
-    Serial.setTimeout(2000);
-    waitForSerialPort();
-  */
+  //setupSerial();
   open_heat::Logger::setup();
-  open_heat::Logger::setLogLevel(open_heat::Logger::DEBUG);
+  open_heat::Logger::setLogLevel(open_heat::Logger::FATAL);
 
   setupPins();
   filesystem_.setup();
@@ -100,8 +89,9 @@ void setup()
   windowSensor_.setup();
 
   logVersions();
-
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
+
+//  mqtt_.enableDebug();
 }
 
 void loop()
@@ -115,7 +105,6 @@ void loop()
   drd_.loop();
 
   open_heat::sensors::WindowSensor::loop();
-  // const auto wifiSleep = wifiManager_.loop();
   const auto valveSleep = valve_.loop();
   const auto mqttSleep = mqtt_.loop();
 
@@ -138,7 +127,7 @@ void loop()
     valveSleep - millis(),
     mqttSleep - millis());
 
-  const auto minSleepTime = 1000UL;
+  const auto minSleepTime = 5000UL;
   unsigned long idleTime;
   auto nextCheckMillis = std::min(mqttSleep, valveSleep);
   if (nextCheckMillis < (millis() + minSleepTime)) {
@@ -154,10 +143,10 @@ void loop()
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", idleTime);
 
   const auto& config = filesystem_.getConfig();
-  setSleepType(config);
+  wifi_set_sleep_type(LIGHT_SLEEP_T);
 
   // Wait one second before forcing sleep to send messages.
-  delay(1000);
+  delay(500);
   if (idleTime == minSleepTime) {
     return;
   }
