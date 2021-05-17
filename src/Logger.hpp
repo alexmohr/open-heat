@@ -36,15 +36,7 @@ static constexpr const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
 
 class Logger {
   public:
-  enum Level {
-    TRACE = 0,
-    DEBUG,
-    INFO,
-    WARNING,
-    ERROR,
-    FATAL,
-    OFF
-  };
+  enum Level { TRACE = 0, DEBUG, INFO, WARNING, ERROR, FATAL, OFF };
 
   typedef std::function<void(Level level, const char* module, const char* message)>
     LoggerOutputFunction;

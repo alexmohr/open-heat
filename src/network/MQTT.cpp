@@ -4,7 +4,6 @@
 //
 
 #include "MQTT.hpp"
-#include <Logger.hpp>
 #include <cstring>
 
 Config* open_heat::network::MQTT::config_;

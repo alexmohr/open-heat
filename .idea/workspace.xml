@@ -15,14 +15,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="detach interupt handler in off mode.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-    </list>
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="fix potential crash in release mode if debug is enabled." />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -206,7 +199,7 @@
       <workItem from="1621233471770" duration="4121000" />
       <workItem from="1621257922872" duration="190000" />
       <workItem from="1621258250770" duration="659000" />
-      <workItem from="1621272118916" duration="4770000" />
+      <workItem from="1621272118916" duration="5304000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -425,7 +418,14 @@
       <option name="project" value="LOCAL" />
       <updated>1620334072330</updated>
     </task>
-    <option name="localTasksCounter" value="33" />
+    <task id="LOCAL-00033" summary="fix potential crash in release mode if debug is enabled.">
+      <created>1621278836056</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1621278836056</updated>
+    </task>
+    <option name="localTasksCounter" value="34" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -444,7 +444,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="cleaned up filesystem" />
     <MESSAGE value="cleaned platformio.ini" />
     <MESSAGE value="added save, load and connect methods to manager" />
     <MESSAGE value="removed obsolete defines, which are now set via platformio.ini" />
@@ -469,7 +468,8 @@
     <MESSAGE value="updated algorithm" />
     <MESSAGE value="improve power usage" />
     <MESSAGE value="detach interupt handler in off mode." />
-    <option name="LAST_COMMIT_MESSAGE" value="detach interupt handler in off mode." />
+    <MESSAGE value="fix potential crash in release mode if debug is enabled." />
+    <option name="LAST_COMMIT_MESSAGE" value="fix potential crash in release mode if debug is enabled." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

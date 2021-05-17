@@ -6,7 +6,6 @@
 #include "WifiManager.hpp"
 #include <Logger.hpp>
 #include <cstring>
-#include <string>
 
 namespace open_heat {
 namespace network {
