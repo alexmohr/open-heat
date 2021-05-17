@@ -4,7 +4,6 @@
 //
 
 #include "Logger.hpp"
-#include <array>
 #include <cstdarg>
 #include <cstring>
 
@@ -31,7 +30,6 @@ const char* const CONSOLE_LOG_LEVEL_STRINGS[] MEM_TYPE = {
 };
 
 Logger Logger::s_logger;
-
 
 Logger::Logger() = default;
 

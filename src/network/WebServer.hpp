@@ -33,8 +33,7 @@ class WebServer {
   void setup();
   void loop();
 
-  static void installUpdateHandlePost(
-    AsyncWebServerRequest *request, Config& config);
+  static void installUpdateHandlePost(AsyncWebServerRequest* request, Config& config);
   void fullOpenHandlePost(AsyncWebServerRequest* request);
 
   AsyncWebServer& getWebServer();

@@ -12,13 +12,10 @@
 #include <network/MQTT.hpp>
 #include <network/WebServer.hpp>
 
-#include <sensors/ITemperatureSensor.hpp>
-
 DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 
 #if TEMP_SENSOR == BME280
-#include <heating/RadiatorValve.hpp>
 #include <sensors/BME280.hpp>
 #include <sensors/WindowSensor.hpp>
 open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
@@ -91,7 +88,7 @@ void setup()
   logVersions();
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 
-//  mqtt_.enableDebug();
+  //  mqtt_.enableDebug();
 }
 
 void loop()
@@ -119,10 +116,8 @@ void loop()
   if (open_heat::network::MQTT::debug()) {
     delay(100);
 
-    if (millis() - lastLogMillis_ > 60*1000) {
-      open_heat::Logger::log(
-        open_heat::Logger::DEBUG,
-        "DEBUG MODE: Sleep disabled");
+    if (millis() - lastLogMillis_ > 60 * 1000) {
+      open_heat::Logger::log(open_heat::Logger::DEBUG, "DEBUG MODE: Sleep disabled");
       lastLogMillis_ = millis();
     }
 

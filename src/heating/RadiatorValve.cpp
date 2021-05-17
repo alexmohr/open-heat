@@ -4,7 +4,6 @@
 //
 
 #include "RadiatorValve.hpp"
-#include <Arduino.h>
 #include <Logger.hpp>
 
 open_heat::heating::RadiatorValve::RadiatorValve(
@@ -218,7 +217,7 @@ void open_heat::heating::RadiatorValve::openValve(const unsigned short rotateTim
   }
 
   currentRotateTime_ += rotateTime;
-  
+
   const auto& config = filesystem_.getConfig().MotorPins;
 
   open_heat::Logger::log(

@@ -45,7 +45,6 @@ class WifiManager {
   static void clearSettings(Config& config);
   void updateSettings(Config& config);
 
-  const std::chrono::milliseconds checkInterval_{std::chrono::minutes(2)};
   unsigned char reconnectCount_ = 0;
 
   AsyncWebServer& webServer_;

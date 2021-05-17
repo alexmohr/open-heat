@@ -4,9 +4,6 @@
 //
 
 #include "WebServer.hpp"
-#include "hardware/HAL.hpp"
-#include <Config.hpp>
-#include <Logger.hpp>
 #include <cstring>
 
 namespace open_heat {
@@ -118,9 +115,11 @@ AsyncWebServer& open_heat::network::WebServer::getWebServer()
 }
 
 void WebServer::installUpdateHandlePost(
-  AsyncWebServerRequest *const request, Config& config)
+  AsyncWebServerRequest* const request,
+  Config& config)
 {
-  if (std::strlen(config.Update.Username) > 0 && std::strlen(config.Update.Password) > 0) {
+  if (
+    std::strlen(config.Update.Username) > 0 && std::strlen(config.Update.Password) > 0) {
     if (!request->authenticate(config.Update.Username, config.Update.Password)) {
       return request->requestAuthentication();
     }
@@ -137,7 +136,9 @@ void WebServer::installUpdateHandlePost(
   request->send(response);
 }
 
-void WebServer::reset(AsyncWebServerRequest* const request, AsyncResponseStream* const response)
+void WebServer::reset(
+  AsyncWebServerRequest* const request,
+  AsyncResponseStream* const response)
 {
   response->addHeader("Connection", "close");
   request->onDisconnect([]() {
