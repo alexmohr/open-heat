@@ -43,6 +43,7 @@ class Logger {
     WARNING,
     ERROR,
     FATAL,
+    OFF
   };
 
   typedef std::function<void(Level level, const char* module, const char* message)>
@@ -67,11 +68,12 @@ class Logger {
   void operator=(const Logger&);
 
   static Logger& getInstance();
+  static Logger s_logger;
   static void defaultLog(Level level, const char* module, const char* message);
 
   std::vector<LoggerOutputFunction> loggerOutputFunctions_;
 
-  Level level_{Level::DEBUG};
+  Level level_{LOG_LEVEL};
 };
 } // namespace open_heat
 
