@@ -30,6 +30,9 @@ const char* const CONSOLE_LOG_LEVEL_STRINGS[] MEM_TYPE = {
   CONSOLE_LEVEL_OFF,
 };
 
+Logger Logger::s_logger;
+
+
 Logger::Logger() = default;
 
 void Logger::setup()
@@ -41,14 +44,14 @@ void Logger::setup()
 
 void Logger::log(Level level, const char* format, ...)
 {
+  if (level < getLogLevel()) {
+    return;
+  }
+
   va_list args;
   va_start(args, format);
   vsnprintf(logBuffer_.data(), logBuffer_.size(), format, args);
   va_end(args);
-
-  if (level < getLogLevel()) {
-    return;
-  }
 
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {
     outFun(level, "", logBuffer_.data());
@@ -57,13 +60,14 @@ void Logger::log(Level level, const char* format, ...)
 
 Logger& Logger::getInstance()
 {
-  static Logger logger;
-  return logger;
+  return s_logger;
 }
 
 void Logger::setLogLevel(Logger::Level level)
 {
-  getInstance().level_ = level;
+  if (level >= LOG_LEVEL) {
+    getInstance().level_ = level;
+  }
 }
 
 Logger::Level Logger::getLogLevel()

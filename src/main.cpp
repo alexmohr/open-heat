@@ -21,7 +21,6 @@ DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 #include <heating/RadiatorValve.hpp>
 #include <sensors/BME280.hpp>
 #include <sensors/WindowSensor.hpp>
-#include <cstring>
 open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
 #elif TEMP_SENSOR == TP100
 #include <sensors/TP100.hpp>
@@ -43,6 +42,8 @@ open_heat::network::WifiManager wifiManager_(
   &drd_);
 
 open_heat::network::MQTT mqtt_(filesystem_, wifiManager_, *tempSensor_, &valve_);
+
+unsigned long lastLogMillis_ = 0;
 
 void setupSerial()
 {
@@ -73,9 +74,8 @@ void logVersions()
 
 void setup()
 {
-  //setupSerial();
+  setupSerial();
   open_heat::Logger::setup();
-  open_heat::Logger::setLogLevel(open_heat::Logger::FATAL);
 
   setupPins();
   filesystem_.setup();
@@ -118,6 +118,14 @@ void loop()
   // do not sleep if debug is enabled.
   if (open_heat::network::MQTT::debug()) {
     delay(100);
+
+    if (millis() - lastLogMillis_ > 60*1000) {
+      open_heat::Logger::log(
+        open_heat::Logger::DEBUG,
+        "DEBUG MODE: Sleep disabled");
+      lastLogMillis_ = millis();
+    }
+
     return;
   }
 
@@ -142,7 +150,6 @@ void loop()
 
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", idleTime);
 
-  const auto& config = filesystem_.getConfig();
   wifi_set_sleep_type(LIGHT_SLEEP_T);
 
   // Wait one second before forcing sleep to send messages.
