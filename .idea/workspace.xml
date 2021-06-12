@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
       <config projectName="open-heat" targetName="Z_DUMMY_TARGET" />
@@ -12,10 +15,20 @@
       <configuration PROFILE_NAME="nodemcuv2" CONFIG_NAME="nodemcuv2" ENABLED="true" />
       <configuration PROFILE_NAME="esp32" CONFIG_NAME="esp32" ENABLED="true" />
       <configuration PROFILE_NAME="nodemcuv2-debug" CONFIG_NAME="nodemcuv2" GENERATION_OPTIONS="-DCMAKE_BUILD_TYPE=nodemcuv2debug" ENABLED="true" />
+      <configuration PROFILE_NAME="esp12e" CONFIG_NAME="esp12e" ENABLED="true" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="fix potential crash in release mode if debug is enabled." />
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="reformat code.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/clion-configs/PlatformIO Upload.run.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -24,7 +37,7 @@
   <component name="ClangdSettings">
     <option name="clangTidyViaClangd" value="false" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:nodemcuv2" />
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:esp12e" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -71,7 +84,7 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="reference.settingsdialog.IDE.editor.colors.Language Defaults" />
+    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -106,8 +119,8 @@
     </configuration>
     <list>
       <item itemvalue="CMake Application.Z_DUMMY_TARGET" />
-      <item itemvalue="PlatformIO.PlatformIO Upload" />
       <item itemvalue="PlatformIO.PlatformIO Debug" />
+      <item itemvalue="PlatformIO.PlatformIO Upload" />
     </list>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
@@ -199,7 +212,22 @@
       <workItem from="1621233471770" duration="4121000" />
       <workItem from="1621257922872" duration="190000" />
       <workItem from="1621258250770" duration="659000" />
-      <workItem from="1621272118916" duration="5304000" />
+      <workItem from="1621272118916" duration="6669000" />
+      <workItem from="1621953158929" duration="1719000" />
+      <workItem from="1622042410440" duration="776000" />
+      <workItem from="1622453874186" duration="2356000" />
+      <workItem from="1622978764005" duration="6711000" />
+      <workItem from="1622997373599" duration="22000" />
+      <workItem from="1622997431069" duration="2543000" />
+      <workItem from="1623001940611" duration="4717000" />
+      <workItem from="1623009532101" duration="636000" />
+      <workItem from="1623053390444" duration="4588000" />
+      <workItem from="1623058660206" duration="2632000" />
+      <workItem from="1623061335655" duration="54000" />
+      <workItem from="1623061416354" duration="1902000" />
+      <workItem from="1623063427927" duration="1240000" />
+      <workItem from="1623066282604" duration="1763000" />
+      <workItem from="1623511161536" duration="1328000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -425,7 +453,14 @@
       <option name="project" value="LOCAL" />
       <updated>1621278836056</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="reformat code.">
+      <created>1621278931151</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1621278931151</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -444,7 +479,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="cleaned platformio.ini" />
     <MESSAGE value="added save, load and connect methods to manager" />
     <MESSAGE value="removed obsolete defines, which are now set via platformio.ini" />
     <MESSAGE value="Update readme.md" />
@@ -469,7 +503,8 @@
     <MESSAGE value="improve power usage" />
     <MESSAGE value="detach interupt handler in off mode." />
     <MESSAGE value="fix potential crash in release mode if debug is enabled." />
-    <option name="LAST_COMMIT_MESSAGE" value="fix potential crash in release mode if debug is enabled." />
+    <MESSAGE value="reformat code." />
+    <option name="LAST_COMMIT_MESSAGE" value="reformat code." />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

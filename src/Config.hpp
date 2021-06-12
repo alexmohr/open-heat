@@ -16,10 +16,10 @@ static constexpr uint8_t PASS_MAX_LEN = 64;
 
 static constexpr uint16_t MQTT_DEFAULT_PORT = 1883;
 static constexpr uint8_t MQTT_SERVER_NAME_MAX_SIZE = 32;
-static constexpr uint8_t MQTT_PORT_STR_MAX_SIZE = 00000;
-static constexpr uint8_t MQTT_TOPIC_MAX_SIZE = 255;
-static constexpr uint8_t MQTT_USERNAME_MAX_SIZE = 64;
-static constexpr uint8_t MQTT_PASSWORD_MAX_SIZE = 64;
+static constexpr uint8_t MQTT_PORT_STR_MAX_SIZE = 16;
+static constexpr uint16_t MQTT_TOPIC_MAX_SIZE = 64;
+static constexpr uint8_t MQTT_USERNAME_MAX_SIZE = 32;
+static constexpr uint8_t MQTT_PASSWORD_MAX_SIZE = 32;
 
 static constexpr uint8_t UPDATE_MIN_USERNAME_LEN = 1;
 static constexpr uint8_t UPDATE_MAX_USERNAME_LEN = 32;

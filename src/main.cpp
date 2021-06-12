@@ -71,7 +71,7 @@ void logVersions()
 
 void setup()
 {
-  setupSerial();
+ // setupSerial();
   open_heat::Logger::setup();
 
   setupPins();
@@ -88,12 +88,12 @@ void setup()
   logVersions();
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 
-  //  mqtt_.enableDebug();
+    mqtt_.enableDebug();
 }
 
 void loop()
 {
-  wifi_set_sleep_type(NONE_SLEEP_T);
+//   wifi_set_sleep_type(NONE_SLEEP_T);
 
   // Call the double reset detector loop method every so often,
   // so that it can recognise when the timeout expires.
@@ -147,7 +147,7 @@ void loop()
 
   wifi_set_sleep_type(LIGHT_SLEEP_T);
 
-  // Wait one second before forcing sleep to send messages.
+  // Wait 0.5 seconds before forcing sleep to send messages.
   delay(500);
   if (idleTime == minSleepTime) {
     return;
