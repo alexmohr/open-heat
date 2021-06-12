@@ -78,7 +78,7 @@ bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
 #endif
 
   initAdditionalParams();
-  for (auto& param : additionalParameters_) {
+ for (auto& param : additionalParameters_) {
     espWifiManager->addParameter(param);
   }
 
@@ -297,6 +297,7 @@ void WifiManager::initAdditionalParams()
   paramHostname_.setWMParam_Data(paramData);
 
   // MQTT
+ /*
   paramMqttServer_.getWMParam_Data(paramData);
   std::strcpy(paramData._value, config.MQTT.Server);
   paramMqttServer_.setWMParam_Data(paramData);
@@ -305,8 +306,9 @@ void WifiManager::initAdditionalParams()
   std::strcpy(paramData._value, String(config.MQTT.Port).c_str());
   paramMqttPortString_.setWMParam_Data(paramData);
 
+
   paramMqttTopic_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, config.MQTT.Topic);
+  std::strcpy(paramData._value, "");
   paramMqttTopic_.setWMParam_Data(paramData);
 
   paramMqttUsername_.getWMParam_Data(paramData);
@@ -316,7 +318,7 @@ void WifiManager::initAdditionalParams()
   paramMqttPassword_.getWMParam_Data(paramData);
   std::strcpy(paramData._value, config.MQTT.Password);
   paramMqttPassword_.setWMParam_Data(paramData);
-
+  */
   // Update
   paramUpdateUsername_.getWMParam_Data(paramData);
   std::strcpy(paramData._value, config.Update.Username);
@@ -326,6 +328,7 @@ void WifiManager::initAdditionalParams()
   std::strcpy(paramData._value, config.Update.Password);
   paramUpdatePassword_.setWMParam_Data(paramData);
 
+  /*
   // MotorPins
   paramMotorVin_.getWMParam_Data(paramData);
   std::strcpy(paramData._value, String(config.MotorPins.Vin).c_str());
@@ -343,6 +346,7 @@ void WifiManager::initAdditionalParams()
   paramWindowGround_.getWMParam_Data(paramData);
   std::strcpy(paramData._value, String(config.WindowPins.Ground).c_str());
   paramWindowGround_.setWMParam_Data(paramData);
+   */
 }
 
 } // namespace network
