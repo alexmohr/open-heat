@@ -6,11 +6,13 @@
 #include <Arduino.h>
 #include <Logger.hpp>
 
-#include "Filesystem.hpp"
-#include "network/WifiManager.hpp"
+#include <Filesystem.hpp>
+#include <network/WifiManager.hpp>
 
 #include <network/MQTT.hpp>
 #include <network/WebServer.hpp>
+
+#include <hardware/esp_err.h>
 
 DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
@@ -71,7 +73,10 @@ void logVersions()
 
 void setup()
 {
- // setupSerial();
+  if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF) {
+    setupSerial();
+  }
+
   open_heat::Logger::setup();
 
   setupPins();
@@ -89,16 +94,29 @@ void setup()
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 }
 
-static int wifi_sleep(uint32_t time)
+void wifiSleep(uint64_t timeInMs)
 {
-  // set WiFi mode to null mode
-  wifi_set_opmode(NULL_MODE);
-  // set force sleep type
-  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
-  wifi_fpm_open();
-  wifi_fpm_do_sleep(time);
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", timeInMs);
 
-  // reconnect to wifi
+  wifi_fpm_open();
+  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
+  wifi_set_opmode(NULL_MODE);
+
+  const auto rv = wifi_fpm_do_sleep(timeInMs * 1000);
+  if (rv != ESP_OK) {
+    open_heat::Logger::log(
+      open_heat::Logger::DEBUG, "Failed to sleep: %i");
+    return;
+  }
+
+  // ESP8266 will not enter sleep mode immediately,
+  // it is going to sleep in the system idle task
+  delay(timeInMs);
+
+  if (millis() > 10 * 1000) {
+    drd_.stop();
+  }
+
   wifiManager_.setup();
 }
 
@@ -116,7 +134,6 @@ void loop()
 
   if (millis() > 10 * 1000) {
     drd_.stop();
-    return;
   }
 
   // do not sleep if debug is enabled.
@@ -150,15 +167,9 @@ void loop()
     idleTime = nextCheckMillis - millis();
   }
 
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", idleTime);
-
   // Wait 0.5 seconds before forcing sleep to send messages.
   delay(500);
-  if (idleTime == minSleepTime) {
-    return;
-  }
-
-  wifi_sleep(idleTime * 1000);
+  wifiSleep(idleTime);
 
   // // WiFi.forceSleepBegin();
   //  **delay(idleTime);

@@ -8,6 +8,7 @@
 
 #include "Arduino.h"
 #include "Print.h"
+#include <string>
 
 #if defined(ARDUINO_ARCH_AVR)
 #include <avr/pgmspace.h>
@@ -38,8 +39,7 @@ class Logger {
   public:
   enum Level { TRACE = 0, DEBUG, INFO, WARNING, ERROR, FATAL, OFF };
 
-  typedef std::function<void(Level level, const char* module, const char* message)>
-    LoggerOutputFunction;
+  typedef std::function<void(const std::string&)> LoggerOutputFunction;
 
   static void setup();
 
@@ -48,7 +48,7 @@ class Logger {
 
   static void log(Level level, const char* format, ...);
 
-  static const char* asString(Level level);
+  static const char* levelToText(Level level);
 
   static String formatBytes(size_t bytes);
 
@@ -61,7 +61,7 @@ class Logger {
 
   static Logger& getInstance();
   static Logger s_logger;
-  static void defaultLog(Level level, const char* module, const char* message);
+  static void defaultLog(const std::string& message);
 
   std::vector<LoggerOutputFunction> loggerOutputFunctions_;
 
