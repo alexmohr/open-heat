@@ -18,6 +18,7 @@ DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 
 #if TEMP_SENSOR == BME280
+#include "RTCMemory.hpp"
 #include <sensors/BME280.hpp>
 #include <sensors/WindowSensor.hpp>
 open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
@@ -60,6 +61,23 @@ void setupPins()
   // set led pin as output
   pinMode(LED_BUILTIN, OUTPUT);
   digitalWrite(LED_BUILTIN, LED_OFF);
+
+
+  const auto& config = filesystem_.getConfig();
+  if (config.MotorPins.Vin > 1) {
+    pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
+  } else {
+    open_heat::Logger::log(
+      open_heat::Logger::ERROR,
+      "Motor pin vin invalid: %i\n", config.MotorPins.Vin);
+  }
+  if (config.MotorPins.Ground > 1) {
+    pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
+  } else {
+    open_heat::Logger::log(
+      open_heat::Logger::ERROR,
+      "Motor pin ground invalid: %i\n", config.MotorPins.Ground);
+  }
 }
 
 void logVersions()
@@ -77,10 +95,18 @@ void setup()
     setupSerial();
   }
 
+  auto rtcMem = open_heat::readRTCMemory();
+  if (rtcMem.initalized != 0) {
+    std::memset(&rtcMem, 0, sizeof(open_heat::RTCMemory));
+    rtcMem.initalized = 0;
+    open_heat::writeRTCMemory(rtcMem);
+
+  }
+
   open_heat::Logger::setup();
 
-  setupPins();
   filesystem_.setup();
+  setupPins();
   tempSensor_->setup();
 
   wifiManager_.setup();
@@ -92,6 +118,8 @@ void setup()
 
   logVersions();
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
+
+  loop();
 }
 
 void wifiSleep(uint64_t timeInMs)
