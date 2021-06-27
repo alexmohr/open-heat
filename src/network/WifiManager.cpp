@@ -24,6 +24,7 @@ void WifiManager::setup()
 
   if (startConfigPortal || connectMultiWiFi() != WL_CONNECTED) {
     // Starts an access point
+    pinMode(LED_BUILTIN, OUTPUT);
     digitalWrite(LED_BUILTIN, LED_ON);
     while (!showConfigurationPortal(&espWifiManager)) {
       Logger::log(Logger::WARNING, "Configuration did not yield valid wifi, retrying");

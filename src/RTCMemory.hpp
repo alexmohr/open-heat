@@ -9,13 +9,15 @@
 #ifndef OPEN_HEAT_RTCMEMORY_H
 #define OPEN_HEAT_RTCMEMORY_H
 namespace open_heat {
+
+static constexpr  uint64_t CANARY = 0xDEADBEEFCAFEBABE;
+
 struct RTCMemory {
-
-  int initalized;
-
+  uint64_t canary;
 
   uint64_t valveNextCheckMillis;
   uint64_t mqttNextCheckMillis;
+  uint64_t millisOffset;
 
   float lastMeasuredTemp;
   float lastPredictedTemp;
@@ -30,10 +32,13 @@ struct RTCMemory {
   bool isWindowOpen;
   bool restoreMode;
 
+
+
 };
 
 RTCMemory readRTCMemory();
 void writeRTCMemory(const RTCMemory& rtcMemory);
+uint64_t offsetMillis();
 
 } // namespace open_heat
 
