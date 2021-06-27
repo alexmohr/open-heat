@@ -10,7 +10,7 @@
 
 namespace open_heat {
 // ToDo this could be moved into progmem if more RAM is needed
-std::array<char, 300> logBuffer_;
+std::array<char, 512> logBuffer_;
 
 const char CONSOLE_LEVEL_TRACE[] MEM_TYPE = "\033[1;37m[TRACE] ";
 const char CONSOLE_LEVEL_DEBUG[] MEM_TYPE = "\033[1;37m[DEBUG] ";
@@ -55,13 +55,15 @@ void Logger::log(Level level, const char* format, ...)
 
   va_list args;
   va_start(args, format);
-  vsnprintf(logBuffer_.data() + levelTextLen,
-            logBuffer_.size() , format, args);
+  vsnprintf(
+    logBuffer_.data() + levelTextLen, logBuffer_.size() - levelTextLen, format, args);
   va_end(args);
 
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {
     outFun(logBuffer_.data());
   }
+
+
 }
 
 Logger& Logger::getInstance()

@@ -25,16 +25,14 @@ String open_heat::network::MQTT::windowStateTopic_;
 
 String open_heat::network::MQTT::logTopic_;
 
-String logBuffer_;
 bool open_heat::network::MQTT::debugEnabled_ = false;
 
 void open_heat::network::MQTT::setup()
 {
   Logger::log(Logger::INFO, "Running MQTT setup");
+  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 
   connect();
-
-  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 
   valve_->registerModeChangedHandler([this](OperationMode mode) {
     mqttClient_.publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(mode));
@@ -56,7 +54,8 @@ void open_heat::network::MQTT::setup()
 unsigned long open_heat::network::MQTT::loop()
 {
   auto rtcMem = readRTCMemory();
-  if (millis() < rtcMem.mqttNextCheckMillis) {
+  if (offsetMillis() < rtcMem.mqttNextCheckMillis) {
+    Logger::log(Logger::DEBUG, "rtcMem.mqttNextCheckMillis %lu", rtcMem.mqttNextCheckMillis);
     return rtcMem.mqttNextCheckMillis;
   }
 
@@ -71,7 +70,8 @@ unsigned long open_heat::network::MQTT::loop()
   publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
   publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(valve_->getMode()));
 
-  rtcMem.mqttNextCheckMillis = millis() + checkIntervalMillis_;
+  rtcMem.mqttNextCheckMillis = offsetMillis() + checkIntervalMillis_;
+
   writeRTCMemory(rtcMem);
   return rtcMem.mqttNextCheckMillis;
 }

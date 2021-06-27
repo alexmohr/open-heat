@@ -11,7 +11,7 @@ namespace open_heat {
 
 
 //prints all rtcData, including the leading crc32
-/*void printMemory(const RTCMemory& rtcMemory) {
+void printMemory(const RTCMemory& rtcMemory) {
   char buf[3];
   uint8_t *ptr = (uint8_t *)&rtcMemory;
   for (size_t i = 0; i < sizeof(RTCMemory); i++) {
@@ -24,7 +24,7 @@ namespace open_heat {
     }
   }
   Serial.println();
-}*/
+}
 
 RTCMemory readRTCMemory()
 {
@@ -34,7 +34,6 @@ RTCMemory readRTCMemory()
     Logger::log(Logger::ERROR, "Failed to read RTC user memory");
   }
 
- // printMemory(rtcMemory);
   return rtcMemory;
 }
 
@@ -43,6 +42,13 @@ void writeRTCMemory(const RTCMemory& rtcMemory)
   if (!ESP.rtcUserMemoryWrite(0, (uint32_t *)&rtcMemory, sizeof(RTCMemory))) {
     Logger::log(Logger::ERROR, "Failed to write RTC user memory");
   }
+}
+
+uint64_t offsetMillis()
+{
+  const auto mem = readRTCMemory();
+  const auto ms = millis() + mem.millisOffset;
+  return ms;
 }
 
 } // namespace open_heat

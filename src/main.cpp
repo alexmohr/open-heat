@@ -59,24 +59,23 @@ void setupSerial()
 void setupPins()
 {
   // set led pin as output
-  pinMode(LED_BUILTIN, OUTPUT);
-  digitalWrite(LED_BUILTIN, LED_OFF);
-
+ // pinMode(LED_BUILTIN, OUTPUT);
+//  digitalWrite(LED_BUILTIN, LED_OFF);
 
   const auto& config = filesystem_.getConfig();
   if (config.MotorPins.Vin > 1) {
     pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
   } else {
     open_heat::Logger::log(
-      open_heat::Logger::ERROR,
-      "Motor pin vin invalid: %i\n", config.MotorPins.Vin);
+      open_heat::Logger::ERROR, "Motor pin vin invalid: %i\n", config.MotorPins.Vin);
   }
   if (config.MotorPins.Ground > 1) {
     pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
   } else {
     open_heat::Logger::log(
       open_heat::Logger::ERROR,
-      "Motor pin ground invalid: %i\n", config.MotorPins.Ground);
+      "Motor pin ground invalid: %i\n",
+      config.MotorPins.Ground);
   }
 }
 
@@ -94,16 +93,23 @@ void setup()
   if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF) {
     setupSerial();
   }
+  open_heat::Logger::setup();
+  logVersions();
 
   auto rtcMem = open_heat::readRTCMemory();
-  if (rtcMem.initalized != 0) {
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "canary value: %#16x", rtcMem.canary);
+
+  if (rtcMem.canary == open_heat::CANARY) {
+    open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
+    drd_.stop();
+
+  } else {
     std::memset(&rtcMem, 0, sizeof(open_heat::RTCMemory));
-    rtcMem.initalized = 0;
+    rtcMem.canary = open_heat::CANARY;
     open_heat::writeRTCMemory(rtcMem);
 
+    open_heat::Logger::log(open_heat::Logger::DEBUG, "Initalized rtcmem");
   }
-
-  open_heat::Logger::setup();
 
   filesystem_.setup();
   setupPins();
@@ -116,7 +122,6 @@ void setup()
   webServer_.setup();
   windowSensor_.setup();
 
-  logVersions();
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 
   loop();
@@ -132,8 +137,7 @@ void wifiSleep(uint64_t timeInMs)
 
   const auto rv = wifi_fpm_do_sleep(timeInMs * 1000);
   if (rv != ESP_OK) {
-    open_heat::Logger::log(
-      open_heat::Logger::DEBUG, "Failed to sleep: %i");
+    open_heat::Logger::log(open_heat::Logger::DEBUG, "Failed to sleep: %i");
     return;
   }
 
@@ -141,11 +145,21 @@ void wifiSleep(uint64_t timeInMs)
   // it is going to sleep in the system idle task
   delay(timeInMs);
 
-  if (millis() > 10 * 1000) {
+  if (open_heat::offsetMillis() > 10 * 1000) {
     drd_.stop();
   }
 
   wifiManager_.setup();
+}
+
+void wifiDeepSleep(uint64_t timeInMs)
+{
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", timeInMs);
+  auto mem = open_heat::readRTCMemory();
+  mem.millisOffset = open_heat::offsetMillis();
+  open_heat::writeRTCMemory(mem);
+
+  ESP.deepSleep(timeInMs * 1000, RF_DISABLED);
 }
 
 void loop()
@@ -160,17 +174,13 @@ void loop()
   const auto valveSleep = valve_.loop();
   const auto mqttSleep = mqtt_.loop();
 
-  if (millis() > 10 * 1000) {
-    drd_.stop();
-  }
-
   // do not sleep if debug is enabled.
   if (open_heat::network::MQTT::debug()) {
     delay(100);
 
-    if (millis() - lastLogMillis_ > 60 * 1000) {
+    if (open_heat::offsetMillis() - lastLogMillis_ > 60 * 1000) {
       open_heat::Logger::log(open_heat::Logger::DEBUG, "DEBUG MODE: Sleep disabled");
-      lastLogMillis_ = millis();
+      lastLogMillis_ = open_heat::offsetMillis();
     }
 
     return;
@@ -179,25 +189,26 @@ void loop()
   open_heat::Logger::log(
     open_heat::Logger::DEBUG,
     "Sleep times: valveSleep %lu, mqttSleep %lu",
-    valveSleep - millis(),
-    mqttSleep - millis());
+    valveSleep - open_heat::offsetMillis(),
+    mqttSleep - open_heat::offsetMillis());
 
   const auto minSleepTime = 5000UL;
   unsigned long idleTime;
   auto nextCheckMillis = std::min(mqttSleep, valveSleep);
-  if (nextCheckMillis < (millis() + minSleepTime)) {
+  if (nextCheckMillis < (open_heat::offsetMillis() + minSleepTime)) {
     open_heat::Logger::log(
       open_heat::Logger::DEBUG,
       "Minimal sleep or underflow prevented, sleep set to %ul ms",
       minSleepTime);
     idleTime = minSleepTime;
   } else {
-    idleTime = nextCheckMillis - millis();
+    idleTime = nextCheckMillis - open_heat::offsetMillis();
   }
 
   // Wait 0.5 seconds before forcing sleep to send messages.
   delay(500);
-  wifiSleep(idleTime);
+  // wifiSleep(idleTime);
+  wifiDeepSleep(idleTime);
 
   // // WiFi.forceSleepBegin();
   //  **delay(idleTime);

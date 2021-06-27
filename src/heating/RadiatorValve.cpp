@@ -33,18 +33,19 @@ unsigned long open_heat::heating::RadiatorValve::loop()
   if (rtcMem.turnOff) {
     closeValve(VALVE_FULL_ROTATE_TIME);
     rtcMem.turnOff = false;
-    rtcMem.valveNextCheckMillis = millis() + checkIntervalMillis_;
+    rtcMem.valveNextCheckMillis = offsetMillis() + checkIntervalMillis_;
     writeRTCMemory(rtcMem);
     return rtcMem.valveNextCheckMillis;
   } else if (rtcMem.openFully) {
     openValve(VALVE_FULL_ROTATE_TIME);
     rtcMem.openFully = false;
-    rtcMem.valveNextCheckMillis = millis() + checkIntervalMillis_;
+    rtcMem.valveNextCheckMillis = offsetMillis() + checkIntervalMillis_;
     writeRTCMemory(rtcMem);
     return rtcMem.valveNextCheckMillis;
   }
 
-  if (millis() < rtcMem.valveNextCheckMillis) {
+  if (offsetMillis() < rtcMem.valveNextCheckMillis) {
+    Logger::log(Logger::DEBUG, "rtcMem.valveNextCheckMillis %lu", rtcMem.valveNextCheckMillis);
     return rtcMem.valveNextCheckMillis;
   }
 
@@ -82,7 +83,7 @@ unsigned long open_heat::heating::RadiatorValve::loop()
     predictionError);
 
   if (0 == predictTemp) {
-    rtcMem.valveNextCheckMillis = millis() + checkIntervalMillis_ + additionalWaitTime;
+    rtcMem.valveNextCheckMillis = offsetMillis() + checkIntervalMillis_ + additionalWaitTime;
     rtcMem.lastPredictedTemp = predictTemp;
     rtcMem.lastMeasuredTemp = temp;
     writeRTCMemory(rtcMem);
@@ -152,7 +153,7 @@ unsigned long open_heat::heating::RadiatorValve::loop()
     additionalWaitTime = 30 * 1000;
   }
 
-  rtcMem.valveNextCheckMillis = millis() + checkIntervalMillis_ + additionalWaitTime;
+  rtcMem.valveNextCheckMillis = offsetMillis() + checkIntervalMillis_ + additionalWaitTime;
   writeRTCMemory(rtcMem);
   return rtcMem.valveNextCheckMillis;
 }
@@ -257,6 +258,9 @@ void open_heat::heating::RadiatorValve::setPinsLow()
 
 void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
 {
+  Logger::log(Logger::DEBUG, "Request to change mode to: %s", modeToCharArray(mode));
+
+
   auto rtcMem = readRTCMemory();
   if (mode == rtcMem.mode) {
     return;
@@ -273,7 +277,7 @@ void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
     rtcMem.openFully = true;
     rtcMem.mode = HEAT;
   case HEAT:
-    rtcMem.valveNextCheckMillis = millis();
+    rtcMem.valveNextCheckMillis = offsetMillis();
   default:
     break;
   }
