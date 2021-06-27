@@ -4,6 +4,7 @@
 //
 
 #include "MQTT.hpp"
+#include <RTCMemory.hpp>
 #include <cstring>
 
 Config* open_heat::network::MQTT::config_;
@@ -54,8 +55,9 @@ void open_heat::network::MQTT::setup()
 
 unsigned long open_heat::network::MQTT::loop()
 {
-  if (millis() < nextCheckMillis_) {
-    return nextCheckMillis_;
+  auto rtcMem = readRTCMemory();
+  if (millis() < rtcMem.mqttNextCheckMillis) {
+    return rtcMem.mqttNextCheckMillis;
   }
 
   wifi_.checkWifi();
@@ -68,8 +70,10 @@ unsigned long open_heat::network::MQTT::loop()
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
   publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(valve_->getMode()));
-  nextCheckMillis_ = millis() + checkIntervalMillis_;
-  return nextCheckMillis_;
+
+  rtcMem.mqttNextCheckMillis = millis() + checkIntervalMillis_;
+  writeRTCMemory(rtcMem);
+  return rtcMem.mqttNextCheckMillis;
 }
 
 void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& payload)

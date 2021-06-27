@@ -37,19 +37,10 @@ class RadiatorValve {
   void updateConfig();
 
   Filesystem& filesystem_;
-  OperationMode mode_{OFF};
 
   static constexpr int VALVE_FULL_ROTATE_TIME = 20000;
   sensors::ITemperatureSensor& tempSensor_;
-  float setTemp_;
-  float lastTemp_{0};
-  float lastPredictTemp_{0};
-  int currentRotateTime_{-VALVE_FULL_ROTATE_TIME / 2};
 
-  bool turnOff_{false};
-  bool openFully_{false};
-
-  unsigned long nextCheckMillis_{0};
   static constexpr unsigned long checkIntervalMillis_
     = static_cast<unsigned long>(2.5 * 60 * 1000);
 
@@ -57,9 +48,7 @@ class RadiatorValve {
   std::vector<std::function<void(bool)>> windowStateHandler_{};
   std::vector<std::function<void(float)>> setTempChangedHandler_{};
 
-  OperationMode lastMode_;
-  bool restoreMode_ = false;
-  bool isWindowOpen_ = false;
+
   // Wait 3 minutes before heating again after window opened
   const unsigned long sleepMillisAfterWindowClose_{3 * 60 * 1000};
 
