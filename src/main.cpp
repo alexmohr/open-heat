@@ -87,14 +87,23 @@ void setup()
 
   logVersions();
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
+}
 
-    mqtt_.enableDebug();
+static int wifi_sleep(uint32_t time)
+{
+  // set WiFi mode to null mode
+  wifi_set_opmode(NULL_MODE);
+  // set force sleep type
+  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
+  wifi_fpm_open();
+  wifi_fpm_do_sleep(time);
+
+  // reconnect to wifi
+  wifiManager_.setup();
 }
 
 void loop()
 {
-//   wifi_set_sleep_type(NONE_SLEEP_T);
-
   // Call the double reset detector loop method every so often,
   // so that it can recognise when the timeout expires.
   // You can also call drd.stop() when you wish to no longer
@@ -105,12 +114,10 @@ void loop()
   const auto valveSleep = valve_.loop();
   const auto mqttSleep = mqtt_.loop();
 
-  if (millis() < 10 * 1000) {
-    delay(100);
+  if (millis() > 10 * 1000) {
+    drd_.stop();
     return;
   }
-
-  drd_.stop();
 
   // do not sleep if debug is enabled.
   if (open_heat::network::MQTT::debug()) {
@@ -145,15 +152,15 @@ void loop()
 
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", idleTime);
 
-  wifi_set_sleep_type(LIGHT_SLEEP_T);
-
   // Wait 0.5 seconds before forcing sleep to send messages.
   delay(500);
   if (idleTime == minSleepTime) {
     return;
   }
 
-  WiFi.forceSleepBegin();
-  delay(idleTime);
-  WiFi.forceSleepWake();
+  wifi_sleep(idleTime * 1000);
+
+  // // WiFi.forceSleepBegin();
+  //  **delay(idleTime);
+  //  WiFi.forceSleepWake();
 }
