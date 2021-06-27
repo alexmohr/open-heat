@@ -14,7 +14,7 @@ open_heat::heating::RadiatorValve::RadiatorValve(
     setTemp_(20),
     lastMode_(OperationMode::UNKNOWN)
 {
-  setPinsLow();
+
 }
 
 void open_heat::heating::RadiatorValve::setup()
@@ -24,8 +24,22 @@ void open_heat::heating::RadiatorValve::setup()
   lastTemp_ = tempSensor_.getTemperature();
   mode_ = config.Mode;
 
-  pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
-  pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
+
+  if (config.MotorPins.Vin > 1) {
+    pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
+    Logger::log(
+      Logger::ERROR,
+      "Motor pin vin invalid: %i\n", config.MotorPins.Vin);
+  }
+  if (config.MotorPins.Ground > 1) {
+    pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
+  } else {
+    Logger::log(
+      Logger::ERROR,
+      "Motor pin ground invalid: %i\n", config.MotorPins.Ground);
+  }
+
+  setPinsLow();
 }
 
 unsigned long open_heat::heating::RadiatorValve::loop()

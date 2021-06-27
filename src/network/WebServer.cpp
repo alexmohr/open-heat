@@ -72,19 +72,17 @@ void open_heat::network::WebServer::setup()
   setupEvents();
 
   asyncWebServer_.begin();
-  Logger::log(Logger::DEBUG, "Web server ready");
+ // Logger::log(Logger::DEBUG, "Web server ready");
 }
 
 void WebServer::setupEvents()
 {
-  Logger::addPrinter(
+  /*Logger::addPrinter(
     [this](Logger::Level level, const char* module, const char* message) {
       eventsLogPrinter(level, module, message);
     });
 
-  asyncWebServer_.addHandler(&logEvents_);
-
-  asyncWebServer_.addHandler(&logEvents_);
+  asyncWebServer_.addHandler(&logEvents_);*/
 }
 
 void WebServer::eventsLogPrinter(

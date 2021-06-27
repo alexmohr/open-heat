@@ -46,8 +46,7 @@ void open_heat::network::MQTT::setup()
     [this](bool state) { mqttClient_.publish(windowStateTopic_, String(state)); });
 
   if (!loggerAdded_) {
-    Logger::addPrinter([](Logger::Level level, const char* module, const char* message) {
-      mqttLogPrinter(level, module, message);
+    Logger::addPrinter([](const std::string& message) { mqttLogPrinter(message);
     });
     loggerAdded_ = true;
   }
@@ -236,23 +235,9 @@ void open_heat::network::MQTT::subscribe(const String& topic)
   }
 }
 
-void open_heat::network::MQTT::mqttLogPrinter(
-  open_heat::Logger::Level level,
-  const char* module,
-  const char* message)
+void open_heat::network::MQTT::mqttLogPrinter(const std::string& message)
 {
-  logBuffer_ = LOG_LEVEL_STRINGS[level];
-  logBuffer_ += F(" ");
-
-  if (std::strlen(module) > 0) {
-    logBuffer_ += F(": ");
-    logBuffer_ += module;
-    logBuffer_ += F(": ");
-  }
-
-  logBuffer_ += message;
-  // do not use publish method, because it also logs.
-  mqttClient_.publish(logTopic_, logBuffer_);
+  mqttClient_.publish(logTopic_, message.c_str());
 }
 
 bool open_heat::network::MQTT::debug()

@@ -6,18 +6,19 @@
 #include "Logger.hpp"
 #include <cstdarg>
 #include <cstring>
+#include <sstream>
 
 namespace open_heat {
 // ToDo this could be moved into progmem if more RAM is needed
-std::array<char, 256> logBuffer_;
+std::array<char, 300> logBuffer_;
 
-const char CONSOLE_LEVEL_TRACE[] MEM_TYPE = "\033[1;37m[TRACE]";
-const char CONSOLE_LEVEL_DEBUG[] MEM_TYPE = "\033[1;37m[DEBUG]";
-const char CONSOLE_LEVEL_INFO[] MEM_TYPE = "\033[1;32m[INFO] ";
-const char CONSOLE_LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN] ";
-const char CONSOLE_LEVEL_ERROR[] MEM_TYPE = "\033[1;31m[ERROR]";
-const char CONSOLE_LEVEL_FATAL[] MEM_TYPE = "\033[1;31m[FATAL]";
-const char CONSOLE_LEVEL_OFF[] MEM_TYPE = "\033[1;31m[OFF]  ";
+const char CONSOLE_LEVEL_TRACE[] MEM_TYPE = "\033[1;37m[TRACE] ";
+const char CONSOLE_LEVEL_DEBUG[] MEM_TYPE = "\033[1;37m[DEBUG] ";
+const char CONSOLE_LEVEL_INFO[] MEM_TYPE = "\033[1;32m[INFO]  ";
+const char CONSOLE_LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN]  ";
+const char CONSOLE_LEVEL_ERROR[] MEM_TYPE = "\033[1;31m[ERROR] ";
+const char CONSOLE_LEVEL_FATAL[] MEM_TYPE = "\033[1;31m[FATAL] ";
+const char CONSOLE_LEVEL_OFF[] MEM_TYPE = "\033[1;31m[OFF]   ";
 
 const char* const CONSOLE_LOG_LEVEL_STRINGS[] MEM_TYPE = {
   CONSOLE_LEVEL_TRACE,
@@ -36,7 +37,7 @@ Logger::Logger() = default;
 void Logger::setup()
 {
   if (Serial) {
-    getInstance().loggerOutputFunctions_.emplace_back(defaultLog);
+    getInstance().loggerOutputFunctions_.push_back(defaultLog);
   }
 }
 
@@ -46,13 +47,20 @@ void Logger::log(Level level, const char* format, ...)
     return;
   }
 
+  std::memset(logBuffer_.data(), 0, logBuffer_.size());
+
+  const auto levelText = levelToText(level);
+  std::strcpy(logBuffer_.data(), levelText);
+  const auto levelTextLen = std::strlen(logBuffer_.data());
+
   va_list args;
   va_start(args, format);
-  vsnprintf(logBuffer_.data(), logBuffer_.size(), format, args);
+  vsnprintf(logBuffer_.data() + levelTextLen,
+            logBuffer_.size() , format, args);
   va_end(args);
 
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {
-    outFun(level, "", logBuffer_.data());
+    outFun(logBuffer_.data());
   }
 }
 
@@ -86,25 +94,16 @@ String Logger::formatBytes(size_t bytes)
   }
 }
 
-void Logger::defaultLog(Logger::Level level, const char* module, const char* message)
+void Logger::defaultLog(const std::string& message)
 {
-  Serial.print(asString(level));
-  Serial.print(F(" "));
-
-  if (std::strlen(module) > 0) {
-    Serial.print(F(": "));
-    Serial.print(module);
-    Serial.print(F(" "));
-  }
-
-  Serial.print(message);
-  Serial.println("\033[1;97m");
+  Serial.println(message.c_str());
 }
 
-const char* Logger::asString(Logger::Level level)
+const char* Logger::levelToText(Logger::Level level)
 {
   return CONSOLE_LOG_LEVEL_STRINGS[level];
 }
+
 void Logger::addPrinter(const Logger::LoggerOutputFunction& outFun)
 {
   getInstance().loggerOutputFunctions_.push_back(outFun);

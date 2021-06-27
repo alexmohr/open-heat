@@ -41,10 +41,7 @@ class MQTT {
   static void publish(const String& topic, const String& message);
   static void messageReceivedCallback(String& topic, String& payload);
 
-  static void mqttLogPrinter(
-    open_heat::Logger::Level level,
-    const char* module,
-    const char* message);
+  static void mqttLogPrinter(const std::string& message);
 
   private:
   Filesystem& filesystem_;
