@@ -45,7 +45,6 @@ unsigned long open_heat::heating::RadiatorValve::loop()
   }
 
   if (offsetMillis() < rtcMem.valveNextCheckMillis) {
-    Logger::log(Logger::DEBUG, "rtcMem.valveNextCheckMillis %lu", rtcMem.valveNextCheckMillis);
     return rtcMem.valveNextCheckMillis;
   }
 

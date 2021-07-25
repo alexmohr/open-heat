@@ -58,9 +58,16 @@ void setupSerial()
 
 void setupPins()
 {
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Running setupPins");
+
   // set led pin as output
- // pinMode(LED_BUILTIN, OUTPUT);
-//  digitalWrite(LED_BUILTIN, LED_OFF);
+  pinMode(LED_BUILTIN_PIN, OUTPUT);
+  // level is inverted
+  digitalWrite(LED_BUILTIN_PIN, LED_ON);
+
+  // set led pin as output
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LED_OFF);
 
   const auto& config = filesystem_.getConfig();
   if (config.MotorPins.Vin > 1) {
@@ -76,6 +83,15 @@ void setupPins()
       open_heat::Logger::ERROR,
       "Motor pin ground invalid: %i\n",
       config.MotorPins.Ground);
+  }
+
+  // enable temp sensor
+  if (config.TempVin > 0) {
+    pinMode(static_cast<uint8_t>(config.TempVin), OUTPUT);
+    digitalWrite(static_cast<uint8_t>(config.TempVin), HIGH);
+  } else {
+    open_heat::Logger::log(
+      open_heat::Logger::ERROR, "Temp pin vin invalid: %i\n", config.TempVin);
   }
 }
 
@@ -93,6 +109,7 @@ void setup()
   if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF) {
     setupSerial();
   }
+
   open_heat::Logger::setup();
   logVersions();
 
@@ -102,7 +119,6 @@ void setup()
   if (rtcMem.canary == open_heat::CANARY) {
     open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
     drd_.stop();
-
   } else {
     std::memset(&rtcMem, 0, sizeof(open_heat::RTCMemory));
     rtcMem.canary = open_heat::CANARY;
@@ -113,6 +129,7 @@ void setup()
 
   filesystem_.setup();
   setupPins();
+
   tempSensor_->setup();
 
   wifiManager_.setup();
@@ -127,39 +144,19 @@ void setup()
   loop();
 }
 
-void wifiSleep(uint64_t timeInMs)
-{
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", timeInMs);
-
-  wifi_fpm_open();
-  wifi_fpm_set_sleep_type(LIGHT_SLEEP_T);
-  wifi_set_opmode(NULL_MODE);
-
-  const auto rv = wifi_fpm_do_sleep(timeInMs * 1000);
-  if (rv != ESP_OK) {
-    open_heat::Logger::log(open_heat::Logger::DEBUG, "Failed to sleep: %i");
-    return;
-  }
-
-  // ESP8266 will not enter sleep mode immediately,
-  // it is going to sleep in the system idle task
-  delay(timeInMs);
-
-  if (open_heat::offsetMillis() > 10 * 1000) {
-    drd_.stop();
-  }
-
-  wifiManager_.setup();
-}
-
 void wifiDeepSleep(uint64_t timeInMs)
 {
+  const auto& config = filesystem_.getConfig();
+  digitalWrite(static_cast<uint8_t>(config.TempVin), LOW);
+  digitalWrite(static_cast<uint8_t>(config.MotorPins.Vin), LOW);
+  digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
+
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", timeInMs);
   auto mem = open_heat::readRTCMemory();
-  mem.millisOffset = open_heat::offsetMillis();
+  mem.millisOffset = open_heat::offsetMillis() + timeInMs;
   open_heat::writeRTCMemory(mem);
 
-  ESP.deepSleep(timeInMs * 1000, RF_DISABLED);
+  ESP.deepSleep(timeInMs * 1000, RF_CAL);
 }
 
 void loop()
@@ -205,12 +202,12 @@ void loop()
     idleTime = nextCheckMillis - open_heat::offsetMillis();
   }
 
+  open_heat::Logger::log(
+    open_heat::Logger::DEBUG,
+    "Starting deep sleep, millis: %lu",
+    open_heat::offsetMillis());
+
   // Wait 0.5 seconds before forcing sleep to send messages.
   delay(500);
-  // wifiSleep(idleTime);
   wifiDeepSleep(idleTime);
-
-  // // WiFi.forceSleepBegin();
-  //  **delay(idleTime);
-  //  WiFi.forceSleepWake();
 }

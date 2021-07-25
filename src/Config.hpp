@@ -31,13 +31,19 @@ static constexpr uint8_t HOST_NAME_MAX_LEN = 32;
 static constexpr uint8_t DEFAULT_MOTOR_GROUND = D6;
 static constexpr uint8_t DEFAULT_MOTOR_VIN = D5;
 
+static constexpr int8_t DEFAULT_TEMP_VIN = D7;
 // On devboard defaults are D8 and D7
 // PIN_D7 13
 // PIN_D8 15
 static constexpr int8_t DEFAULT_WINDOW_GROUND = -1;
 static constexpr int8_t DEFAULT_WINDOW_VIN = -1;
 
+
+
 static constexpr const char* DEFAULT_HOST_NAME = "OpenHeat";
+
+static constexpr const char* DEFAULT_USER = "admin";
+static constexpr const char* DEFAULT_PW = "letmein";
 
 typedef struct {
   char wifi_ssid[SSID_MAX_LEN];
@@ -80,6 +86,7 @@ typedef struct Config {
   OperationMode Mode{OFF};
   PinSettings MotorPins{};
   PinSettings WindowPins{};
+  int8 TempVin;
 } Config;
 
 #endif // WIFIMANAGERCONFIG_HPP_
