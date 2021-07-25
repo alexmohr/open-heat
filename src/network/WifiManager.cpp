@@ -24,12 +24,12 @@ void WifiManager::setup()
 
   if (startConfigPortal || connectMultiWiFi() != WL_CONNECTED) {
     // Starts an access point
-    pinMode(LED_BUILTIN, OUTPUT);
-    digitalWrite(LED_BUILTIN, LED_ON);
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LED_ON);
     while (!showConfigurationPortal(&espWifiManager)) {
       Logger::log(Logger::WARNING, "Configuration did not yield valid wifi, retrying");
     }
-    digitalWrite(LED_BUILTIN, LED_OFF);
+    digitalWrite(LED_PIN, LED_OFF);
   }
 
   checkWifi();
@@ -79,7 +79,7 @@ bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
 #endif
 
   initAdditionalParams();
- for (auto& param : additionalParameters_) {
+  for (auto& param : additionalParameters_) {
     espWifiManager->addParameter(param);
   }
 
@@ -124,35 +124,9 @@ void WifiManager::updateConfig(ESPAsync_WiFiManager* espWifiManager)
 
 void WifiManager::updateSettings(Config& config)
 {
-  // Host
-  std::strcpy(config.Hostname, paramHostname_.getValue());
-
-  // MQTT
-  std::strcpy(config.MQTT.Server, paramMqttServer_.getValue());
-  std::strcpy(config.MQTT.Topic, paramMqttTopic_.getValue());
-  std::strcpy(config.MQTT.Username, paramMqttUsername_.getValue());
-  std::strcpy(config.MQTT.Password, paramMqttPassword_.getValue());
-  const auto newPort = static_cast<unsigned short>(
-    std::strtol(paramMqttPortString_.getValue(), nullptr, 10));
-  config.MQTT.Port = newPort == 0 ? MQTT_DEFAULT_PORT : newPort;
-
   // Update
   std::strcpy(config.Update.Username, paramUpdateUsername_.getValue());
   std::strcpy(config.Update.Password, paramUpdatePassword_.getValue());
-
-  // MotorPins
-  auto pin = static_cast<int8>(std::strtol(paramMotorGround_.getValue(), nullptr, 10));
-  config.MotorPins.Ground = pin;
-
-  pin = static_cast<int8>(std::strtol(paramMotorVin_.getValue(), nullptr, 10));
-  config.MotorPins.Vin = pin;
-
-  // Window Pins
-  pin = static_cast<int8>(std::strtol(paramWindowGround_.getValue(), nullptr, 10));
-  config.WindowPins.Ground = pin;
-
-  pin = static_cast<int8>(std::strtol(paramWindowVin_.getValue(), nullptr, 10));
-  config.WindowPins.Vin = pin;
 
   filesystem_->persistConfig();
 }
@@ -297,29 +271,6 @@ void WifiManager::initAdditionalParams()
   std::strcpy(paramData._value, config.Hostname);
   paramHostname_.setWMParam_Data(paramData);
 
-  // MQTT
- /*
-  paramMqttServer_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, config.MQTT.Server);
-  paramMqttServer_.setWMParam_Data(paramData);
-
-  paramMqttPortString_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, String(config.MQTT.Port).c_str());
-  paramMqttPortString_.setWMParam_Data(paramData);
-
-
-  paramMqttTopic_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, "");
-  paramMqttTopic_.setWMParam_Data(paramData);
-
-  paramMqttUsername_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, config.MQTT.Username);
-  paramMqttUsername_.setWMParam_Data(paramData);
-
-  paramMqttPassword_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, config.MQTT.Password);
-  paramMqttPassword_.setWMParam_Data(paramData);
-  */
   // Update
   paramUpdateUsername_.getWMParam_Data(paramData);
   std::strcpy(paramData._value, config.Update.Username);
@@ -328,26 +279,6 @@ void WifiManager::initAdditionalParams()
   paramUpdatePassword_.getWMParam_Data(paramData);
   std::strcpy(paramData._value, config.Update.Password);
   paramUpdatePassword_.setWMParam_Data(paramData);
-
-  /*
-  // MotorPins
-  paramMotorVin_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, String(config.MotorPins.Vin).c_str());
-  paramMotorVin_.setWMParam_Data(paramData);
-
-  paramMotorGround_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, String(config.MotorPins.Ground).c_str());
-  paramMotorGround_.setWMParam_Data(paramData);
-
-  // Window pins
-  paramWindowVin_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, String(config.WindowPins.Vin).c_str());
-  paramWindowVin_.setWMParam_Data(paramData);
-
-  paramWindowGround_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, String(config.WindowPins.Ground).c_str());
-  paramWindowGround_.setWMParam_Data(paramData);
-   */
 }
 
 } // namespace network

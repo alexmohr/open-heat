@@ -98,6 +98,14 @@ void Filesystem::initConfig()
     std::strcpy(config_.Hostname, DEFAULT_HOST_NAME);
   }
 
+  if (0 == std::strlen(config_.Update.Username)) {
+    std::strcpy(config_.Update.Username, DEFAULT_USER);
+  }
+
+  if (0 == std::strlen(config_.Update.Password)) {
+    std::strcpy(config_.Update.Username, DEFAULT_PW);
+  }
+
   const auto topic = std::string(config_.MQTT.Topic);
   if (topic.size() > 1 && topic[topic.size() - 1] != '/') {
     std::strcpy(config_.MQTT.Topic, (topic + "/").c_str());

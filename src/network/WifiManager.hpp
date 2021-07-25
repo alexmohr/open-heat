@@ -53,46 +53,16 @@ class WifiManager {
   DoubleResetDetector* drd_{};
   Filesystem* filesystem_{};
 
-  ESPAsync_WMParameter paramMqttServer_{
-    "MQTTServer",
-    "MQTT Server",
-    "",
-    MQTT_SERVER_NAME_MAX_SIZE};
-
-  ESPAsync_WMParameter paramMqttPortString_{
-    "MQTTPort",
-    "MQTT Port",
-    "1883",
-    MQTT_PORT_STR_MAX_SIZE};
-
-  ESPAsync_WMParameter paramMqttTopic_{
-    "MQTTTopic",
-    "MQTT Topic",
-    "",
-    MQTT_TOPIC_MAX_SIZE};
-
-  ESPAsync_WMParameter paramMqttUsername_{
-    "MQTTUsername",
-    "MQTT Username",
-    "",
-    MQTT_USERNAME_MAX_SIZE};
-
-  ESPAsync_WMParameter paramMqttPassword_{
-    "MQTTPassword",
-    "MQTT Password",
-    "",
-    MQTT_PASSWORD_MAX_SIZE};
-
   ESPAsync_WMParameter paramUpdateUsername_{
     "UpdateUsername",
     "Update Username",
-    "",
+    DEFAULT_USER,
     UPDATE_MAX_USERNAME_LEN};
 
   ESPAsync_WMParameter paramUpdatePassword_{
     "UpdatePassword",
     "Update Password",
-    "",
+    DEFAULT_PW,
     UPDATE_MAX_PW_LEN};
 
   ESPAsync_WMParameter paramHostname_{
@@ -101,29 +71,7 @@ class WifiManager {
     DEFAULT_HOST_NAME,
     HOST_NAME_MAX_LEN};
 
-  ESPAsync_WMParameter paramMotorGround_{
-    "MotorGround",
-    "Motor Ground",
-    String(DEFAULT_MOTOR_GROUND).c_str(),
-    sizeof(int8)};
 
-  ESPAsync_WMParameter paramMotorVin_{
-    "MotorVin",
-    "Motor Vin",
-    String(DEFAULT_MOTOR_VIN).c_str(),
-    sizeof(int8)};
-
-  ESPAsync_WMParameter paramWindowGround_{
-    "WindowGround",
-    "Window Ground",
-    String(DEFAULT_WINDOW_GROUND).c_str(),
-    sizeof(int8)};
-
-  ESPAsync_WMParameter paramWindowVin_{
-    "WindowVin",
-    "Window Vin",
-    String(DEFAULT_WINDOW_VIN).c_str(),
-    sizeof(int8)};
 
   ESPAsync_WMParameter* additionalParameters_[3] = {
     &paramHostname_,

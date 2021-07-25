@@ -55,7 +55,6 @@ unsigned long open_heat::network::MQTT::loop()
 {
   auto rtcMem = readRTCMemory();
   if (offsetMillis() < rtcMem.mqttNextCheckMillis) {
-    Logger::log(Logger::DEBUG, "rtcMem.mqttNextCheckMillis %lu", rtcMem.mqttNextCheckMillis);
     return rtcMem.mqttNextCheckMillis;
   }
 

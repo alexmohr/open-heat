@@ -4,6 +4,7 @@
 //
 
 #include "BME280.hpp"
+#include <Logger.hpp>
 
 float open_heat::sensors::BME280::getTemperature()
 {
@@ -14,7 +15,9 @@ float open_heat::sensors::BME280::getTemperature()
 }
 void open_heat::sensors::BME280::setup()
 {
-  bme_.begin(BME280_ADDRESS_ALTERNATE);
+  const auto initResult = bme_.begin(BME280_ADDRESS_ALTERNATE);
+  Logger::log(
+    Logger::INFO, "BME280 init result: %d", initResult);
   sleep();
 }
 void open_heat::sensors::BME280::loop()

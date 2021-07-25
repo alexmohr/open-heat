@@ -20,15 +20,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="improve logging and light sleep impl">
-      <change afterPath="$PROJECT_DIR$/src/RTCMemory.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/RTCMemory.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Filesystem.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/ESP8266.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/ESP8266.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/hardware/pins.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/hardware/pins.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/BME280.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/BME280.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -93,11 +98,6 @@
     </key>
   </component>
   <component name="RunManager" selected="PlatformIO.PlatformIO Upload">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -106,6 +106,11 @@
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
@@ -229,6 +234,11 @@
       <workItem from="1623063427927" duration="1240000" />
       <workItem from="1623066282604" duration="1763000" />
       <workItem from="1623511161536" duration="1328000" />
+      <workItem from="1624862154809" duration="5123000" />
+      <workItem from="1625553920083" duration="998000" />
+      <workItem from="1625555918887" duration="1233000" />
+      <workItem from="1626030102794" duration="1857000" />
+      <workItem from="1627213428892" duration="21139000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
