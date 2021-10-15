@@ -43,6 +43,10 @@ void Logger::setup()
 
 void Logger::log(Level level, const char* format, ...)
 {
+  if (DISABLE_ALL_LOGGING) {
+    return;
+  }
+
   if (level < getLogLevel()) {
     return;
   }

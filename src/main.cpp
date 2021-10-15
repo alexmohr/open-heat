@@ -104,6 +104,27 @@ void logVersions()
     open_heat::Logger::DEBUG, "WifiManager Version: %s", ESP_ASYNC_WIFIMANAGER_VERSION);
 }
 
+void wifiDeepSleep(uint64_t timeInMs)
+{
+  const auto& config = filesystem_.getConfig();
+  digitalWrite(static_cast<uint8_t>(config.TempVin), LOW);
+  digitalWrite(static_cast<uint8_t>(config.MotorPins.Vin), LOW);
+  digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
+
+  pinMode(static_cast<uint8_t>(config.TempVin), INPUT);
+  pinMode(static_cast<uint8_t>(config.MotorPins.Vin), INPUT);
+  pinMode(static_cast<uint8_t>(config.MotorPins.Ground), INPUT);
+  pinMode(static_cast<uint8_t>(LED_BUILTIN), INPUT);
+
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", timeInMs);
+  auto mem = open_heat::readRTCMemory();
+  mem.millisOffset = open_heat::offsetMillis() + timeInMs;
+  open_heat::writeRTCMemory(mem);
+
+  ESP.deepSleep(timeInMs * 1000, RF_DISABLED);
+  delay(1);
+}
+
 void setup()
 {
   if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF) {
@@ -127,36 +148,25 @@ void setup()
     open_heat::Logger::log(open_heat::Logger::DEBUG, "Initalized rtcmem");
   }
 
+  mqtt_.enableDebug();
+
   filesystem_.setup();
   setupPins();
 
   tempSensor_->setup();
 
-  wifiManager_.setup();
-
   valve_.setup();
-  mqtt_.setup();
-  webServer_.setup();
+
+  if (mqtt_.needLoop()) {
+    wifiManager_.setup();
+    mqtt_.setup();
+  }
+
   windowSensor_.setup();
 
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 
   loop();
-}
-
-void wifiDeepSleep(uint64_t timeInMs)
-{
-  const auto& config = filesystem_.getConfig();
-  digitalWrite(static_cast<uint8_t>(config.TempVin), LOW);
-  digitalWrite(static_cast<uint8_t>(config.MotorPins.Vin), LOW);
-  digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
-
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", timeInMs);
-  auto mem = open_heat::readRTCMemory();
-  mem.millisOffset = open_heat::offsetMillis() + timeInMs;
-  open_heat::writeRTCMemory(mem);
-
-  ESP.deepSleep(timeInMs * 1000, RF_CAL);
 }
 
 void loop()
@@ -171,8 +181,17 @@ void loop()
   const auto valveSleep = valve_.loop();
   const auto mqttSleep = mqtt_.loop();
 
+  const auto msg
+    = "Sleep times: valveSleep: " + std::to_string(valveSleep - open_heat::offsetMillis())
+    + ", mqttSleep: " + std::to_string(mqttSleep - open_heat::offsetMillis());
+  open_heat::Logger::log(open_heat::Logger::DEBUG, msg.c_str());
+
   // do not sleep if debug is enabled.
   if (open_heat::network::MQTT::debug()) {
+    pinMode(LED_PIN, OUTPUT);
+    digitalWrite(LED_PIN, LED_ON);
+    webServer_.setup();
+
     delay(100);
 
     if (open_heat::offsetMillis() - lastLogMillis_ > 60 * 1000) {
@@ -183,13 +202,7 @@ void loop()
     return;
   }
 
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG,
-    "Sleep times: valveSleep %lu, mqttSleep %lu",
-    valveSleep - open_heat::offsetMillis(),
-    mqttSleep - open_heat::offsetMillis());
-
-  const auto minSleepTime = 5000UL;
+  const auto minSleepTime = 10000UL;
   unsigned long idleTime;
   auto nextCheckMillis = std::min(mqttSleep, valveSleep);
   if (nextCheckMillis < (open_heat::offsetMillis() + minSleepTime)) {
@@ -203,11 +216,9 @@ void loop()
   }
 
   open_heat::Logger::log(
-    open_heat::Logger::DEBUG,
-    "Starting deep sleep, millis: %lu",
-    open_heat::offsetMillis());
+    open_heat::Logger::DEBUG, "Starting deep sleep for: %lu", idleTime);
 
-  // Wait 0.5 seconds before forcing sleep to send messages.
-  delay(500);
+  // Wai before forcing sleep to send messages.
+  delay(100);
   wifiDeepSleep(idleTime);
 }

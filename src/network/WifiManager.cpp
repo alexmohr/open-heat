@@ -5,6 +5,7 @@
 
 #include "WifiManager.hpp"
 #include <Logger.hpp>
+#include <RTCMemory.hpp>
 #include <cstring>
 
 namespace open_heat {
@@ -17,13 +18,14 @@ void WifiManager::setup()
 
   // Check if any config is valid.
   auto startConfigPortal = !loadAPsFromConfig();
-  if (drd_->detectDoubleReset()) {
+  auto rtcMem = readRTCMemory();
+  if (!rtcMem.drdDisabled && drd_->detectDoubleReset()) {
     Logger::log(Logger::WARNING, ">>> Detected double reset <<<");
     startConfigPortal = true;
   }
 
   if (startConfigPortal || connectMultiWiFi() != WL_CONNECTED) {
-    // Starts an access point
+    // Starts access point
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LED_ON);
     while (!showConfigurationPortal(&espWifiManager)) {

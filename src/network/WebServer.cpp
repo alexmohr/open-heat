@@ -22,6 +22,11 @@ String logBuffer_;
 
 void open_heat::network::WebServer::setup()
 {
+  if (isSetup_) {
+    return;
+  }
+  isSetup_ = true;
+
   auto& config = filesystem_.getConfig();
   MDNS.begin(config.Hostname);
   MDNS.addService("http", "tcp", 80);

@@ -13,6 +13,15 @@ float open_heat::sensors::BME280::getTemperature()
   sleep();
   return temp;
 }
+
+float open_heat::sensors::BME280::getHumidity()
+{
+  wake();
+  const auto humid = bme_.readHumidity();
+  sleep();
+  return humid;
+}
+
 void open_heat::sensors::BME280::setup()
 {
   const auto maxRetries = 5;
@@ -20,17 +29,22 @@ void open_heat::sensors::BME280::setup()
   auto initResult = false;
   while (!initResult && retries < maxRetries) {
     initResult = bme_.begin(BME280_ADDRESS_ALTERNATE);
-    Logger::log(Logger::INFO, "BME280 init result: %d, try: %d", initResult, retries);
+    Logger::log(Logger::INFO, "BME280 init result: %d, try: %d", initResult, ++retries);
+    delay(100);
   }
+
   sleep();
 }
+
 void open_heat::sensors::BME280::loop()
 {
 }
+
 void open_heat::sensors::BME280::sleep()
 {
   bme_.setSampling(Adafruit_BME280::MODE_SLEEP);
 }
+
 void open_heat::sensors::BME280::wake()
 {
   bme_.setSampling(Adafruit_BME280::MODE_NORMAL);

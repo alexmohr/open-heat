@@ -62,6 +62,10 @@ unsigned long open_heat::heating::RadiatorValve::loop()
     rtcMem.lastMeasuredTemp = temp;
     rtcMem.valveNextCheckMillis = std::numeric_limits<unsigned long>::max();
     writeRTCMemory(rtcMem);
+
+    Logger::log(
+      Logger::DEBUG,
+      "Heating is turned off, disable heating");
     return rtcMem.valveNextCheckMillis;
   }
 
@@ -86,6 +90,8 @@ unsigned long open_heat::heating::RadiatorValve::loop()
     rtcMem.lastPredictedTemp = predictTemp;
     rtcMem.lastMeasuredTemp = temp;
     writeRTCMemory(rtcMem);
+    Logger::log(
+      Logger::DEBUG, "Skipping temperature setting, predictTemp = 0");
     return rtcMem.valveNextCheckMillis;
   }
 
@@ -143,6 +149,8 @@ unsigned long open_heat::heating::RadiatorValve::loop()
         temp,
         temperatureChange);
     }
+  } else {
+    Logger::log(Logger::INFO, "Temperature is in tolerance, not changing");
   }
 
   rtcMem.lastPredictedTemp = predictTemp;
