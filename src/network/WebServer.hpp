@@ -74,6 +74,8 @@ class WebServer {
     const char* module,
     const char* message);
   static void reset(AsyncWebServerRequest* request, AsyncResponseStream* response);
+
+  bool isSetup_ = false;
 };
 
 } // namespace network

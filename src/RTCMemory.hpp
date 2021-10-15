@@ -32,6 +32,8 @@ struct RTCMemory {
   bool isWindowOpen;
   bool restoreMode;
 
+  bool drdDisabled;
+
 
 
 };

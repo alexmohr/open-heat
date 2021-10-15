@@ -31,6 +31,7 @@ class MQTT {
 
   public:
   void setup();
+  bool needLoop();
   unsigned long loop();
 
   static bool debug();
@@ -60,6 +61,7 @@ class MQTT {
   static String getConfiguredTempTopic_;
 
   static String getMeasuredTempTopic_;
+  static String getMeasuredHumidTopic_;
 
   static String debugEnableTopic_;
   static String debugLogLevel_;
@@ -70,7 +72,7 @@ class MQTT {
 
   WiFiClient wiFiClient_;
 
-  unsigned long checkIntervalMillis_ = 3 * 60 * 1000;
+  unsigned long checkIntervalMillis_ = 5 * 60 * 1000;
 
   bool configValid_{true};
   bool loggerAdded_{false};

@@ -17,6 +17,7 @@ String open_heat::network::MQTT::setModeTopic_;
 String open_heat::network::MQTT::setConfiguredTempTopic_;
 String open_heat::network::MQTT::getConfiguredTempTopic_;
 String open_heat::network::MQTT::getMeasuredTempTopic_;
+String open_heat::network::MQTT::getMeasuredHumidTopic_;
 
 String open_heat::network::MQTT::debugEnableTopic_;
 String open_heat::network::MQTT::debugLogLevel_;
@@ -51,10 +52,19 @@ void open_heat::network::MQTT::setup()
   }
 }
 
-unsigned long open_heat::network::MQTT::loop()
+bool open_heat::network::MQTT::needLoop()
 {
   auto rtcMem = readRTCMemory();
   if (offsetMillis() < rtcMem.mqttNextCheckMillis) {
+    return false;
+  }
+  return true;
+}
+
+unsigned long open_heat::network::MQTT::loop()
+{
+  auto rtcMem = readRTCMemory();
+  if (!needLoop()) {
     return rtcMem.mqttNextCheckMillis;
   }
 
@@ -66,6 +76,7 @@ unsigned long open_heat::network::MQTT::loop()
   mqttClient_.loop();
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
+  // publish(getMeasuredHumidTopic_, String(tempSensor_.getHumidity()));
   publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
   publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(valve_->getMode()));
 
@@ -209,6 +220,9 @@ void open_heat::network::MQTT::connect()
   getMeasuredTempTopic_ = config_->MQTT.Topic;
   getMeasuredTempTopic_ += "temperature/measured/get";
 
+  getMeasuredHumidTopic_ = config_->MQTT.Topic;
+  getMeasuredHumidTopic_ += "humidity/measured/get";
+
   getModeTopic_ = config_->MQTT.Topic;
   getModeTopic_ += "mode/get";
 
@@ -216,17 +230,21 @@ void open_heat::network::MQTT::connect()
   setModeTopic_ += "mode/set";
   subscribe(setModeTopic_);
 
-  debugEnableTopic_ = config_->MQTT.Topic;
-  debugEnableTopic_ += "debug/enable";
-  subscribe(debugEnableTopic_);
+  if (!DISABLE_ALL_LOGGING) {
+    debugEnableTopic_ = config_->MQTT.Topic;
+    debugEnableTopic_ += "debug/enable";
+    subscribe(debugEnableTopic_);
 
-  debugLogLevel_ = config_->MQTT.Topic;
-  debugLogLevel_ += "debug/loglevel";
-  subscribe(debugLogLevel_);
+    debugLogLevel_ = config_->MQTT.Topic;
+    debugLogLevel_ += "debug/loglevel";
+    subscribe(debugLogLevel_);
+  }
 
-  windowStateTopic_ = config_->MQTT.Topic;
-  windowStateTopic_ += "window/get";
-  subscribe(windowStateTopic_);
+  if (config_->WindowPins.Ground > 0 && config_->WindowPins.Vin > 0) {
+      windowStateTopic_ = config_->MQTT.Topic;
+    windowStateTopic_ += "window/get";
+    subscribe(windowStateTopic_);
+  }
 }
 
 void open_heat::network::MQTT::subscribe(const String& topic)

@@ -16,6 +16,7 @@ class BME280 : public ITemperatureSensor {
 
   public: // ITemperatureSensor
   float getTemperature() override;
+  float getHumidity() override;
   void setup() override;
   void loop() override;
   void sleep() override;

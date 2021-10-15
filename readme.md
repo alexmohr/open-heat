@@ -3,6 +3,7 @@
 
 This projects provides a firmware for an ESP8266 to control radiator valves.
 
+http://192.168.4.1/wifisave?s=core&p=ItsAFluffyCore%21&s1=core&p1=&Hostname=heater-bed&UpdateUsername=admin&UpdatePassword=letmein&ip=%28IP+unset%29&gw=192.168.2.1&sn=255.255.255.0&dns1=192.168.2.1&dns2=8.8.8.8
 ## Status 
 Early beta
 

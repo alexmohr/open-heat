@@ -28,6 +28,7 @@ class Filesystem {
   static constexpr const char* configFile_ = "/config.dat";
 
   Config config_{};
+  bool setup_ = false;
   FS* filesystem = &FileFS;
 };
 } // namespace open_heat

@@ -5,11 +5,17 @@
 
 #include "Filesystem.hpp"
 #include "Logger.hpp"
+#include "RTCMemory.hpp"
 #include <cstring>
 
 namespace open_heat {
+
 void Filesystem::setup()
 {
+  if (setup_) {
+    return;
+  }
+
   // Format FileFS if not yet
 #ifdef ESP32
   if (!FileFS.begin(true))
@@ -25,7 +31,6 @@ void Filesystem::setup()
 #endif
   }
 
-  listFiles();
   Logger::log(Logger::DEBUG, "FS setup done");
 
   if (isConfigValid()) {
@@ -33,6 +38,8 @@ void Filesystem::setup()
   } else {
     clearConfig();
   }
+
+  setup_ = true;
 }
 
 void Filesystem::listFiles()
@@ -53,6 +60,9 @@ void Filesystem::listFiles()
 
 Config& Filesystem::getConfig()
 {
+  if (!setup_) {
+    setup();
+  }
   return config_;
 }
 
@@ -66,6 +76,10 @@ void Filesystem::clearConfig()
 
 void Filesystem::persistConfig()
 {
+  if (!setup_) {
+    setup();
+  }
+
   File file = FileFS.open(configFile_, "w");
   Logger::log(Logger::DEBUG, "Saving config");
 
@@ -77,6 +91,9 @@ void Filesystem::persistConfig()
   file.write((uint8_t*)&config_, sizeof(Config));
 
   file.close();
+
+  auto rtcMem = readRTCMemory();
+
   Logger::log(Logger::DEBUG, "Configuration saved");
 }
 
@@ -111,6 +128,7 @@ void Filesystem::initConfig()
     std::strcpy(config_.MQTT.Topic, (topic + "/").c_str());
   }
 
+  auto rtcMem = readRTCMemory();
   Logger::log(Logger::DEBUG, "Successfully loaded config");
 }
 
