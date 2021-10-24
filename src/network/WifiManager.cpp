@@ -11,15 +11,14 @@
 namespace open_heat {
 namespace network {
 
-void WifiManager::setup()
+void WifiManager::setup(bool doubleReset)
 {
   const auto& config = filesystem_->getConfig();
   ESPAsync_WiFiManager espWifiManager(&webServer_, dnsServer_, config.Hostname);
 
   // Check if any config is valid.
   auto startConfigPortal = !loadAPsFromConfig();
-  auto rtcMem = readRTCMemory();
-  if (!rtcMem.drdDisabled && drd_->detectDoubleReset()) {
+  if (doubleReset) {
     Logger::log(Logger::WARNING, ">>> Detected double reset <<<");
     startConfigPortal = true;
   }
@@ -197,6 +196,7 @@ void WifiManager::checkWifi()
 
 uint8_t WifiManager::connectMultiWiFi()
 {
+  WiFi.forceSleepWake();
   Logger::log(Logger::INFO, "Connecting MultiWifi...");
 
   // STA = client mode

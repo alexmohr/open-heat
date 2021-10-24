@@ -31,7 +31,7 @@ class MQTT {
 
   public:
   void setup();
-  bool needLoop();
+  static bool needLoop();
   unsigned long loop();
 
   static bool debug();

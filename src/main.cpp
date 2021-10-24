@@ -104,7 +104,7 @@ void logVersions()
     open_heat::Logger::DEBUG, "WifiManager Version: %s", ESP_ASYNC_WIFIMANAGER_VERSION);
 }
 
-void wifiDeepSleep(uint64_t timeInMs)
+void wifiDeepSleep(uint64_t timeInMs, bool enableRF)
 {
   const auto& config = filesystem_.getConfig();
   digitalWrite(static_cast<uint8_t>(config.TempVin), LOW);
@@ -116,41 +116,33 @@ void wifiDeepSleep(uint64_t timeInMs)
   pinMode(static_cast<uint8_t>(config.MotorPins.Ground), INPUT);
   pinMode(static_cast<uint8_t>(LED_BUILTIN), INPUT);
 
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Sleeping for %lu ms", timeInMs);
-  auto mem = open_heat::readRTCMemory();
-  mem.millisOffset = open_heat::offsetMillis() + timeInMs;
-  open_heat::writeRTCMemory(mem);
+  open_heat::Logger::log(open_heat::Logger::INFO, "Sleeping for %lu ms", timeInMs);
+  open_heat::rtc::setMillisOffset(open_heat::rtc::offsetMillis() + timeInMs);
 
-  ESP.deepSleep(timeInMs * 1000, RF_DISABLED);
+  ESP.deepSleep(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);
   delay(1);
 }
 
 void setup()
 {
-  if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF) {
+  if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF && !DISABLE_ALL_LOGGING) {
     setupSerial();
   }
 
   open_heat::Logger::setup();
   logVersions();
+  filesystem_.setup();
 
-  auto rtcMem = open_heat::readRTCMemory();
+  const auto rtcMem = open_heat::rtc::read();
   open_heat::Logger::log(open_heat::Logger::DEBUG, "canary value: %#16x", rtcMem.canary);
 
-  if (rtcMem.canary == open_heat::CANARY) {
+  if (rtcMem.canary == open_heat::rtc::CANARY) {
     open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
     drd_.stop();
   } else {
-    std::memset(&rtcMem, 0, sizeof(open_heat::RTCMemory));
-    rtcMem.canary = open_heat::CANARY;
-    open_heat::writeRTCMemory(rtcMem);
-
-    open_heat::Logger::log(open_heat::Logger::DEBUG, "Initalized rtcmem");
+    open_heat::rtc::init(filesystem_);
   }
 
-  mqtt_.enableDebug();
-
-  filesystem_.setup();
   setupPins();
 
   tempSensor_->setup();
@@ -158,32 +150,38 @@ void setup()
   valve_.setup();
 
   if (mqtt_.needLoop()) {
-    wifiManager_.setup();
+    wifiManager_.setup(!rtcMem.drdDisabled && drd_.detectDoubleReset());
     mqtt_.setup();
   }
 
-  windowSensor_.setup();
+  //windowSensor_.setup();
 
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
+
+  while (open_heat::rtc::offsetMillis() < 10*1000) {
+    // Call the double reset detector loop method every so often,
+    // so that it can recognise when the timeout expires.
+    // You can also call drd.stop() when you wish to no longer
+    // consider the next reset as a double reset.
+    drd_.loop();
+    delay(1000);
+  }
+
+  open_heat::rtc::setDrdDisabled(true);
+  drd_.stop();
 
   loop();
 }
 
 void loop()
 {
-  // Call the double reset detector loop method every so often,
-  // so that it can recognise when the timeout expires.
-  // You can also call drd.stop() when you wish to no longer
-  // consider the next reset as a double reset.
-  drd_.loop();
-
-  open_heat::sensors::WindowSensor::loop();
-  const auto valveSleep = valve_.loop();
+ // open_heat::sensors::WindowSensor::loop();
   const auto mqttSleep = mqtt_.loop();
+  const auto valveSleep = valve_.loop();
 
   const auto msg
-    = "Sleep times: valveSleep: " + std::to_string(valveSleep - open_heat::offsetMillis())
-    + ", mqttSleep: " + std::to_string(mqttSleep - open_heat::offsetMillis());
+    = "Sleep times: valveSleep: " + std::to_string(valveSleep - open_heat::rtc::offsetMillis())
+    + ", mqttSleep: " + std::to_string(mqttSleep - open_heat::rtc::offsetMillis());
   open_heat::Logger::log(open_heat::Logger::DEBUG, msg.c_str());
 
   // do not sleep if debug is enabled.
@@ -194,9 +192,9 @@ void loop()
 
     delay(100);
 
-    if (open_heat::offsetMillis() - lastLogMillis_ > 60 * 1000) {
+    if (open_heat::rtc::offsetMillis() - lastLogMillis_ > 60 * 1000) {
       open_heat::Logger::log(open_heat::Logger::DEBUG, "DEBUG MODE: Sleep disabled");
-      lastLogMillis_ = open_heat::offsetMillis();
+      lastLogMillis_ = open_heat::rtc::offsetMillis();
     }
 
     return;
@@ -204,21 +202,29 @@ void loop()
 
   const auto minSleepTime = 10000UL;
   unsigned long idleTime;
-  auto nextCheckMillis = std::min(mqttSleep, valveSleep);
-  if (nextCheckMillis < (open_heat::offsetMillis() + minSleepTime)) {
+  unsigned long nextCheckMillis;
+  bool enableWifi = false;
+  if (valveSleep < mqttSleep) {
+    nextCheckMillis = valveSleep;
+  } else {
+    nextCheckMillis = mqttSleep;
+    enableWifi = true;
+  }
+
+  if (nextCheckMillis < (open_heat::rtc::offsetMillis() + minSleepTime)) {
     open_heat::Logger::log(
       open_heat::Logger::DEBUG,
       "Minimal sleep or underflow prevented, sleep set to %ul ms",
       minSleepTime);
     idleTime = minSleepTime;
   } else {
-    idleTime = nextCheckMillis - open_heat::offsetMillis();
+    idleTime = nextCheckMillis - open_heat::rtc::offsetMillis();
   }
 
   open_heat::Logger::log(
     open_heat::Logger::DEBUG, "Starting deep sleep for: %lu", idleTime);
 
-  // Wai before forcing sleep to send messages.
+  // Wait before forcing sleep to send messages.
   delay(100);
-  wifiDeepSleep(idleTime);
+  wifiDeepSleep(idleTime, enableWifi);
 }

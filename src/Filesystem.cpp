@@ -58,7 +58,7 @@ void Filesystem::listFiles()
   }
 }
 
-Config& Filesystem::getConfig()
+ Config& Filesystem::getConfig()
 {
   if (!setup_) {
     setup();
@@ -91,8 +91,6 @@ void Filesystem::persistConfig()
   file.write((uint8_t*)&config_, sizeof(Config));
 
   file.close();
-
-  auto rtcMem = readRTCMemory();
 
   Logger::log(Logger::DEBUG, "Configuration saved");
 }
@@ -128,7 +126,6 @@ void Filesystem::initConfig()
     std::strcpy(config_.MQTT.Topic, (topic + "/").c_str());
   }
 
-  auto rtcMem = readRTCMemory();
   Logger::log(Logger::DEBUG, "Successfully loaded config");
 }
 

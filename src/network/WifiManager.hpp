@@ -26,7 +26,7 @@ class WifiManager {
       drd_{drd},
       filesystem_(filesystem){};
 
-  void setup();
+  void setup(bool doubleReset);
   void checkWifi();
 
   private:
