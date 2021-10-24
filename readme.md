@@ -10,11 +10,10 @@ Early beta
   * ESP8266
 (ESP32 can be supported in the future)
   * [Radiator Valve](https://www.amazon.de/-/en/Eqiva-Bluetooth-Smart-Radiator-Thermostat/dp/B085LW2K1M/ref=sr_1_1?crid=3I212STBS18JX&dchild=1&keywords=eqiva%2Bheizk%C3%B6rperthermostat&qid=1609525097&sprefix=eqiva%2Caps%2C280&sr=8-1&th=1)
-    * The linked valve is taken apart and only the motor and temperature sensor is used.
+    * The linked valve is taken apart and only the motor is used.
     Therefore the cheapest version without support or bluetooth for wifi is sufficient
-  * BME280
-    * This can be used instead the temperature sensor from the Eqiva valve.
-    Using this requires less intricate soldering.
+  * BME280 <br>
+    Using the heat dependend resisistor from the valve currently is not supported.
 
 ### Pin configuration
 Pins can be configured via the webinterface.
