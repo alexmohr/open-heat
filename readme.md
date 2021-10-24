@@ -38,6 +38,11 @@ Connect to the WiFi OpenHeatESP... with password "OpenHeat".
 Open 192.168.4.1 in your browser and start configuration. 
 Save config and the ESP will reboot and connect to your Wifi.
 
+## Uploading
+```bash
+esptool.py --before no_reset --after hard_reset --chip esp8266 --port "/dev/ttyUSB0" --baud 921600 write_flash 0x0 ".pio/build/nodemcuv2/firmware.bin"
+
+```
 
 ## Updating
 Download the latest firmware from releases and upload it on the web-ui.

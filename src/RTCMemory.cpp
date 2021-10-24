@@ -8,47 +8,203 @@
 #include <user_interface.h>
 
 namespace open_heat {
+namespace rtc {
+
+bool _lock = false;
 
 
-//prints all rtcData, including the leading crc32
-void printMemory(const RTCMemory& rtcMemory) {
-  char buf[3];
-  uint8_t *ptr = (uint8_t *)&rtcMemory;
-  for (size_t i = 0; i < sizeof(RTCMemory); i++) {
-    sprintf(buf, "%02X", ptr[i]);
-    Serial.print(buf);
-    if ((i + 1) % 32 == 0) {
-      Serial.println();
-    } else {
-      Serial.print(" ");
-    }
-  }
-  Serial.println();
+void printRTCMemory(const Memory& rtcMemory)
+{
+  const auto msg = " canary " + std::to_string(rtcMemory.canary)
+    + "\nvalveNextCheckMillis " + std::to_string(rtcMemory.valveNextCheckMillis)
+    + "\nmqttNextCheckMillis " + std::to_string(rtcMemory.mqttNextCheckMillis)
+    + "\nmillisOffset " + std::to_string(rtcMemory.millisOffset) + "\nlastMeasuredTemp "
+    + std::to_string(rtcMemory.lastMeasuredTemp) + "\nlastPredictedTemp "
+    + std::to_string(rtcMemory.lastPredictedTemp) + "\nsetTemp "
+    + std::to_string(rtcMemory.setTemp) + "\ncurrentRotateTime "
+    + std::to_string(rtcMemory.currentRotateTime) + "\nturnOff "
+    + std::to_string(rtcMemory.turnOff) + "\nopenFully "
+    + std::to_string(rtcMemory.openFully) + "\nmode " + std::to_string(rtcMemory.mode)
+    + "\nlastMode " + std::to_string(rtcMemory.lastMode) + "\nisWindowOpen "
+    + std::to_string(rtcMemory.isWindowOpen) + "\nrestoreMode "
+    + std::to_string(rtcMemory.restoreMode) + "\ndrdDisabled "
+    + std::to_string(rtcMemory.drdDisabled);
+
+  Logger::log(Logger::DEBUG, "Rtc memory data: %s", msg.c_str());
 }
 
-RTCMemory readRTCMemory()
+void writeRTCMemory(const Memory& rtcMemory)
 {
-  RTCMemory rtcMemory{};
-
-  if (!ESP.rtcUserMemoryRead(0, (uint32_t *)&rtcMemory, sizeof(RTCMemory))) {
-    Logger::log(Logger::ERROR, "Failed to read RTC user memory");
-  }
-
-  return rtcMemory;
-}
-
-void writeRTCMemory(const RTCMemory& rtcMemory)
-{
-  if (!ESP.rtcUserMemoryWrite(0, (uint32_t *)&rtcMemory, sizeof(RTCMemory))) {
+  Logger::log(Logger::DEBUG, "Updating RTCMemory");
+  printRTCMemory(rtcMemory);
+  if (!ESP.rtcUserMemoryWrite(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
     Logger::log(Logger::ERROR, "Failed to write RTC user memory");
   }
 }
 
+void lockMem() {
+  while (_lock) {
+    delay(10);
+    Logger::log(Logger::INFO, "Waiting for mem lock");
+  }
+  _lock = true;
+}
+
+void unlockMem() {
+  _lock = false;
+}
+
+Memory readWithoutLock()
+{
+    Memory rtcMemory{};
+
+    if (!ESP.rtcUserMemoryRead(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
+        Logger::log(Logger::ERROR, "Failed to read RTC user memory");
+    }
+
+    return rtcMemory;
+}
+
+Memory read()
+{
+    lockMem();
+    const auto mem = readWithoutLock();
+    unlockMem();
+
+    return mem;
+}
+
+void init(Filesystem& filesystem)
+{
+    Memory rtcMem = {};
+    const auto& config = filesystem.getConfig();
+    rtcMem.setTemp = config.SetTemperature;
+    rtcMem.mode = config.Mode;
+    rtcMem.lastPredictedTemp = 0.0f;
+    rtcMem.canary = CANARY;
+
+    writeRTCMemory(rtcMem);
+}
+
+void setValveNextCheckMillis(uint64_t val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.valveNextCheckMillis = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setMqttNextCheckMillis(uint64_t val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.mqttNextCheckMillis = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setMillisOffset(uint64_t val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.millisOffset = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setLastMeasuredTemp(float val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.lastMeasuredTemp = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setLastPredictedTemp(float val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.lastPredictedTemp = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setSetTemp(float val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.setTemp = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setCurrentRotateTime(int val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.currentRotateTime = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setTurnOff(bool val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.turnOff = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setOpenFully(bool val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.openFully = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setMode(OperationMode val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.mode = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setLastMode(OperationMode val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.lastMode = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setIsWindowOpen(bool val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.isWindowOpen = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setRestoreMode(bool val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.restoreMode = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+void setDrdDisabled(bool val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.drdDisabled = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+
 uint64_t offsetMillis()
 {
-  const auto mem = readRTCMemory();
+  const auto mem = read();
   const auto ms = millis() + mem.millisOffset;
   return ms;
 }
 
+} // namespace RTC
 } // namespace open_heat

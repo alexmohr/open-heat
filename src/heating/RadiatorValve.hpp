@@ -33,7 +33,8 @@ class RadiatorValve {
   private:
   void openValve(unsigned short rotateTime);
   void closeValve(unsigned short rotateTime);
-  void setPinsLow();
+  void disablePins();
+  void enablePins();
   void updateConfig();
 
   Filesystem& filesystem_;
