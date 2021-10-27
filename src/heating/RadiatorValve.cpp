@@ -94,7 +94,7 @@ unsigned long open_heat::heating::RadiatorValve::loop()
   const float temperatureChange = temp - rtc::read().lastMeasuredTemp;
   const float minTemperatureChange = 0.2;
 
-  const float lageTempDiff = 1;
+  const float lageTempDiff = 3;
 
   // Act according to the prediction.
   if (predictTemp < (rtc::read().setTemp - openHysteresis)) {
