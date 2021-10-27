@@ -8,8 +8,9 @@ float open_heat::sensors::TP100::getTemperature()
 {
   return 0;
 }
-void open_heat::sensors::TP100::setup()
+bool open_heat::sensors::TP100::setup()
 {
+  return false;
 }
 void open_heat::sensors::TP100::loop()
 {
