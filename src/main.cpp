@@ -145,7 +145,14 @@ void setup()
 
   setupPins();
 
-  tempSensor_->setup();
+  if (!tempSensor_->setup()) {
+    // blink led 10 times to indicate temp sensor error
+    for (auto i = 0; i < 10; ++i) {
+      digitalWrite(LED_PIN, LED_OFF);
+      delay(250);
+      digitalWrite(LED_PIN, LED_ON);
+    }
+  }
 
   valve_.setup();
 
@@ -157,7 +164,6 @@ void setup()
   //windowSensor_.setup();
 
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
-
   while (open_heat::rtc::offsetMillis() < 10*1000) {
     // Call the double reset detector loop method every so often,
     // so that it can recognise when the timeout expires.
@@ -169,6 +175,7 @@ void setup()
 
   open_heat::rtc::setDrdDisabled(true);
   drd_.stop();
+
 
   loop();
 }
@@ -190,6 +197,8 @@ void loop()
     digitalWrite(LED_PIN, LED_ON);
     webServer_.setup();
 
+    delay(100);
+    digitalWrite(LED_PIN, LED_OFF);
     delay(100);
 
     if (open_heat::rtc::offsetMillis() - lastLogMillis_ > 60 * 1000) {

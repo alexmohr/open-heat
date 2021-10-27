@@ -22,7 +22,7 @@ float open_heat::sensors::BME280::getHumidity()
   return humid;
 }
 
-void open_heat::sensors::BME280::setup()
+bool open_heat::sensors::BME280::setup()
 {
   const auto maxRetries = 5;
   auto retries = 0;
@@ -34,6 +34,7 @@ void open_heat::sensors::BME280::setup()
   }
 
   sleep();
+  return initResult;
 }
 
 void open_heat::sensors::BME280::loop()

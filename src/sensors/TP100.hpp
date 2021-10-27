@@ -14,7 +14,7 @@ namespace sensors {
 class TP100 : public ITemperatureSensor {
   public: // ITemperatureSensor
   float getTemperature() override;
-  void setup() override;
+  bool setup() override;
   void loop() override;
 };
 
