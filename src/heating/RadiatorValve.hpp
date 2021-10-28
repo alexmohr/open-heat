@@ -39,7 +39,7 @@ class RadiatorValve {
 
   Filesystem& filesystem_;
 
-  static constexpr int VALVE_FULL_ROTATE_TIME = 20000;
+  static constexpr int VALVE_FULL_ROTATE_TIME = 20'000;
   sensors::ITemperatureSensor& tempSensor_;
 
   static constexpr unsigned long checkIntervalMillis_

@@ -27,6 +27,7 @@ struct Memory {
   int currentRotateTime;
   bool turnOff;
   bool openFully;
+  bool debug;
 
   OperationMode mode;
   OperationMode lastMode;
@@ -36,7 +37,6 @@ struct Memory {
 
   bool drdDisabled;
 };
-
 
 void setValveNextCheckMillis(uint64_t val);
 void setMqttNextCheckMillis(uint64_t val);
@@ -52,17 +52,15 @@ void setLastMode(OperationMode val);
 void setIsWindowOpen(bool val);
 void setRestoreMode(bool val);
 void setDrdDisabled(bool val);
+void setDebug(bool val);
 
 Memory read();
 void init(Filesystem& filesystem);
 
-
-// void writeRTCMemory(const RTCMemory& rtcMemory);
 uint64_t offsetMillis();
+void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem);
 
-}
+} // namespace rtc
 } // namespace open_heat
-
-
 
 #endif // OPEN_HEAT_RTCMEMORY_H

@@ -27,7 +27,7 @@ class WifiManager {
       filesystem_(filesystem){};
 
   void setup(bool doubleReset);
-  void checkWifi();
+  bool checkWifi();
 
   private:
   bool showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager);

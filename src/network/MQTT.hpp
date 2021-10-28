@@ -18,15 +18,15 @@ namespace open_heat {
 namespace network {
 class MQTT {
   public:
-  explicit MQTT(
-    Filesystem& filesystem,
+  MQTT(
+    Filesystem* filesystem,
     WifiManager& wifi,
     sensors::ITemperatureSensor& tempSensor,
     heating::RadiatorValve* valve) :
-      filesystem_(filesystem), wifi_(wifi), tempSensor_(tempSensor)
+      wifi_(wifi), tempSensor_(tempSensor)
   {
-    config_ = &filesystem_.getConfig();
     valve_ = valve;
+    filesystem_ = filesystem;
   }
 
   public:
@@ -34,8 +34,7 @@ class MQTT {
   static bool needLoop();
   unsigned long loop();
 
-  static bool debug();
-  static void enableDebug();
+  static void enableDebug(bool value);
 
   private:
   void connect();
@@ -45,10 +44,10 @@ class MQTT {
   static void mqttLogPrinter(const std::string& message);
 
   private:
-  Filesystem& filesystem_;
   WifiManager& wifi_;
 
   sensors::ITemperatureSensor& tempSensor_;
+  static Filesystem* filesystem_;
   static heating::RadiatorValve* valve_;
 
   static MQTTClient mqttClient_;
@@ -72,15 +71,13 @@ class MQTT {
 
   WiFiClient wiFiClient_;
 
-  unsigned long checkIntervalMillis_ = 5 * 60 * 1000;
+  unsigned long checkIntervalMillis_ = 5 * 1000;
+  //unsigned long checkIntervalMillis_ = 5 * 60 * 1000;
 
   bool configValid_{true};
   bool loggerAdded_{false};
-  static bool debugEnabled_;
 
-  static Config* config_;
   static void handleSetConfigTemp(const String& payload);
-  static void handleGetConfigTemp();
   static void handleSetMode(const String& payload);
   static void handleDebug(const String& payload);
   static void subscribe(const String& topic);

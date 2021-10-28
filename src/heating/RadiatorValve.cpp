@@ -32,7 +32,7 @@ unsigned long open_heat::heating::RadiatorValve::loop()
   } else if (rtc::read().openFully) {
     openValve(VALVE_FULL_ROTATE_TIME);
 
-    rtc::setOpenFully(true);
+    rtc::setOpenFully(false);
     rtc::setValveNextCheckMillis(rtc::offsetMillis() + checkIntervalMillis_);
     return rtc::read().valveNextCheckMillis;
   }
@@ -133,11 +133,11 @@ unsigned long open_heat::heating::RadiatorValve::loop()
       const auto predictDiff = rtc::read().setTemp - predictTemp - closeHysteresis;
       Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
       if (predictDiff <= 2) {
-        closeTime = 2000;
+        closeTime = 1250;
       } else if (predictDiff <= 1.5) {
-        closeTime = 1500;
-      } else if (predictDiff <= 1) {
         closeTime = 1000;
+      } else if (predictDiff <= 1) {
+        closeTime = 750;
       } else if (predictDiff <= 0.5) {
         closeTime = 500;
       }
@@ -211,8 +211,8 @@ void open_heat::heating::RadiatorValve::closeValve(const unsigned short rotateTi
     rtc::read().currentRotateTime);
 
   enablePins();
-  digitalWrite(static_cast<uint8_t>(config.Vin), LOW);
-  digitalWrite(static_cast<uint8_t>(config.Ground), HIGH);
+  digitalWrite(static_cast<uint8_t>(config.Vin), HIGH);
+  digitalWrite(static_cast<uint8_t>(config.Ground), LOW);
 
   delay(rotateTime);
 
@@ -227,18 +227,17 @@ void open_heat::heating::RadiatorValve::openValve(const unsigned short rotateTim
   }
 
   rtc::setCurrentRotateTime(rtc::read().currentRotateTime +  rotateTime);
-
   const auto& config = filesystem_.getConfig().MotorPins;
 
   open_heat::Logger::log(
     open_heat::Logger::DEBUG,
-    "Opening valve for %ims, currentRotateTime: %ims",
-    rotateTime,
-    rtc::read().currentRotateTime);
+    "Opening valve for %ims, currentRotateTime: %ims, vin: %i, ground: %i",
+    rtc::read().currentRotateTime, rotateTime, config.Vin, config.Ground);
 
   enablePins();
-  digitalWrite(static_cast<uint8_t>(config.Ground), LOW);
-  digitalWrite(static_cast<uint8_t>(config.Vin), HIGH);
+
+  digitalWrite(static_cast<uint8_t>(config.Vin), LOW);
+  digitalWrite(static_cast<uint8_t>(config.Ground), HIGH);
 
   delay(rotateTime);
 
@@ -266,9 +265,6 @@ void open_heat::heating::RadiatorValve::enablePins()
 
 void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
 {
-  //Logger::log(Logger::DEBUG, "Request to change mode to: %s", modeToCharArray(mode));
-
-  //Logger::log(Logger::INFO, "Valve, new mode: %s", modeToCharArray(mode));
   rtc::setMode(mode);
 
   switch (mode) {
