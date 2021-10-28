@@ -7,8 +7,8 @@
 #include <RTCMemory.hpp>
 #include <cstring>
 
-Config* open_heat::network::MQTT::config_;
 open_heat::heating::RadiatorValve* open_heat::network::MQTT::valve_;
+open_heat::Filesystem* open_heat::network::MQTT::filesystem_;
 MQTTClient open_heat::network::MQTT::mqttClient_;
 
 String open_heat::network::MQTT::getModeTopic_;
@@ -26,8 +26,6 @@ String open_heat::network::MQTT::windowStateTopic_;
 
 String open_heat::network::MQTT::logTopic_;
 
-bool open_heat::network::MQTT::debugEnabled_ = false;
-
 void open_heat::network::MQTT::setup()
 {
   Logger::log(Logger::INFO, "Running MQTT setup");
@@ -37,24 +35,21 @@ void open_heat::network::MQTT::setup()
     publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(mode));
   });
 
-  valve_->registerSetTempChangedHandler([this](float temp) {
-      publish(getConfiguredTempTopic_, String(temp));
-    });
+  valve_->registerSetTempChangedHandler(
+    [this](float temp) { publish(getConfiguredTempTopic_, String(temp)); });
 
   valve_->registerWindowChangeHandler(
-    [this](bool state) {
-      publish(windowStateTopic_, String(state));
-    });
+    [this](bool state) { publish(windowStateTopic_, String(state)); });
 
   if (!loggerAdded_) {
-   // Logger::addPrinter([](const std::string& message) { mqttLogPrinter(message); });
+    // Logger::addPrinter([](const std::string& message) { mqttLogPrinter(message); });
     loggerAdded_ = true;
   }
 }
 
 bool open_heat::network::MQTT::needLoop()
 {
-  if (debugEnabled_) {
+  if (rtc::read().debug) {
     return true;
   }
 
@@ -66,6 +61,11 @@ bool open_heat::network::MQTT::needLoop()
 
 unsigned long open_heat::network::MQTT::loop()
 {
+  if (!configValid_) {
+    Logger::log(Logger::ERROR, "Config is not valid, no mqtt loop!");
+    return 0UL;
+  }
+
   if (!needLoop()) {
     return rtc::read().mqttNextCheckMillis;
   }
@@ -78,7 +78,7 @@ unsigned long open_heat::network::MQTT::loop()
   mqttClient_.loop();
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
-  // publish(getMeasuredHumidTopic_, String(tempSensor_.getHumidity()));
+  publish(getMeasuredHumidTopic_, String(tempSensor_.getHumidity()));
   // publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
   // publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(valve_->getMode()));
 
@@ -110,7 +110,7 @@ void open_heat::network::MQTT::handleLogLevel(const String& payload)
   std::stringstream ss(payload.c_str());
   int level;
   if (!(ss >> level)) {
-    //Logger::log(Logger::DEBUG, "Log level is invalid: %s", payload.c_str());
+    // Logger::log(Logger::DEBUG, "Log level is invalid: %s", payload.c_str());
     return;
   }
 
@@ -118,11 +118,12 @@ void open_heat::network::MQTT::handleLogLevel(const String& payload)
 }
 void open_heat::network::MQTT::handleDebug(const String& payload)
 {
+  bool state = false;
   if (payload == "true") {
-    debugEnabled_ = true;
-  } else if (payload == "false") {
-    debugEnabled_ = false;
+    state = true;
   }
+
+  enableDebug(state);
 }
 
 void open_heat::network::MQTT::handleSetMode(const String& payload)
@@ -133,24 +134,16 @@ void open_heat::network::MQTT::handleSetMode(const String& payload)
   } else if (payload == "off") {
     mode = OFF;
   } else {
-    //Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
+    // Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
     return;
   }
   valve_->setMode(mode);
-  // publish(getModeTopic_, payload);
-}
-
-void open_heat::network::MQTT::handleGetConfigTemp()
-{
-  const auto setTemp = valve_->getConfiguredTemp();
-  publish(getConfiguredTempTopic_, String(setTemp));
 }
 
 void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
 {
   const auto newTemp = static_cast<float>(strtod(payload.c_str(), nullptr));
   valve_->setConfiguredTemp(newTemp);
-  // publish(getConfiguredTempTopic_, String(newTemp));
 }
 
 void open_heat::network::MQTT::publish(const String& topic, const String& message)
@@ -164,10 +157,15 @@ void open_heat::network::MQTT::publish(const String& topic, const String& messag
 
 void open_heat::network::MQTT::connect()
 {
-  if ((std::strlen(config_->MQTT.Server) == 0 || config_->MQTT.Port == 0)) {
+  const auto& config = filesystem_->getConfig();
+  if ((std::strlen(config.MQTT.Server) == 0 || config.MQTT.Port == 0)) {
     if (configValid_) {
-      Logger::log(Logger::ERROR, "MQTT Server or port not set up");
-      enableDebug();
+      Logger::log(
+        Logger::ERROR,
+        "MQTT Server (%s) or port (%i) not set up",
+        config.MQTT.Server,
+        config.MQTT.Port);
+      enableDebug(true);
     }
 
     configValid_ = false;
@@ -177,70 +175,70 @@ void open_heat::network::MQTT::connect()
   mqttClient_.setTimeout(
     static_cast<int>(std::chrono::milliseconds(std::chrono::seconds(1)).count()));
 
-  mqttClient_.begin(config_->MQTT.Server, config_->MQTT.Port, wiFiClient_);
+  mqttClient_.begin(config.MQTT.Server, config.MQTT.Port, wiFiClient_);
   // Large timeout to allow large sleeps
   const char* username = nullptr;
   const char* password = nullptr;
 
-  if (std::strlen(config_->MQTT.Username) > 0) {
-    username = config_->MQTT.Username;
+  if (std::strlen(config.MQTT.Username) > 0) {
+    username = config.MQTT.Username;
   }
 
-  if (std::strlen(config_->MQTT.Password) > 0) {
-    password = config_->MQTT.Password;
+  if (std::strlen(config.MQTT.Password) > 0) {
+    password = config.MQTT.Password;
   }
 
-  if (!mqttClient_.connect(config_->Hostname, username, password)) {
+  if (!mqttClient_.connect(config.Hostname, username, password)) {
     Logger::log(
       Logger::ERROR,
       "Failed to connect to mqtt server host %s, user: %s, pw: %s",
-      config_->MQTT.Server,
-      config_->MQTT.Username,
-      config_->MQTT.Password);
+      config.MQTT.Server,
+      config.MQTT.Username,
+      config.MQTT.Password);
     return;
   }
 
   Logger::log(
     Logger::INFO,
     "MQTT topic: %s, topic len: %i",
-    config_->MQTT.Topic,
-    std::strlen(config_->MQTT.Topic));
+    config.MQTT.Topic,
+    std::strlen(config.MQTT.Topic));
 
-  logTopic_ = config_->MQTT.Topic;
+  logTopic_ = config.MQTT.Topic;
   logTopic_ += "log";
 
-  setConfiguredTempTopic_ = config_->MQTT.Topic;
+  setConfiguredTempTopic_ = config.MQTT.Topic;
   setConfiguredTempTopic_ += "temperature/target/set";
   subscribe(setConfiguredTempTopic_);
 
-  getConfiguredTempTopic_ = config_->MQTT.Topic;
+  getConfiguredTempTopic_ = config.MQTT.Topic;
   getConfiguredTempTopic_ += "temperature/target/get";
 
-  getMeasuredTempTopic_ = config_->MQTT.Topic;
+  getMeasuredTempTopic_ = config.MQTT.Topic;
   getMeasuredTempTopic_ += "temperature/measured/get";
 
-  getMeasuredHumidTopic_ = config_->MQTT.Topic;
+  getMeasuredHumidTopic_ = config.MQTT.Topic;
   getMeasuredHumidTopic_ += "humidity/measured/get";
 
-  getModeTopic_ = config_->MQTT.Topic;
+  getModeTopic_ = config.MQTT.Topic;
   getModeTopic_ += "mode/get";
 
-  setModeTopic_ = config_->MQTT.Topic;
+  setModeTopic_ = config.MQTT.Topic;
   setModeTopic_ += "mode/set";
   subscribe(setModeTopic_);
 
-  if (!DISABLE_ALL_LOGGING) {
-    debugEnableTopic_ = config_->MQTT.Topic;
-    debugEnableTopic_ += "debug/enable";
-    subscribe(debugEnableTopic_);
+  debugEnableTopic_ = config.MQTT.Topic;
+  debugEnableTopic_ += "debug/enable";
+  subscribe(debugEnableTopic_);
 
-    debugLogLevel_ = config_->MQTT.Topic;
+  if (!DISABLE_ALL_LOGGING) {
+    debugLogLevel_ = config.MQTT.Topic;
     debugLogLevel_ += "debug/loglevel";
     subscribe(debugLogLevel_);
   }
 
-  if (config_->WindowPins.Ground > 0 && config_->WindowPins.Vin > 0) {
-    windowStateTopic_ = config_->MQTT.Topic;
+  if (config.WindowPins.Ground > 0 && config.WindowPins.Vin > 0) {
+    windowStateTopic_ = config.MQTT.Topic;
     windowStateTopic_ += "window/get";
     subscribe(windowStateTopic_);
   }
@@ -262,12 +260,12 @@ void open_heat::network::MQTT::mqttLogPrinter(const std::string& message)
   mqttClient_.publish(logTopic_, message.c_str());
 }
 
-bool open_heat::network::MQTT::debug()
+void open_heat::network::MQTT::enableDebug(bool value)
 {
-  return debugEnabled_;
-}
+  if (rtc::read().debug == value) {
+    return;
+  }
 
-void open_heat::network::MQTT::enableDebug()
-{
-  debugEnabled_ = true;
+  rtc::setDebug(value);
+  open_heat::rtc::wifiDeepSleep(1, value, *filesystem_);
 }

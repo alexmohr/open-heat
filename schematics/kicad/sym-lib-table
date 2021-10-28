@@ -1,3 +1,4 @@
 (sym_lib_table
   (lib (name SensorCopy)(type Legacy)(uri ${KIPRJMOD}/SensorCopy.lib)(options "")(descr ""))
+  (lib (name ht7333-a)(type Legacy)(uri ${KIPRJMOD}/ht7333-a.lib)(options "")(descr ""))
 )

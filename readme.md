@@ -16,6 +16,7 @@ Early beta
   * BME280
     * This can be used instead the temperature sensor from the Eqiva valve.
     Using this requires less intricate soldering.
+  * HT7333 voltage regulator
 
 ### Pin configuration
 Pins can be configured via the webinterface.
@@ -71,6 +72,7 @@ It offers the following topics, all of them are prefixed with the configured top
 * Set target temp: `$TOPIC/temperature/target/set`
 * Get target temp: `$TOPIC/temperature/target/get`
 * Get measured temp: `$TOPIC/temperature/measured/get`
+* Get measured humidity: `$TOPIC/humidity/measured/get`
 * Get current mode (can be off or heating): `$TOPIC/mode/get`
 * Set current mode (can be off or heating): `$TOPIC/mode/set`
 

@@ -36,7 +36,7 @@ void printRTCMemory(const Memory& rtcMemory)
 void writeRTCMemory(const Memory& rtcMemory)
 {
   Logger::log(Logger::DEBUG, "Updating RTCMemory");
-  printRTCMemory(rtcMemory);
+  //printRTCMemory(rtcMemory);
   if (!ESP.rtcUserMemoryWrite(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
     Logger::log(Logger::ERROR, "Failed to write RTC user memory");
   }
@@ -45,7 +45,6 @@ void writeRTCMemory(const Memory& rtcMemory)
 void lockMem() {
   while (_lock) {
     delay(10);
-    Logger::log(Logger::INFO, "Waiting for mem lock");
   }
   _lock = true;
 }
@@ -198,12 +197,40 @@ void setDrdDisabled(bool val)
   writeRTCMemory(mem);
   unlockMem();
 }
+void setDebug(bool val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.debug = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
 
 uint64_t offsetMillis()
 {
   const auto mem = read();
   const auto ms = millis() + mem.millisOffset;
   return ms;
+}
+
+
+void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
+{
+  const auto& config = filesystem.getConfig();
+  digitalWrite(static_cast<uint8_t>(config.TempVin), LOW);
+  digitalWrite(static_cast<uint8_t>(config.MotorPins.Vin), LOW);
+  digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
+
+  pinMode(static_cast<uint8_t>(config.TempVin), INPUT);
+  pinMode(static_cast<uint8_t>(config.MotorPins.Vin), INPUT);
+  pinMode(static_cast<uint8_t>(config.MotorPins.Ground), INPUT);
+  pinMode(static_cast<uint8_t>(LED_BUILTIN), INPUT);
+
+  open_heat::Logger::log(open_heat::Logger::INFO, "Sleeping for %lu ms", timeInMs);
+  setMillisOffset(offsetMillis() + timeInMs);
+
+  ESP.deepSleep(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);
+  delay(1);
 }
 
 } // namespace RTC

@@ -179,19 +179,20 @@ void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) co
   }
 }
 
-void WifiManager::checkWifi()
+bool WifiManager::checkWifi()
 {
   if (WiFi.status() == WL_CONNECTED) {
-    return;
+    return true;
   }
 
   Logger::log(Logger::WARNING, "WIFi disconnected, reconnecting...");
   if (connectMultiWiFi() == WL_CONNECTED) {
     reconnectCount_ = 0;
-    return;
+    return true;
   }
 
   Logger::log(Logger::WARNING, "WiFi reconnection failed, %i times", ++reconnectCount_);
+  return false;
 }
 
 uint8_t WifiManager::connectMultiWiFi()
