@@ -10,14 +10,12 @@
 open_heat::heating::RadiatorValve::RadiatorValve(
   open_heat::sensors::ITemperatureSensor& tempSensor,
   open_heat::Filesystem& filesystem) :
-    filesystem_(filesystem),
-    tempSensor_(tempSensor)
+    filesystem_(filesystem), tempSensor_(tempSensor)
 {
 }
 
 void open_heat::heating::RadiatorValve::setup()
 {
-
   disablePins();
 }
 
@@ -41,9 +39,7 @@ unsigned long open_heat::heating::RadiatorValve::loop()
     return rtc::read().valveNextCheckMillis;
   }
 
-  Logger::log(
-    Logger::DEBUG,
-    "trying to reach temperature: %f", rtc::read().setTemp);
+  Logger::log(Logger::DEBUG, "trying to reach temperature: %f", rtc::read().setTemp);
 
   const auto temp = tempSensor_.getTemperature();
   const float predictPart = PREDICTION_STEEPNESS * (temp - rtc::read().lastMeasuredTemp);
@@ -60,9 +56,7 @@ unsigned long open_heat::heating::RadiatorValve::loop()
   if (rtc::read().mode != HEAT) {
     rtc::setValveNextCheckMillis(std::numeric_limits<unsigned long>::max());
 
-    Logger::log(
-      Logger::DEBUG,
-      "Heating is turned off, disable heating");
+    Logger::log(Logger::DEBUG, "Heating is turned off, disable heating");
     return rtc::read().valveNextCheckMillis;
   }
 
@@ -83,11 +77,11 @@ unsigned long open_heat::heating::RadiatorValve::loop()
     predictionError);
 
   if (0 == predictTemp) {
-    rtc::setValveNextCheckMillis(rtc::offsetMillis() + checkIntervalMillis_ + additionalWaitTime);
+    rtc::setValveNextCheckMillis(
+      rtc::offsetMillis() + checkIntervalMillis_ + additionalWaitTime);
     rtc::setLastPredictedTemp(temp);
 
-    Logger::log(
-      Logger::DEBUG, "Skipping temperature setting, predictTemp = 0");
+    Logger::log(Logger::DEBUG, "Skipping temperature setting, predictTemp = 0");
     return rtc::read().valveNextCheckMillis;
   }
 
@@ -158,7 +152,8 @@ unsigned long open_heat::heating::RadiatorValve::loop()
     additionalWaitTime = 30 * 1000;
   }
 
-  rtc::setValveNextCheckMillis(rtc::offsetMillis() + checkIntervalMillis_ + additionalWaitTime);
+  rtc::setValveNextCheckMillis(
+    rtc::offsetMillis() + checkIntervalMillis_ + additionalWaitTime);
   return rtc::read().valveNextCheckMillis;
 }
 
@@ -175,7 +170,7 @@ void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
 
   if (temp != rtc::read().setTemp) {
     open_heat::Logger::log(open_heat::Logger::INFO, "New target temperature %f", temp);
-    rtc::setSetTemp (temp);
+    rtc::setSetTemp(temp);
     rtc::setValveNextCheckMillis(0);
 
     updateConfig();
@@ -194,21 +189,32 @@ void open_heat::heating::RadiatorValve::updateConfig()
   filesystem_.persistConfig();
 }
 
-void open_heat::heating::RadiatorValve::closeValve(const unsigned short rotateTime)
+void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
 {
-  if (rtc::read().currentRotateTime <= -VALVE_FULL_ROTATE_TIME) {
-    open_heat::Logger::log(open_heat::Logger::DEBUG, "Valve already fully closed");
+  if (rtc::read().currentRotateTime <= (-VALVE_FULL_ROTATE_TIME)) {
+    open_heat::Logger::log(
+      open_heat::Logger::DEBUG,
+      "Valve already fully closed, current rotate time: %i",
+      rtc::read().currentRotateTime);
     return;
   }
 
-  rtc::setCurrentRotateTime(rtc::read().currentRotateTime -  rotateTime);
+  if (rtc::read().currentRotateTime < 0) {
+    const auto remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+    rotateTime = std::min(rotateTime, static_cast<unsigned short>(remainingTime));
+  }
+
+  rtc::setCurrentRotateTime(
+    rtc::read().currentRotateTime - rotateTime, VALVE_FULL_ROTATE_TIME);
   const auto& config = filesystem_.getConfig().MotorPins;
 
   open_heat::Logger::log(
     open_heat::Logger::DEBUG,
-    "Closing valve for %ims, currentRotateTime: %ims",
+    "Closing valve for %ims, currentRotateTime: %ims, vin: %i, ground: %i",
     rotateTime,
-    rtc::read().currentRotateTime);
+    rtc::read().currentRotateTime,
+    config.Vin,
+    config.Ground);
 
   enablePins();
   digitalWrite(static_cast<uint8_t>(config.Vin), HIGH);
@@ -219,20 +225,33 @@ void open_heat::heating::RadiatorValve::closeValve(const unsigned short rotateTi
   disablePins();
 }
 
-void open_heat::heating::RadiatorValve::openValve(const unsigned short rotateTime)
+void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
 {
   if (rtc::read().currentRotateTime >= VALVE_FULL_ROTATE_TIME) {
-    open_heat::Logger::log(open_heat::Logger::DEBUG, "Valve already fully open");
+    open_heat::Logger::log(
+      open_heat::Logger::DEBUG,
+      "Valve already fully open, current rotate time: %i",
+      rtc::read().currentRotateTime);
     return;
   }
 
-  rtc::setCurrentRotateTime(rtc::read().currentRotateTime +  rotateTime);
+  if (rtc::read().currentRotateTime > 0) {
+    const auto remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+    rotateTime = std::min(rotateTime, static_cast<unsigned short>(remainingTime));
+  }
+
+
+  rtc::setCurrentRotateTime(
+    rtc::read().currentRotateTime + rotateTime, VALVE_FULL_ROTATE_TIME);
   const auto& config = filesystem_.getConfig().MotorPins;
 
   open_heat::Logger::log(
     open_heat::Logger::DEBUG,
     "Opening valve for %ims, currentRotateTime: %ims, vin: %i, ground: %i",
-    rtc::read().currentRotateTime, rotateTime, config.Vin, config.Ground);
+    rotateTime,
+    rtc::read().currentRotateTime,
+    config.Vin,
+    config.Ground);
 
   enablePins();
 
@@ -263,8 +282,18 @@ void open_heat::heating::RadiatorValve::enablePins()
   pinMode(static_cast<uint8_t>(config.Ground), OUTPUT);
 }
 
-void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
+void open_heat::heating::RadiatorValve::setMode(const OperationMode mode)
 {
+  if (rtc::read().isWindowOpen) {
+    rtc::setRestoreMode(false);
+  }
+
+  if (mode != rtc::read().mode) {
+    auto& config = filesystem_.getConfig();
+    config.Mode = rtc::read().mode;
+    filesystem_.persistConfig();
+  }
+
   rtc::setMode(mode);
 
   switch (mode) {
@@ -280,20 +309,11 @@ void open_heat::heating::RadiatorValve::setMode(OperationMode mode)
     break;
   }
 
-  if (rtc::read().isWindowOpen) {
-    rtc::setRestoreMode(false);
-  }
-
-  if (mode != rtc::read().mode) {
-    auto& config = filesystem_.getConfig();
-    config.Mode = rtc::read().mode;
-    filesystem_.persistConfig();
-  }
-
   for (const auto& handler : opModeChangedHandler_) {
     handler(rtc::read().mode);
   }
 }
+
 OperationMode open_heat::heating::RadiatorValve::getMode()
 {
   return rtc::read().mode;
@@ -343,7 +363,6 @@ void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
         Logger::DEBUG, "Mode changed while window was open, not enabled old mode");
     }
   }
-
 
   for (const auto& stateHandler : windowStateHandler_) {
     stateHandler(isOpen);
