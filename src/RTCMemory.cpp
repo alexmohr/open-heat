@@ -133,10 +133,16 @@ void setSetTemp(float val)
   writeRTCMemory(mem);
   unlockMem();
 }
-void setCurrentRotateTime(int val)
+void setCurrentRotateTime(int val, const int absoluteLimit)
 {
   lockMem();
   auto mem = readWithoutLock();
+  if (val < -absoluteLimit) {
+    val = -absoluteLimit;
+  } else if (val > absoluteLimit) {
+    val = absoluteLimit;
+  }
+
   mem.currentRotateTime = val;
   writeRTCMemory(mem);
   unlockMem();

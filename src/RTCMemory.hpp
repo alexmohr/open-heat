@@ -44,7 +44,7 @@ void setMillisOffset(uint64_t val);
 void setLastMeasuredTemp(float val);
 void setLastPredictedTemp(float val);
 void setSetTemp(float val);
-void setCurrentRotateTime(int val);
+void setCurrentRotateTime(int val, int absoluteLimit);
 void setTurnOff(bool val);
 void setOpenFully(bool val);
 void setMode(OperationMode val);
