@@ -38,8 +38,6 @@ static constexpr int8_t DEFAULT_TEMP_VIN = D7;
 static constexpr int8_t DEFAULT_WINDOW_GROUND = -1;
 static constexpr int8_t DEFAULT_WINDOW_VIN = -1;
 
-
-
 static constexpr const char* DEFAULT_HOST_NAME = "OpenHeat";
 
 static constexpr const char* DEFAULT_USER = "admin";

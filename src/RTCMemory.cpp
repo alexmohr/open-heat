@@ -12,7 +12,6 @@ namespace rtc {
 
 bool _lock = false;
 
-
 void printRTCMemory(const Memory& rtcMemory)
 {
   const auto msg = " canary " + std::to_string(rtcMemory.canary)
@@ -36,53 +35,55 @@ void printRTCMemory(const Memory& rtcMemory)
 void writeRTCMemory(const Memory& rtcMemory)
 {
   Logger::log(Logger::DEBUG, "Updating RTCMemory");
-  //printRTCMemory(rtcMemory);
+  // printRTCMemory(rtcMemory);
   if (!ESP.rtcUserMemoryWrite(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
     Logger::log(Logger::ERROR, "Failed to write RTC user memory");
   }
 }
 
-void lockMem() {
+void lockMem()
+{
   while (_lock) {
     delay(10);
   }
   _lock = true;
 }
 
-void unlockMem() {
+void unlockMem()
+{
   _lock = false;
 }
 
 Memory readWithoutLock()
 {
-    Memory rtcMemory{};
+  Memory rtcMemory{};
 
-    if (!ESP.rtcUserMemoryRead(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
-        Logger::log(Logger::ERROR, "Failed to read RTC user memory");
-    }
+  if (!ESP.rtcUserMemoryRead(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
+    Logger::log(Logger::ERROR, "Failed to read RTC user memory");
+  }
 
-    return rtcMemory;
+  return rtcMemory;
 }
 
 Memory read()
 {
-    lockMem();
-    const auto mem = readWithoutLock();
-    unlockMem();
+  lockMem();
+  const auto mem = readWithoutLock();
+  unlockMem();
 
-    return mem;
+  return mem;
 }
 
 void init(Filesystem& filesystem)
 {
-    Memory rtcMem = {};
-    const auto& config = filesystem.getConfig();
-    rtcMem.setTemp = config.SetTemperature;
-    rtcMem.mode = config.Mode;
-    rtcMem.lastPredictedTemp = 0.0f;
-    rtcMem.canary = CANARY;
+  Memory rtcMem = {};
+  const auto& config = filesystem.getConfig();
+  rtcMem.setTemp = config.SetTemperature;
+  rtcMem.mode = config.Mode;
+  rtcMem.lastPredictedTemp = 0.0f;
+  rtcMem.canary = CANARY;
 
-    writeRTCMemory(rtcMem);
+  writeRTCMemory(rtcMem);
 }
 
 void setValveNextCheckMillis(uint64_t val)
@@ -219,7 +220,6 @@ uint64_t offsetMillis()
   return ms;
 }
 
-
 void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
 {
   const auto& config = filesystem.getConfig();
@@ -239,5 +239,5 @@ void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
   delay(1);
 }
 
-} // namespace RTC
+} // namespace rtc
 } // namespace open_heat

@@ -96,9 +96,9 @@
 
 #define LED_PIN PIN_D8
 
-#define LED_BUILTIN_PIN 2 \
- // Pin D0 mapped to pin GPIO16 of ESP8266. This pin is also used for Onboard-Blue
- // LED. PIN_D0 = 0 => LED ON
+#define LED_BUILTIN_PIN                                                                  \
+  2 // Pin D0 mapped to pin GPIO16 of ESP8266. This pin is also used for Onboard-Blue
+    // LED. PIN_D0 = 0 => LED ON
 #endif // ESP32
 
 #endif // PINS_H_

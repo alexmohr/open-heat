@@ -49,7 +49,6 @@ class RadiatorValve {
   std::vector<std::function<void(bool)>> windowStateHandler_{};
   std::vector<std::function<void(float)>> setTempChangedHandler_{};
 
-
   // Wait 3 minutes before heating again after window opened
   const unsigned long sleepMillisAfterWindowClose_{3 * 60 * 1000};
 

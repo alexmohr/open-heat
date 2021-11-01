@@ -200,7 +200,8 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
   }
 
   if (rtc::read().currentRotateTime < 0) {
-    const auto remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+    const auto remainingTime
+      = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
     rotateTime = std::min(rotateTime, static_cast<unsigned short>(remainingTime));
   }
 
@@ -236,10 +237,10 @@ void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
   }
 
   if (rtc::read().currentRotateTime > 0) {
-    const auto remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+    const auto remainingTime
+      = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
     rotateTime = std::min(rotateTime, static_cast<unsigned short>(remainingTime));
   }
-
 
   rtc::setCurrentRotateTime(
     rtc::read().currentRotateTime + rotateTime, VALVE_FULL_ROTATE_TIME);
