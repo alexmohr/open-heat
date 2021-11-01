@@ -19,23 +19,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="regulator: Close faster">
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="regulator: fix turn off bug&#10;&#10;fixes #15">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad-cache.lib" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad-cache.lib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad.sch" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad.sch" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad.sch-bak" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad.sch-bak" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schematics/kicad/sym-lib-table" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/sym-lib-table" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RTCMemory.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/RTCMemory.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RTCMemory.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/RTCMemory.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,11 +97,6 @@
     </key>
   </component>
   <component name="RunManager" selected="PlatformIO.PlatformIO Upload">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -124,6 +105,11 @@
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
@@ -268,6 +254,7 @@
       <workItem from="1635238737283" duration="7179000" />
       <workItem from="1635319230432" duration="5000" />
       <workItem from="1635418347107" duration="7000" />
+      <workItem from="1635696282182" duration="13435000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -521,7 +508,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627245263255</updated>
     </task>
-    <option name="localTasksCounter" value="38" />
+    <task id="LOCAL-00038" summary="regulator: fix turn off bug&#10;&#10;fixes #15">
+      <created>1635702854394</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1635702854394</updated>
+    </task>
+    <option name="localTasksCounter" value="39" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -540,7 +534,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Update readme.md" />
     <MESSAGE value="Add esp32 config and add nodemcuv2 to github actions." />
     <MESSAGE value="Fix #2" />
     <MESSAGE value="Add color to logoutput" />
@@ -565,7 +558,8 @@
     <MESSAGE value="reformat code." />
     <MESSAGE value="improve logging and light sleep impl" />
     <MESSAGE value="enable bme280 via gpio" />
-    <option name="LAST_COMMIT_MESSAGE" value="enable bme280 via gpio" />
+    <MESSAGE value="regulator: fix turn off bug&#10;&#10;fixes #15" />
+    <option name="LAST_COMMIT_MESSAGE" value="regulator: fix turn off bug&#10;&#10;fixes #15" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

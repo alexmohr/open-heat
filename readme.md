@@ -128,6 +128,17 @@ cmake .. -DCMAKE_BUILD_TYPE=nodemcuv2 --CMAKE_EXPORT_COMPILE_COMMANDS=YES ..
 ~/dev/public/llvm-project/build/bin/scan-build make
 ````
 
+## Case 
+
+The case is designed to hold to valve, a dual 18650 battery holder and an 60x40mm circuit board. 
+At this moment the case has not been printed nor tested yet. 
+
+Battery holder: 
+* https://de.aliexpress.com/item/32969695165.html
+Battery: 
+* https://de.aliexpress.com/item/1005003394481523.html
+
+
 ## Installation
 
 ## Contributions
