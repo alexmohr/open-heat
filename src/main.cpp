@@ -149,7 +149,6 @@ void setup()
     mqtt_.setup();
   }
 
-
   // windowSensor_.setup();
 
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
@@ -174,7 +173,8 @@ void loop()
   const auto mqttSleep = mqtt_.loop();
   const auto valveSleep = valve_.loop();
 
-  open_heat::Logger::log(open_heat::Logger::INFO, "DEBUG: %i", open_heat::rtc::read().debug);
+  open_heat::Logger::log(
+    open_heat::Logger::INFO, "DEBUG: %i", open_heat::rtc::read().debug);
 
   // do not sleep if debug is enabled.
   if (open_heat::rtc::read().debug) {

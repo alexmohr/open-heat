@@ -66,8 +66,6 @@ void Logger::log(Level level, const char* format, ...)
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {
     outFun(logBuffer_.data());
   }
-
-
 }
 
 Logger& Logger::getInstance()

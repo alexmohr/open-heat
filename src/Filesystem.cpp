@@ -58,7 +58,7 @@ void Filesystem::listFiles()
   }
 }
 
- Config& Filesystem::getConfig()
+Config& Filesystem::getConfig()
 {
   if (!setup_) {
     setup();

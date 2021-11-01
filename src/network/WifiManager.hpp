@@ -71,17 +71,15 @@ class WifiManager {
     DEFAULT_HOST_NAME,
     HOST_NAME_MAX_LEN};
 
-
-
   ESPAsync_WMParameter* additionalParameters_[3] = {
     &paramHostname_,
     &paramUpdateUsername_,
     &paramUpdatePassword_,
 
-  //  &paramMqttServer_,
-   //e &paramMqttPortString_,
-   // &paramMqttTopic_,
-   // &paramMqttUsername_,
+    //  &paramMqttServer_,
+    // e &paramMqttPortString_,
+    // &paramMqttTopic_,
+    // &paramMqttUsername_,
     /*&paramMqttPassword_,
     &paramMotorGround_,
     &paramMotorVin_,
