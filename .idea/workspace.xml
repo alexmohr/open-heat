@@ -1,5 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="SCOPE_TYPE" value="8" />
+    <option name="CUSTOM_SCOPE_NAME" value="Selection" />
+  </component>
   <component name="AutoImportSettings">
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
@@ -19,9 +23,11 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="regulator: fix turn off bug&#10;&#10;fixes #15">
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="reformat code">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/case.FCStd" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/case.FCStd" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/case.FCStd1" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/case.FCStd1" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/case.stl" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/case.stl" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -56,8 +62,11 @@
   <component name="MacroExpansionManager">
     <option name="directoryName" value="wjowkc07" />
   </component>
+  <component name="NamedScopeManager">
+    <scope name="src" pattern="" />
+  </component>
   <component name="ProblemsViewState">
-    <option name="selectedIndex" value="2" />
+    <option name="selectedIndex" value="1" />
   </component>
   <component name="ProjectId" id="1mZSiUXCM3vnXDA5doy47NIP9wM" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
@@ -255,6 +264,8 @@
       <workItem from="1635319230432" duration="5000" />
       <workItem from="1635418347107" duration="7000" />
       <workItem from="1635696282182" duration="13435000" />
+      <workItem from="1635798540856" duration="1400000" />
+      <workItem from="1635843119049" duration="3806000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>
@@ -515,7 +526,21 @@
       <option name="project" value="LOCAL" />
       <updated>1635702854394</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="reformat code">
+      <created>1635798695021</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1635798695021</updated>
+    </task>
+    <task id="LOCAL-00040" summary="reformat code">
+      <created>1635798738370</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1635798738370</updated>
+    </task>
+    <option name="localTasksCounter" value="41" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -534,7 +559,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Add esp32 config and add nodemcuv2 to github actions." />
     <MESSAGE value="Fix #2" />
     <MESSAGE value="Add color to logoutput" />
     <MESSAGE value="Fix mqtt crash" />
@@ -559,7 +583,8 @@
     <MESSAGE value="improve logging and light sleep impl" />
     <MESSAGE value="enable bme280 via gpio" />
     <MESSAGE value="regulator: fix turn off bug&#10;&#10;fixes #15" />
-    <option name="LAST_COMMIT_MESSAGE" value="regulator: fix turn off bug&#10;&#10;fixes #15" />
+    <MESSAGE value="reformat code" />
+    <option name="LAST_COMMIT_MESSAGE" value="reformat code" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
