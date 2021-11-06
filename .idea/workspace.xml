@@ -24,10 +24,22 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="reformat code">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schematics/case.FCStd" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/case.FCStd" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schematics/case.FCStd1" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/case.FCStd1" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/schematics/case.stl" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/case.stl" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad.sch" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad.sch" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad.sch-bak" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad.sch-bak" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/wiring.png" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/wiring.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/WifiCredentials.hpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/index.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/index.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/Battery.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/Battery.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/Battery.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/Battery.hpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -106,12 +118,12 @@
     </key>
   </component>
   <component name="RunManager" selected="PlatformIO.PlatformIO Upload">
-    <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+    <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -266,6 +278,7 @@
       <workItem from="1635696282182" duration="13435000" />
       <workItem from="1635798540856" duration="1400000" />
       <workItem from="1635843119049" duration="3806000" />
+      <workItem from="1636210185757" duration="11661000" />
     </task>
     <task id="LOCAL-00001" summary="tmp">
       <created>1609719192415</created>

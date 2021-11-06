@@ -8,6 +8,7 @@
 #include <cstring>
 
 open_heat::heating::RadiatorValve* open_heat::network::MQTT::valve_;
+open_heat::sensors::Battery* open_heat::network::MQTT::battery_;
 open_heat::Filesystem* open_heat::network::MQTT::filesystem_;
 MQTTClient open_heat::network::MQTT::mqttClient_;
 
@@ -18,6 +19,7 @@ String open_heat::network::MQTT::setConfiguredTempTopic_;
 String open_heat::network::MQTT::getConfiguredTempTopic_;
 String open_heat::network::MQTT::getMeasuredTempTopic_;
 String open_heat::network::MQTT::getMeasuredHumidTopic_;
+String open_heat::network::MQTT::getBatteryTopic_;
 
 String open_heat::network::MQTT::debugEnableTopic_;
 String open_heat::network::MQTT::debugLogLevel_;
@@ -59,6 +61,8 @@ bool open_heat::network::MQTT::needLoop()
   return true;
 }
 
+
+
 unsigned long open_heat::network::MQTT::loop()
 {
   if (!configValid_) {
@@ -76,11 +80,12 @@ unsigned long open_heat::network::MQTT::loop()
   }
 
   mqttClient_.loop();
-
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getMeasuredHumidTopic_, String(tempSensor_.getHumidity()));
-  // publish(getConfiguredTempTopic_, String(valve_->getConfiguredTemp()));
-  // publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(valve_->getMode()));
+
+  battery_->loop();
+  publish(getBatteryTopic_ +  "percent", String(battery_->percentage()));
+  publish(getBatteryTopic_ +  "voltage", String(battery_->voltage()));
 
   rtc::setMqttNextCheckMillis(rtc::offsetMillis() + checkIntervalMillis_);
 
@@ -89,12 +94,6 @@ unsigned long open_heat::network::MQTT::loop()
 
 void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& payload)
 {
-  /*Logger::log(
-    Logger::DEBUG,
-    "Received message in topic: %s, msg: '%s'",
-    topic.c_str(),*
-    payload.c_str());*/
-
   if (topic == setConfiguredTempTopic_) {
     handleSetConfigTemp(payload);
   } else if (topic == setModeTopic_) {
@@ -110,7 +109,6 @@ void open_heat::network::MQTT::handleLogLevel(const String& payload)
   std::stringstream ss(payload.c_str());
   int level;
   if (!(ss >> level)) {
-    // Logger::log(Logger::DEBUG, "Log level is invalid: %s", payload.c_str());
     return;
   }
 
@@ -219,6 +217,9 @@ void open_heat::network::MQTT::connect()
 
   getMeasuredHumidTopic_ = config.MQTT.Topic;
   getMeasuredHumidTopic_ += "humidity/measured/get";
+
+  getBatteryTopic_ = config.MQTT.Topic;
+  getBatteryTopic_ += "battery/";
 
   getModeTopic_ = config.MQTT.Topic;
   getModeTopic_ += "mode/get";

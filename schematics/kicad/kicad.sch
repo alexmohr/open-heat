@@ -4,10 +4,10 @@ EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
 Sheet 1 1
-Title ""
-Date ""
-Rev ""
-Comp ""
+Title "Open-Heat ESP12-E schematic"
+Date "2021-11-06"
+Rev "0.1"
+Comp "Alexander Mohr"
 Comment1 ""
 Comment2 ""
 Comment3 ""
@@ -139,7 +139,7 @@ Wire Wire Line
 Wire Wire Line
 	5550 2900 4200 2900
 Wire Wire Line
-	4200 2900 4200 5150
+	4200 2900 4200 4600
 Wire Wire Line
 	4200 5150 5550 5150
 $Comp
@@ -154,7 +154,46 @@ F 3 "" H 4800 2450 50  0001 C CNN
 	1    0    0    -1  
 $EndComp
 Wire Wire Line
+	3950 3900 3950 4050
+$Comp
+L Device:R R33000
+U 1 1 6186F150
+P 3950 4450
+F 0 "R33000" H 4020 4496 50  0000 L CNN
+F 1 "R" H 4020 4405 50  0000 L CNN
+F 2 "" V 3880 4450 50  0001 C CNN
+F 3 "~" H 3950 4450 50  0001 C CNN
+	1    3950 4450
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R R100000
+U 1 1 6186E03C
+P 3950 3750
+F 0 "R100000" H 4020 3796 50  0000 L CNN
+F 1 "R" H 4020 3705 50  0000 L CNN
+F 2 "" V 3880 3750 50  0001 C CNN
+F 3 "~" H 3950 3750 50  0001 C CNN
+	1    3950 3750
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4950 4050 3950 4050
+Wire Wire Line
+	3950 4300 3950 4050
+Connection ~ 3950 4050
+Wire Wire Line
+	3950 2600 3950 3600
+Wire Wire Line
+	3950 2600 4800 2600
+Wire Wire Line
 	4800 2450 4800 2600
+Connection ~ 4800 2600
 Wire Wire Line
 	4800 2600 5000 2600
+Wire Wire Line
+	3950 4600 4200 4600
+Connection ~ 4200 4600
+Wire Wire Line
+	4200 4600 4200 5150
 $EndSCHEMATC

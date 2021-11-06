@@ -7,7 +7,6 @@
 #define WIFIMANAGERCONFIG_HPP_
 
 #include "hardware/HAL.hpp"
-#include "network/WifiCredentials.hpp"
 #include <ESPAsync_WiFiManager.h>
 
 static constexpr uint8_t MIN_AP_PASSWORD_SIZE = 8;

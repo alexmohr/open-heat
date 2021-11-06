@@ -11,6 +11,7 @@
 #include <Logger.hpp>
 #include <MQTT.h>
 #include <heating/RadiatorValve.hpp>
+#include <sensors/Battery.hpp>
 #include <sensors/ITemperatureSensor.hpp>
 #include <chrono>
 
@@ -22,11 +23,13 @@ class MQTT {
     Filesystem* filesystem,
     WifiManager& wifi,
     sensors::ITemperatureSensor& tempSensor,
-    heating::RadiatorValve* valve) :
+    heating::RadiatorValve* valve,
+    sensors::Battery* battery) :
       wifi_(wifi), tempSensor_(tempSensor)
   {
     valve_ = valve;
     filesystem_ = filesystem;
+    battery_  = battery;
   }
 
   public:
@@ -47,6 +50,7 @@ class MQTT {
   WifiManager& wifi_;
 
   sensors::ITemperatureSensor& tempSensor_;
+  static sensors::Battery* battery_;
   static Filesystem* filesystem_;
   static heating::RadiatorValve* valve_;
 
@@ -61,6 +65,7 @@ class MQTT {
 
   static String getMeasuredTempTopic_;
   static String getMeasuredHumidTopic_;
+  static String getBatteryTopic_;
 
   static String debugEnableTopic_;
   static String debugLogLevel_;

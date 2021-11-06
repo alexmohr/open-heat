@@ -11,6 +11,7 @@
 #include <Filesystem.hpp>
 #include <Logger.hpp>
 #include <heating/RadiatorValve.hpp>
+#include <sensors/Battery.hpp>
 #include <sensors/ITemperatureSensor.hpp>
 
 namespace open_heat {
@@ -20,9 +21,11 @@ class WebServer {
   WebServer(
     Filesystem& filesystem,
     sensors::ITemperatureSensor& tempSensor,
+    sensors::Battery& battery,
     open_heat::heating::RadiatorValve& valve) :
       filesystem_(filesystem),
       tempSensor_(tempSensor),
+      battery_(battery),
       valve_(valve),
       asyncWebServer_(AsyncWebServer(80)),
       logEvents_(AsyncEventSource("/logEvents"))
@@ -41,6 +44,7 @@ class WebServer {
   private:
   Filesystem& filesystem_;
   sensors::ITemperatureSensor& tempSensor_;
+  sensors::Battery& battery_;
   open_heat::heating::RadiatorValve& valve_;
 
   AsyncWebServer asyncWebServer_;
