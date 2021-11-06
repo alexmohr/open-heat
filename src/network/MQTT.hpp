@@ -76,7 +76,7 @@ class MQTT {
 
   WiFiClient wiFiClient_;
 
-  unsigned long checkIntervalMillis_ = 5 * 60 * 1000;
+  unsigned long checkIntervalMillis_ = 10 * 60 * 1000;
 
   bool configValid_{true};
   bool loggerAdded_{false};
