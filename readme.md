@@ -27,6 +27,22 @@ The current defaults are:
 | Motor    | D6 (12) | D5 (14) |
 | Window   | D8 (15) | D7 (13) |
 
+### Battery 
+To extend the battery lifetime this project is using the following batteries 
+
+Battery holder:
+* https://de.aliexpress.com/item/32969695165.html
+  Battery:
+* https://de.aliexpress.com/item/1005003394481523.html
+
+To monitor their voltage the ADC of the ESP is used. 
+This requires to solder a voltage divider, with 100k and 33k Ohm resistance. 
+For details, see the schematics.
+Please note that at this point it's not possible to configure the resistance
+values via the web interface. 
+Please note that a nodemcu already comes with a voltage divider for the ADC.
+To use the battery management you have to desolder these resistors
+
 ## Building
 Run `init.sh` to properly initialize the project. 
 To build run 
@@ -42,8 +58,8 @@ Save config and the ESP will reboot and connect to your Wifi.
 Or the command below could be run:
 ```bash
 SSID=core
-PW="ItsAFluffyCore%21"
-HOST="heater-test"
+PW="PW"
+HOST="HOST"
 curl http://192.168.4.1/wifisave?s=$SSID&p=$PW&s1=$SSID&p1=&Hostname=$HOST&UpdateUsername=admin&UpdatePassword=letmein&ip=%28IP+unset%29&gw=192.168.2.1&sn=255.255.255.0&dns1=192.168.2.1&dns2=8.8.8.8
 
 ```
@@ -73,8 +89,12 @@ It offers the following topics, all of them are prefixed with the configured top
 * Get target temp: `$TOPIC/temperature/target/get`
 * Get measured temp: `$TOPIC/temperature/measured/get`
 * Get measured humidity: `$TOPIC/humidity/measured/get`
+* Get battery percentage: `$TOPIC/battery/percentage`
+* Get battery voltage: `$TOPIC/battery/voltage`
 * Get current mode (can be off or heating): `$TOPIC/mode/get`
 * Set current mode (can be off or heating): `$TOPIC/mode/set`
+
+The battery percentage assumes a voltage between 3.1 and 3.9 volts
 
 Example configuration for home assistant:
 ```yaml
@@ -84,12 +104,24 @@ climate:
       - "off"
       - "heat"
     name: Living room
-    temperature_command_topic: "living_room/front/temperature/target/set"
-    temperature_state_topic: "living_room/front/temperature/target/get"
-    current_temperature_topic: "living_room/front/temperature/measured/get"
-    mode_command_topic: "living_room/front/mode/set"
-    mode_state_topic: "living_room/front/mode/get"
+    temperature_command_topic: "$TOPIC/temperature/target/set"
+    temperature_state_topic: "$TOPIC/temperature/target/get"
+    current_temperature_topic: "$TOPIC/temperature/measured/get"
+    mode_command_topic: "$TOPIC/mode/set"
+    mode_state_topic: "$TOPIC/mode/get"
     retain: true
+```
+
+optional if you also want to monitor the battery state:
+```yaml
+  - platform: mqtt
+    state_topic: "$TOPIC/battery/voltage"
+    name: "Bed Heater Voltage"
+
+  - platform: mqtt
+    state_topic: "$TOPIC/battery/percent"
+    name: "Bed Heater Percent"
+
 ```
 
 ### Debugging
@@ -132,11 +164,6 @@ cmake .. -DCMAKE_BUILD_TYPE=nodemcuv2 --CMAKE_EXPORT_COMPILE_COMMANDS=YES ..
 
 The case is designed to hold to valve, a dual 18650 battery holder and an 60x40mm circuit board. 
 At this moment the case has not been printed nor tested yet. 
-
-Battery holder: 
-* https://de.aliexpress.com/item/32969695165.html
-Battery: 
-* https://de.aliexpress.com/item/1005003394481523.html
 
 
 ## Installation

@@ -8,11 +8,15 @@
 
 #include <Filesystem.hpp>
 #include <network/WifiManager.hpp>
-
+#include <sensors/Battery.hpp>
 #include <network/MQTT.hpp>
 #include <network/WebServer.hpp>
 
 #include <hardware/esp_err.h>
+
+
+// external voltage
+ADC_MODE(ADC_TOUT);
 
 DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
@@ -32,7 +36,9 @@ open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::TP
 open_heat::Filesystem filesystem_;
 
 open_heat::heating::RadiatorValve valve_(*tempSensor_, filesystem_);
-open_heat::network::WebServer webServer_(filesystem_, *tempSensor_, valve_);
+open_heat::sensors::Battery battery_;
+
+open_heat::network::WebServer webServer_(filesystem_, *tempSensor_, battery_, valve_);
 open_heat::sensors::WindowSensor windowSensor_(&filesystem_, &valve_);
 
 open_heat::network::WifiManager wifiManager_(
@@ -41,7 +47,7 @@ open_heat::network::WifiManager wifiManager_(
   &dnsServer_,
   &drd_);
 
-open_heat::network::MQTT mqtt_(&filesystem_, wifiManager_, *tempSensor_, &valve_);
+open_heat::network::MQTT mqtt_(&filesystem_, wifiManager_, *tempSensor_, &valve_, &battery_);
 
 unsigned long lastLogMillis_ = 0;
 
