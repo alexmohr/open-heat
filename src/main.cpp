@@ -7,13 +7,12 @@
 #include <Logger.hpp>
 
 #include <Filesystem.hpp>
-#include <network/WifiManager.hpp>
-#include <sensors/Battery.hpp>
 #include <network/MQTT.hpp>
 #include <network/WebServer.hpp>
+#include <network/WifiManager.hpp>
+#include <sensors/Battery.hpp>
 
 #include <hardware/esp_err.h>
-
 
 // external voltage
 ADC_MODE(ADC_TOUT);
@@ -47,7 +46,12 @@ open_heat::network::WifiManager wifiManager_(
   &dnsServer_,
   &drd_);
 
-open_heat::network::MQTT mqtt_(&filesystem_, wifiManager_, *tempSensor_, &valve_, &battery_);
+open_heat::network::MQTT mqtt_(
+  &filesystem_,
+  wifiManager_,
+  *tempSensor_,
+  &valve_,
+  &battery_);
 
 unsigned long lastLogMillis_ = 0;
 
@@ -113,6 +117,28 @@ void logVersions()
     open_heat::Logger::DEBUG, "WifiManager Version: %s", ESP_ASYNC_WIFIMANAGER_VERSION);
 }
 
+bool isDoubleReset(const open_heat::rtc::Memory& rtcMem)
+{
+  open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
+  while (open_heat::rtc::offsetMillis() < 5 * 1000) {
+    // Call the double reset detector loop method every so often,
+    // so that it can recognise when the timeout expires.
+    // You can also call drd.stop() when you wish to no longer
+    // consider the next reset as a double reset.
+    drd_.loop();
+    delay(1000);
+  }
+  open_heat::rtc::setDrdDisabled(true);
+  const auto doubleReset
+    = (drd_.detectDoubleReset()
+       || (ESP.getResetInfoPtr()->reason == REASON_EXT_SYS_RST &&
+           open_heat::rtc::read().lastResetTime - open_heat::rtc::offsetMillis() > 10 * 1000))
+    && !rtcMem.drdDisabled;
+
+  open_heat::rtc::setDrdDisabled(doubleReset);
+  return doubleReset;
+}
+
 void setup()
 {
   if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF && !DISABLE_ALL_LOGGING) {
@@ -132,6 +158,7 @@ void setup()
   } else {
     open_heat::rtc::init(filesystem_);
   }
+  open_heat::rtc::setLastResetTime(open_heat::rtc::offsetMillis());
 
   setupPins();
 
@@ -142,6 +169,7 @@ void setup()
       delay(250);
       digitalWrite(LED_PIN, LED_ON);
     }
+    mqtt_.enableDebug(true);
   }
 
   valve_.setup();
@@ -150,24 +178,13 @@ void setup()
     webServer_.setup();
   }
 
-  if (mqtt_.needLoop()) {
-    wifiManager_.setup(!rtcMem.drdDisabled && drd_.detectDoubleReset());
+  const auto doubleReset = isDoubleReset(rtcMem);
+
+  if (mqtt_.needLoop() || doubleReset) {
+    wifiManager_.setup(doubleReset);
     mqtt_.setup();
   }
 
-  // windowSensor_.setup();
-
-  open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
-  while (open_heat::rtc::offsetMillis() < 10 * 1000) {
-    // Call the double reset detector loop method every so often,
-    // so that it can recognise when the timeout expires.
-    // You can also call drd.stop() when you wish to no longer
-    // consider the next reset as a double reset.
-    drd_.loop();
-    delay(1000);
-  }
-
-  open_heat::rtc::setDrdDisabled(true);
   drd_.stop();
 
   loop();

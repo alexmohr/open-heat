@@ -85,7 +85,14 @@ void init(Filesystem& filesystem)
 
   writeRTCMemory(rtcMem);
 }
-
+void setLastResetTime(uint64_t val)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.lastResetTime = val;
+  writeRTCMemory(mem);
+  unlockMem();
+}
 void setValveNextCheckMillis(uint64_t val)
 {
   lockMem();
