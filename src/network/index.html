@@ -157,6 +157,10 @@
             flex: 100%%;
         }
 
+        .fit-content {
+            height: fit-content;
+        }
+
         .flex-card .hero {
             position: relative;
             color: #ffffff;
@@ -205,45 +209,57 @@
 </div>
 <div class="flex-container animated zoomIn">
     <div class="flex-card">
-        <div class="hero">
-            <h3>Temperature</h3>
+        <div class="fit-content">
+            <div class="hero">
+                <h3>Temperature</h3>
+            </div>
+            <div class="content">
+                <label for="currentTemp">Measured</label> <input
+                    class="inputSmall"
+                    readonly="readonly" id="currentTemp" value="%CURRENT_TEMP%">
+                <span
+                        class="input-group-text">°C</span><br>
+                <form method='POST' action='/' enctype='multipart/form-data'>
+                    <label
+                            for="setTemp">Set</label> <input
+                        class="inputSmall" id="setTemp" name="setTemp"
+                        type="number"
+                        value="%SET_TEMP%"> <span
+                        class="input-group-text">°C</span> <input type='submit'
+                                                                  value='Confirm'
+                                                                  class="btn">
+                </form>
+                <form method='POST' action='/toggle'
+                      enctype='multipart/form-data'>
+                    <label></label> <input type='submit'
+                                           value='%TURN_ON_OFF%'
+                                           class="btn btnLarge"></form>
+                <form method='POST' action='/fullOpen'
+                      enctype='multipart/form-data'><label></label> <input
+                        type='submit' value='Open valve fully'
+                        class="btn btnLarge">
+                </form>
+            </div>
         </div>
-        <div class="content">
-            <h3>Temperature</h3>
-            <label for="currentTemp">Measured</label> <input
-                class="inputSmall"
-                readonly="readonly" id="currentTemp" value="%CURRENT_TEMP%">
-            <span
-                    class="input-group-text">°C</span><br>
-            <form method='POST' action='/' enctype='multipart/form-data'><label
-                    for="setTemp">Set</label> <input
-                    class="inputSmall" id="setTemp" name="setTemp" type="number"
-                    value="%SET_TEMP%"> <span
-                    class="input-group-text">°C</span> <input type='submit'
-                                                              value='Confirm'
-                                                              class="btn">
-            </form>
-            <form method='POST' action='/toggle' enctype='multipart/form-data'>
-                <label></label> <input type='submit'
-                                       value='%TURN_ON_OFF%'
-                                       class="btn btnLarge"></form>
-            <form method='POST' action='/fullOpen'
-                  enctype='multipart/form-data'><label></label> <input
-                    type='submit' value='Open valve fully' class="btn btnLarge">
-            </form>
 
-            <br/>
-            <h3>Battery</h3>
-            <label for="batteryVoltage">Voltage</label>
-            <input
-                class="inputSmall"
-                readonly="readonly" id="batteryVoltage" value="%BATTERY_VOLTAGE%">
-            <span class="input-group-text">V</span><br>
-            <label for="batteryPercentage">Percentage</label>
-            <input
-                class="inputSmall"
-                readonly="readonly" id="batteryPercentage" value="%BATTERY_PERCENTAGE%">
-            <span class="input-group-text">%%</span><br>
+        <div class="fit-content">
+            <div class="hero">
+                <h3>Battery</h3>
+            </div>
+            <div class="content">
+                <label for="batteryVoltage">Voltage</label>
+                <input
+                        class="inputSmall"
+                        readonly="readonly" id="batteryVoltage"
+                        value="%BATTERY_VOLTAGE%">
+                <span class="input-group-text">V</span><br>
+                <label for="batteryPercentage">Percent</label>
+                <input
+                        class="inputSmall"
+                        readonly="readonly" id="batteryPercentage"
+                        value="%BATTERY_PERCENTAGE%">
+                <span class="input-group-text">%%</span><br>
+            </div>
         </div>
     </div>
     <div class="flex-card">
