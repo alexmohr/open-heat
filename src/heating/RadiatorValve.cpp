@@ -127,13 +127,13 @@ unsigned long open_heat::heating::RadiatorValve::loop()
       const auto predictDiff = rtc::read().setTemp - predictTemp - closeHysteresis;
       Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
       if (predictDiff <= 2) {
-        closeTime = 1250;
+        closeTime = 5000;
       } else if (predictDiff <= 1.5) {
-        closeTime = 1000;
+        closeTime = 4000;
       } else if (predictDiff <= 1) {
-        closeTime = 750;
+        closeTime = 2500;
       } else if (predictDiff <= 0.5) {
-        closeTime = 500;
+        closeTime = 1500;
       }
 
       closeValve(closeTime);
