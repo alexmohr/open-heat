@@ -165,15 +165,15 @@ cmake .. -DCMAKE_BUILD_TYPE=nodemcuv2 --CMAKE_EXPORT_COMPILE_COMMANDS=YES ..
 The case is designed to hold to valve, a dual 18650 battery holder and an 60x40mm circuit board. 
 At this moment the case has not been printed nor tested yet. 
 
-
 ## Installation
 
 ## Contributions
 As this project is still in a very early stage no contributions will be accepted at the moment.
 
 ## Attributions and libraries
-Special thanks to traumflug and their regulator implementation in [ISTAtrol](https://github.com/Traumflug/ISTAtrol/blob/master/firmware/main.c).
-Altough it was heavily modified and improved the I-Regulator still forms the base of the valve control.
+* Big thanks to @Anycubic for continued bug reports, testing and several improvements and ideas
+* Special thanks to traumflug and their regulator implementation in [ISTAtrol](https://github.com/Traumflug/ISTAtrol/blob/master/firmware/main.c).
+  Although it was heavily modified and improved the I-Regulator still forms the base of the valve control.
 
 ### Libraries
 * [ESP Async WebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
