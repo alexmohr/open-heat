@@ -36,7 +36,7 @@ void Battery::loop()
 
 float Battery::percentage()
 {
-  const float maxBattery = 3.9; // maximum voltage of battery
+  const float maxBattery = 4.2; // maximum voltage of battery
   const float minBattery = 3.1; // minimum voltage of battery before shutdown
 
   const auto percent = ((m_voltage - minBattery) / (maxBattery - minBattery)) * 100;
