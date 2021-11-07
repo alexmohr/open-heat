@@ -20,6 +20,7 @@ struct Memory {
   uint64_t valveNextCheckMillis;
   uint64_t mqttNextCheckMillis;
   uint64_t millisOffset;
+  uint64_t lastResetTime;
 
   float lastMeasuredTemp;
   float lastPredictedTemp;
@@ -53,6 +54,7 @@ void setIsWindowOpen(bool val);
 void setRestoreMode(bool val);
 void setDrdDisabled(bool val);
 void setDebug(bool val);
+void setLastResetTime(uint64_t val);
 
 Memory read();
 void init(Filesystem& filesystem);
