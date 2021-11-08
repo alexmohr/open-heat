@@ -17,29 +17,11 @@
 #define MEM_TYPE PROGMEM
 namespace open_heat {
 
-static constexpr const char LEVEL_TRACE[] MEM_TYPE = "[TRACE]";
-static constexpr const char LEVEL_DEBUG[] MEM_TYPE = "[DEBUG]";
-static constexpr const char LEVEL_INFO[] MEM_TYPE = "[INFO] ";
-static constexpr const char LEVEL_WARNING[] MEM_TYPE = "[WARN]";
-static constexpr const char LEVEL_ERROR[] MEM_TYPE = "[ERROR]";
-static constexpr const char LEVEL_FATAL[] MEM_TYPE = "[FATAL]";
-static constexpr const char LEVEL_OFF[] MEM_TYPE = "[OFF]  ";
-
-static constexpr const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
-  LEVEL_TRACE,
-  LEVEL_DEBUG,
-  LEVEL_INFO,
-  LEVEL_WARNING,
-  LEVEL_ERROR,
-  LEVEL_FATAL,
-  LEVEL_OFF,
-};
-
 class Logger {
   public:
   enum Level { TRACE = 0, DEBUG, INFO, WARNING, ERROR, FATAL, OFF };
 
-  typedef std::function<void(const std::string&)> LoggerOutputFunction;
+  typedef std::function<void(const Level level, const std::string&)> LoggerOutputFunction;
 
   static void setup();
 
@@ -48,11 +30,11 @@ class Logger {
 
   static void log(Level level, const char* format, ...);
 
-  static const char* levelToText(Level level);
+  static const char* levelToText(Level level, bool color);
 
   static String formatBytes(size_t bytes);
 
-  static void addPrinter(const LoggerOutputFunction& outFun);
+  static void addPrinter(const LoggerOutputFunction&& outFun);
 
   private:
   Logger();

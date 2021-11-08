@@ -6,7 +6,6 @@
 #ifndef FILESYSTEM_HPP_
 #define FILESYSTEM_HPP_
 
-#include "hardware/HAL.hpp"
 #include <Config.hpp>
 
 namespace open_heat {

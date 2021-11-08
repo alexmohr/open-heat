@@ -95,7 +95,7 @@ void WebServer::eventsLogPrinter(
   const char* module,
   const char* message)
 {
-  logBuffer_ = LOG_LEVEL_STRINGS[level];
+  /*logBuffer_ = LOG_LEVEL_STRINGS[level];
   logBuffer_ += F(" ");
 
   if (std::strlen(module) > 0) {
@@ -105,7 +105,7 @@ void WebServer::eventsLogPrinter(
   }
 
   logBuffer_ += message;
-  logEvents_.send(logBuffer_.c_str());
+  logEvents_.send(logBuffer_.c_str());*/
 }
 
 void open_heat::network::WebServer::loop()

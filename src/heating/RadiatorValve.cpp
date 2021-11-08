@@ -253,12 +253,9 @@ void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
     config.Ground);
 
   enablePins();
-
   digitalWrite(static_cast<uint8_t>(config.Vin), LOW);
   digitalWrite(static_cast<uint8_t>(config.Ground), HIGH);
-
   delay(rotateTime);
-
   disablePins();
 }
 

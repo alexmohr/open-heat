@@ -11,7 +11,7 @@
 #include <network/WebServer.hpp>
 #include <network/WifiManager.hpp>
 #include <sensors/Battery.hpp>
-
+#include <Serial.hpp>
 #include <hardware/esp_err.h>
 
 // external voltage
@@ -40,6 +40,8 @@ open_heat::sensors::Battery battery_;
 open_heat::network::WebServer webServer_(filesystem_, *tempSensor_, battery_, valve_);
 open_heat::sensors::WindowSensor windowSensor_(&filesystem_, &valve_);
 
+open_heat::Serial m_serial;
+
 open_heat::network::WifiManager wifiManager_(
   &filesystem_,
   webServer_.getWebServer(),
@@ -57,13 +59,7 @@ unsigned long lastLogMillis_ = 0;
 
 void setupSerial()
 {
-  Serial.begin(MONITOR_SPEED);
-  Serial.setTimeout(2000);
-
-  while (!Serial) {
-    delay(200);
-  }
-  Serial.println("");
+;
 }
 
 void setupPins()
@@ -142,7 +138,7 @@ bool isDoubleReset(const open_heat::rtc::Memory& rtcMem)
 void setup()
 {
   if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF && !DISABLE_ALL_LOGGING) {
-    setupSerial();
+    m_serial.setup();
   }
 
   open_heat::Logger::setup();
@@ -169,7 +165,8 @@ void setup()
       delay(250);
       digitalWrite(LED_PIN, LED_ON);
     }
-    mqtt_.enableDebug(true);
+    open_heat::Logger::log(
+      open_heat::Logger::ERROR, "Failed to init temp sensor");
   }
 
   valve_.setup();

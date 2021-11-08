@@ -75,10 +75,6 @@ bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
   espWifiManager->setSTAStaticIPConfig(staticIpConfig_);
 #endif
 
-#if USING_CORS_FEATURE
-  espWifiManager->setCORSHeader("Your Access-Control-Allow-Origin");
-#endif
-
   initAdditionalParams();
   for (auto& param : additionalParameters_) {
     espWifiManager->addParameter(param);

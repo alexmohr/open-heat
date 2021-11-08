@@ -12,22 +12,40 @@ namespace open_heat {
 // ToDo this could be moved into progmem if more RAM is needed
 std::array<char, 512> logBuffer_;
 
-const char CONSOLE_LEVEL_TRACE[] MEM_TYPE = "\033[1;37m[TRACE] ";
-const char CONSOLE_LEVEL_DEBUG[] MEM_TYPE = "\033[1;37m[DEBUG] ";
-const char CONSOLE_LEVEL_INFO[] MEM_TYPE = "\033[1;32m[INFO]  ";
-const char CONSOLE_LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN]  ";
-const char CONSOLE_LEVEL_ERROR[] MEM_TYPE = "\033[1;31m[ERROR] ";
-const char CONSOLE_LEVEL_FATAL[] MEM_TYPE = "\033[1;31m[FATAL] ";
-const char CONSOLE_LEVEL_OFF[] MEM_TYPE = "\033[1;31m[OFF]   ";
+static constexpr const char COLORED_LEVEL_TRACE[] MEM_TYPE = "\033[1;37m[TRACE] ";
+static constexpr const char COLORED_LEVEL_DEBUG[] MEM_TYPE = "\033[1;37m[DEBUG] ";
+static constexpr const char COLORED_LEVEL_INFO[] MEM_TYPE = "\033[1;32m[INFO]  ";
+static constexpr const char COLORED_LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN]  ";
+static constexpr const char COLORED_LEVEL_ERROR[] MEM_TYPE = "\033[1;31m[ERROR] ";
+static constexpr const char COLORED_LEVEL_FATAL[] MEM_TYPE = "\033[1;31m[FATAL] ";
+static constexpr const char COLORED_LEVEL_OFF[] MEM_TYPE = "\033[1;31m[OFF]   ";
 
-const char* const CONSOLE_LOG_LEVEL_STRINGS[] MEM_TYPE = {
-  CONSOLE_LEVEL_TRACE,
-  CONSOLE_LEVEL_DEBUG,
-  CONSOLE_LEVEL_INFO,
-  CONSOLE_LEVEL_WARNING,
-  CONSOLE_LEVEL_ERROR,
-  CONSOLE_LEVEL_FATAL,
-  CONSOLE_LEVEL_OFF,
+static constexpr const char LEVEL_TRACE[] MEM_TYPE = "[TRACE]";
+static constexpr const char LEVEL_DEBUG[] MEM_TYPE = "[DEBUG]";
+static constexpr const char LEVEL_INFO[] MEM_TYPE = "[INFO] ";
+static constexpr const char LEVEL_WARNING[] MEM_TYPE = "[WARN]";
+static constexpr const char LEVEL_ERROR[] MEM_TYPE = "[ERROR]";
+static constexpr const char LEVEL_FATAL[] MEM_TYPE = "[FATAL]";
+static constexpr const char LEVEL_OFF[] MEM_TYPE = "[OFF]  ";
+
+static constexpr const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
+  LEVEL_TRACE,
+  LEVEL_DEBUG,
+  LEVEL_INFO,
+  LEVEL_WARNING,
+  LEVEL_ERROR,
+  LEVEL_FATAL,
+  LEVEL_OFF,
+};
+
+const char* const COLORED_LOG_LEVEL_STRINGS[] MEM_TYPE = {
+  COLORED_LEVEL_TRACE,
+  COLORED_LEVEL_DEBUG,
+  COLORED_LEVEL_INFO,
+  COLORED_LEVEL_WARNING,
+  COLORED_LEVEL_ERROR,
+  COLORED_LEVEL_FATAL,
+  COLORED_LEVEL_OFF,
 };
 
 Logger Logger::s_logger;
@@ -36,9 +54,6 @@ Logger::Logger() = default;
 
 void Logger::setup()
 {
-  if (Serial) {
-    getInstance().loggerOutputFunctions_.push_back(defaultLog);
-  }
 }
 
 void Logger::log(Level level, const char* format, ...)
@@ -53,18 +68,14 @@ void Logger::log(Level level, const char* format, ...)
 
   std::memset(logBuffer_.data(), 0, logBuffer_.size());
 
-  const auto levelText = levelToText(level);
-  std::strcpy(logBuffer_.data(), levelText);
-  const auto levelTextLen = std::strlen(logBuffer_.data());
-
   va_list args;
   va_start(args, format);
   vsnprintf(
-    logBuffer_.data() + levelTextLen, logBuffer_.size() - levelTextLen, format, args);
+    logBuffer_.data(), logBuffer_.size(), format, args);
   va_end(args);
 
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {
-    outFun(logBuffer_.data());
+    outFun(level, logBuffer_.data());
   }
 }
 
@@ -103,14 +114,17 @@ void Logger::defaultLog(const std::string& message)
   Serial.println(message.c_str());
 }
 
-const char* Logger::levelToText(Logger::Level level)
+const char* Logger::levelToText(Logger::Level level, bool color)
 {
-  return CONSOLE_LOG_LEVEL_STRINGS[level];
+  if (color) {
+    return COLORED_LOG_LEVEL_STRINGS[level];
+  }
+  return LOG_LEVEL_STRINGS[level];
 }
 
-void Logger::addPrinter(const Logger::LoggerOutputFunction& outFun)
+void Logger::addPrinter(const LoggerOutputFunction&& outFun)
 {
-  getInstance().loggerOutputFunctions_.push_back(outFun);
+  getInstance().loggerOutputFunctions_.push_back(std::move(outFun));
 }
 
 } // namespace open_heat

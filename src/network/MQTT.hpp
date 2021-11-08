@@ -14,6 +14,7 @@
 #include <sensors/Battery.hpp>
 #include <sensors/ITemperatureSensor.hpp>
 #include <chrono>
+#include <queue>
 
 namespace open_heat {
 namespace network {
@@ -44,8 +45,6 @@ class MQTT {
   static void publish(const String& topic, const String& message);
   static void messageReceivedCallback(String& topic, String& payload);
 
-  static void mqttLogPrinter(const std::string& message);
-
   private:
   WifiManager& wifi_;
 
@@ -67,12 +66,20 @@ class MQTT {
   static String getMeasuredHumidTopic_;
   static String getBatteryTopic_;
 
+  static String enableNightModeTopic_;
+
   static String debugEnableTopic_;
   static String debugLogLevel_;
 
   static String windowStateTopic_;
 
   static String logTopic_;
+
+  struct message {
+    const String* const topic;
+    const String message;
+  };
+  static std::queue<message> m_messageQueue;
 
   WiFiClient wiFiClient_;
 
@@ -86,6 +93,7 @@ class MQTT {
   static void handleDebug(const String& payload);
   static void subscribe(const String& topic);
   static void handleLogLevel(const String& payload);
+  void sendMessageQueue();
 };
 } // namespace network
 } // namespace open_heat

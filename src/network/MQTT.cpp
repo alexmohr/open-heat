@@ -27,6 +27,7 @@ String open_heat::network::MQTT::debugLogLevel_;
 String open_heat::network::MQTT::windowStateTopic_;
 
 String open_heat::network::MQTT::logTopic_;
+std::queue<open_heat::network::MQTT::message> open_heat::network::MQTT::m_messageQueue;
 
 void open_heat::network::MQTT::setup()
 {
@@ -44,8 +45,14 @@ void open_heat::network::MQTT::setup()
     [this](bool state) { publish(windowStateTopic_, String(state)); });
 
   if (!loggerAdded_) {
-    // Logger::addPrinter([](const std::string& message) { mqttLogPrinter(message); });
-    loggerAdded_ = true;
+    Logger::addPrinter([](const Logger::Level level, const std::string& message) {
+
+      String buffer = Logger::levelToText(level, false);
+      buffer += F(" ");
+      buffer += message.c_str();
+      m_messageQueue.push({&logTopic_, buffer});
+      });
+      loggerAdded_ = true;
   }
 }
 
@@ -60,8 +67,6 @@ bool open_heat::network::MQTT::needLoop()
   }
   return true;
 }
-
-
 
 unsigned long open_heat::network::MQTT::loop()
 {
@@ -80,12 +85,19 @@ unsigned long open_heat::network::MQTT::loop()
   }
 
   mqttClient_.loop();
+
+  // drain message queue for old messages
+  sendMessageQueue();
+
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getMeasuredHumidTopic_, String(tempSensor_.getHumidity()));
 
   battery_->loop();
-  publish(getBatteryTopic_ +  "percent", String(battery_->percentage()));
-  publish(getBatteryTopic_ +  "voltage", String(battery_->voltage()));
+  publish(getBatteryTopic_ + "percent", String(battery_->percentage()));
+  publish(getBatteryTopic_ + "voltage", String(battery_->voltage()));
+
+  // drain message queue for new messages
+  sendMessageQueue();
 
   rtc::setMqttNextCheckMillis(rtc::offsetMillis() + checkIntervalMillis_);
 
@@ -132,16 +144,26 @@ void open_heat::network::MQTT::handleSetMode(const String& payload)
   } else if (payload == "off") {
     mode = OFF;
   } else {
-    // Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
+    Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
     return;
   }
+
   valve_->setMode(mode);
+
+  // to allow control via webinterface and mqtt, remove retained message
+  m_messageQueue.push({&setModeTopic_, ""});
 }
 
 void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
 {
-  const auto newTemp = static_cast<float>(strtod(payload.c_str(), nullptr));
+  const auto newTemp = static_cast<float>(std::strtod(payload.c_str(), nullptr));
+  if (newTemp == 0) {
+    return;
+  }
+
   valve_->setConfiguredTemp(newTemp);
+  // to allow control via webinterface and mqtt, remove retained message
+  m_messageQueue.push({&setConfiguredTempTopic_, ""});
 }
 
 void open_heat::network::MQTT::publish(const String& topic, const String& message)
@@ -256,11 +278,6 @@ void open_heat::network::MQTT::subscribe(const String& topic)
   }
 }
 
-void open_heat::network::MQTT::mqttLogPrinter(const std::string& message)
-{
-  mqttClient_.publish(logTopic_, message.c_str());
-}
-
 void open_heat::network::MQTT::enableDebug(bool value)
 {
   if (rtc::read().debug == value) {
@@ -269,4 +286,19 @@ void open_heat::network::MQTT::enableDebug(bool value)
 
   rtc::setDebug(value);
   open_heat::rtc::wifiDeepSleep(1, value, *filesystem_);
+}
+
+void open_heat::network::MQTT::sendMessageQueue()
+{
+  while (!m_messageQueue.empty()) {
+    const auto msg = m_messageQueue.front();
+    if (*msg.topic == logTopic_) {
+      // do not log again
+      mqttClient_.publish(*msg.topic, msg.message);
+    } else {
+      publish(*msg.topic, msg.message);
+    }
+
+    m_messageQueue.pop();
+  }
 }
