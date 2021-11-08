@@ -31,15 +31,15 @@ class RadiatorValve {
   void setWindowState(bool isOpen);
 
   private:
-  void openValve(unsigned short rotateTime);
-  void closeValve(unsigned short rotateTime);
+  void openValve(unsigned int rotateTime);
+  void closeValve(unsigned int rotateTime);
   void disablePins();
   void enablePins();
   void updateConfig();
 
   Filesystem& filesystem_;
 
-  static constexpr int VALVE_FULL_ROTATE_TIME = 60'000;
+  static constexpr int VALVE_FULL_ROTATE_TIME = 90'000;
   sensors::ITemperatureSensor& tempSensor_;
 
   static constexpr unsigned long checkIntervalMillis_

@@ -66,7 +66,7 @@ unsigned long open_heat::heating::RadiatorValve::loop()
   unsigned short closeTime = 200U;
 
   // If valve was opened waiting time is increased
-  unsigned long additionalWaitTime = 0;
+  unsigned long additionalWaitTime = 0UL;
 
   float predictionError = temp - rtc::read().lastPredictedTemp;
   Logger::log(
@@ -189,7 +189,7 @@ void open_heat::heating::RadiatorValve::updateConfig()
   filesystem_.persistConfig();
 }
 
-void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
+void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
 {
   if (rtc::read().currentRotateTime <= (-VALVE_FULL_ROTATE_TIME)) {
     open_heat::Logger::log(
@@ -202,7 +202,7 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
   if (rtc::read().currentRotateTime < 0) {
     const auto remainingTime
       = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
-    rotateTime = std::min(rotateTime, static_cast<unsigned short>(remainingTime));
+    rotateTime = std::min(rotateTime, static_cast<unsigned int>(remainingTime));
   }
 
   rtc::setCurrentRotateTime(
@@ -220,13 +220,11 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned short rotateTime)
   enablePins();
   digitalWrite(static_cast<uint8_t>(config.Vin), HIGH);
   digitalWrite(static_cast<uint8_t>(config.Ground), LOW);
-
   delay(rotateTime);
-
   disablePins();
 }
 
-void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
+void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
 {
   if (rtc::read().currentRotateTime >= VALVE_FULL_ROTATE_TIME) {
     open_heat::Logger::log(
@@ -239,7 +237,7 @@ void open_heat::heating::RadiatorValve::openValve(unsigned short rotateTime)
   if (rtc::read().currentRotateTime > 0) {
     const auto remainingTime
       = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
-    rotateTime = std::min(rotateTime, static_cast<unsigned short>(remainingTime));
+    rotateTime = std::min(rotateTime, static_cast<unsigned int>(remainingTime));
   }
 
   rtc::setCurrentRotateTime(
