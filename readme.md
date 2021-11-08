@@ -9,7 +9,6 @@ Early beta
 
 ## Hardware
   * ESP8266
-(ESP32 can be supported in the future)
   * [Radiator Valve](https://www.amazon.de/-/en/Eqiva-Bluetooth-Smart-Radiator-Thermostat/dp/B085LW2K1M/)
     * The linked valve is taken apart and only the motor and temperature sensor is used.
     Therefore the cheapest version without support or bluetooth for wifi is sufficient
