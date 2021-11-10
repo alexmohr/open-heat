@@ -15,28 +15,29 @@ namespace rtc {
 static constexpr uint64_t CANARY = 0xDEADBEEFCAFEBABE;
 
 struct Memory {
-  uint64_t canary;
+  uint64_t canary = 0;
+  uint64_t valveNextCheckMillis = 0;
+  uint64_t mqttNextCheckMillis = 0;
+  uint64_t millisOffset = 0;
+  uint64_t lastResetTime = 0;
 
-  uint64_t valveNextCheckMillis;
-  uint64_t mqttNextCheckMillis;
-  uint64_t millisOffset;
-  uint64_t lastResetTime;
+  float lastMeasuredTemp = 0;
+  float lastPredictedTemp = 0;
+  float setTemp = 0;
+  int currentRotateTime = 0;
+  bool turnOff = false;
+  bool openFully = false;
+  bool debug = false;
 
-  float lastMeasuredTemp;
-  float lastPredictedTemp;
-  float setTemp;
-  int currentRotateTime;
-  bool turnOff;
-  bool openFully;
-  bool debug;
+  OperationMode mode = UNKNOWN;
+  OperationMode lastMode = mode;
 
-  OperationMode mode;
-  OperationMode lastMode;
+  bool isWindowOpen = false;
+  bool restoreMode = false;
 
-  bool isWindowOpen;
-  bool restoreMode;
-
-  bool drdDisabled;
+  bool drdDisabled = false;
+  unsigned long modemSleepTime = 15 * 60 * 1000;
+  ;
 };
 
 void setValveNextCheckMillis(uint64_t val);
@@ -61,6 +62,8 @@ void init(Filesystem& filesystem);
 
 uint64_t offsetMillis();
 void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem);
+
+void setModemSleepTime(unsigned long time);
 
 } // namespace rtc
 } // namespace open_heat

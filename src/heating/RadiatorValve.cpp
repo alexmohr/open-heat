@@ -164,17 +164,19 @@ float open_heat::heating::RadiatorValve::getConfiguredTemp() const
 
 void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
 {
+  if (temp == rtc::read().setTemp) {
+    return;
+  }
+
   if (0 == temp) {
     rtc::setTurnOff(true);
   }
 
-  if (temp != rtc::read().setTemp) {
-    open_heat::Logger::log(open_heat::Logger::INFO, "New target temperature %f", temp);
-    rtc::setSetTemp(temp);
-    rtc::setValveNextCheckMillis(0);
+  open_heat::Logger::log(open_heat::Logger::INFO, "New target temperature %f", temp);
+  rtc::setSetTemp(temp);
+  rtc::setValveNextCheckMillis(0);
 
-    updateConfig();
-  }
+  updateConfig();
 
   for (const auto& handler : setTempChangedHandler_) {
     handler(temp);
@@ -284,25 +286,26 @@ void open_heat::heating::RadiatorValve::setMode(const OperationMode mode)
     rtc::setRestoreMode(false);
   }
 
-  if (mode != rtc::read().mode) {
-    auto& config = filesystem_.getConfig();
-    config.Mode = rtc::read().mode;
-    filesystem_.persistConfig();
+  if (mode == rtc::read().mode) {
+    return;
   }
 
   rtc::setMode(mode);
+  auto& config = filesystem_.getConfig();
+  config.Mode = rtc::read().mode;
+  filesystem_.persistConfig();
 
   switch (mode) {
   case OFF:
     rtc::setTurnOff(true);
     break;
-  case FULL_OPEN:
-    rtc::setOpenFully(true);
-    rtc::setMode(HEAT);
-  case HEAT:
-    rtc::setValveNextCheckMillis(rtc::offsetMillis());
-  default:
-    break;
+    case FULL_OPEN:
+      rtc::setOpenFully(true);
+      rtc::setMode(HEAT);
+      case HEAT:
+        rtc::setValveNextCheckMillis(rtc::offsetMillis());
+        default:
+          break;
   }
 
   for (const auto& handler : opModeChangedHandler_) {

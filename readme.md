@@ -92,6 +92,14 @@ It offers the following topics, all of them are prefixed with the configured top
 * Get battery voltage: `$TOPIC/battery/voltage`
 * Get current mode (can be off or heating): `$TOPIC/mode/get`
 * Set current mode (can be off or heating): `$TOPIC/mode/set`
+* Get current modem sleep time: `$TOPIC/modemsleep/get` (time is milliseconds)
+* Set current modem sleep time: `$TOPIC/modemsleep/set` (time is milliseconds)
+  * Be careful when setting this. 
+  * If it's set to a small value the device will consume a lot of battery
+  * If it's set to a large value you won't receive temperatures and battery 
+    updates in a high frequency and you won't be able to change the operation mode
+  * This feature is intended to set the sleep time overnight to something like 1h
+    to save battery
 
 The battery percentage assumes a voltage between 3.1 and 3.9 volts
 

@@ -66,10 +66,11 @@ class MQTT {
   static String getMeasuredHumidTopic_;
   static String getBatteryTopic_;
 
-  static String enableNightModeTopic_;
+  static String setModemSleepTopic_;
+  static String getModemSleepTopic_;
 
   static String debugEnableTopic_;
-  static String debugLogLevel_;
+  static String debugLogLevelTopic_;
 
   static String windowStateTopic_;
 
@@ -83,8 +84,6 @@ class MQTT {
 
   WiFiClient wiFiClient_;
 
-  unsigned long checkIntervalMillis_ = 10 * 60 * 1000;
-
   bool configValid_{true};
   bool loggerAdded_{false};
 
@@ -93,7 +92,9 @@ class MQTT {
   static void handleDebug(const String& payload);
   static void subscribe(const String& topic);
   static void handleLogLevel(const String& payload);
+  void setTopic(const String& baseTopic, const String& subTopic, String& out);
   void sendMessageQueue();
+  static void handleSetModemSleep(const String& payload);
 };
 } // namespace network
 } // namespace open_heat

@@ -76,11 +76,10 @@ Memory read()
 
 void init(Filesystem& filesystem)
 {
-  Memory rtcMem = {};
+  Memory rtcMem{};
   const auto& config = filesystem.getConfig();
   rtcMem.setTemp = config.SetTemperature;
   rtcMem.mode = config.Mode;
-  rtcMem.lastPredictedTemp = 0.0f;
   rtcMem.canary = CANARY;
 
   writeRTCMemory(rtcMem);
@@ -219,6 +218,16 @@ void setDebug(bool val)
   writeRTCMemory(mem);
   unlockMem();
 }
+void setModemSleepTime(unsigned long time)
+{
+  lockMem();
+  auto mem = readWithoutLock();
+  mem.modemSleepTime = time;
+  writeRTCMemory(mem);
+  unlockMem();
+}
+
+
 
 uint64_t offsetMillis()
 {

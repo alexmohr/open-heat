@@ -21,8 +21,11 @@ String open_heat::network::MQTT::getMeasuredTempTopic_;
 String open_heat::network::MQTT::getMeasuredHumidTopic_;
 String open_heat::network::MQTT::getBatteryTopic_;
 
+String open_heat::network::MQTT::setModemSleepTopic_;
+String open_heat::network::MQTT::getModemSleepTopic_;
+
 String open_heat::network::MQTT::debugEnableTopic_;
-String open_heat::network::MQTT::debugLogLevel_;
+String open_heat::network::MQTT::debugLogLevelTopic_;
 
 String open_heat::network::MQTT::windowStateTopic_;
 
@@ -35,24 +38,25 @@ void open_heat::network::MQTT::setup()
   mqttClient_.onMessage(&MQTT::messageReceivedCallback);
 
   valve_->registerModeChangedHandler([this](OperationMode mode) {
-    publish(getModeTopic_, heating::RadiatorValve::modeToCharArray(mode));
+    m_messageQueue.push({&getModeTopic_, heating::RadiatorValve::modeToCharArray(mode)});
   });
 
-  valve_->registerSetTempChangedHandler(
-    [this](float temp) { publish(getConfiguredTempTopic_, String(temp)); });
+  valve_->registerSetTempChangedHandler([this](float temp) {
+    m_messageQueue.push({&getConfiguredTempTopic_, String(temp)});
+  });
 
-  valve_->registerWindowChangeHandler(
-    [this](bool state) { publish(windowStateTopic_, String(state)); });
+  valve_->registerWindowChangeHandler([this](bool state) {
+    m_messageQueue.push({&windowStateTopic_, String(state)});
+  });
 
   if (!loggerAdded_) {
     Logger::addPrinter([](const Logger::Level level, const std::string& message) {
-
       String buffer = Logger::levelToText(level, false);
       buffer += F(" ");
       buffer += message.c_str();
       m_messageQueue.push({&logTopic_, buffer});
-      });
-      loggerAdded_ = true;
+    });
+    loggerAdded_ = true;
   }
 }
 
@@ -91,6 +95,7 @@ unsigned long open_heat::network::MQTT::loop()
 
   publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
   publish(getMeasuredHumidTopic_, String(tempSensor_.getHumidity()));
+  publish(getModemSleepTopic_, String(rtc::read().modemSleepTime));
 
   battery_->loop();
   publish(getBatteryTopic_ + "percent", String(battery_->percentage()));
@@ -99,20 +104,35 @@ unsigned long open_heat::network::MQTT::loop()
   // drain message queue for new messages
   sendMessageQueue();
 
-  rtc::setMqttNextCheckMillis(rtc::offsetMillis() + checkIntervalMillis_);
+  rtc::setMqttNextCheckMillis(rtc::offsetMillis() + rtc::read().modemSleepTime);
 
   return rtc::read().mqttNextCheckMillis;
 }
 
 void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& payload)
 {
+  // todo this log statement breaks mqtt logger with floating point numbers
+  /*
+  Logger::log(
+    Logger::INFO,
+    "Received message in topic '%s', payload '%s'",
+    topic.c_str(),
+    payload.c_str());
+    */
+
+  if (payload.isEmpty()) {
+    return;
+  }
+
   if (topic == setConfiguredTempTopic_) {
     handleSetConfigTemp(payload);
   } else if (topic == setModeTopic_) {
     handleSetMode(payload);
+  } else if (topic == setModemSleepTopic_) {
+    handleSetModemSleep(payload);
   } else if (topic == debugEnableTopic_) {
     handleDebug(payload);
-  } else if (topic == debugLogLevel_) {
+  } else if (topic == debugLogLevelTopic_) {
     handleLogLevel(payload);
   }
 }
@@ -149,21 +169,31 @@ void open_heat::network::MQTT::handleSetMode(const String& payload)
   }
 
   valve_->setMode(mode);
-
-  // to allow control via webinterface and mqtt, remove retained message
-  m_messageQueue.push({&setModeTopic_, ""});
 }
 
 void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
 {
   const auto newTemp = static_cast<float>(std::strtod(payload.c_str(), nullptr));
-  if (newTemp == 0) {
+  if (newTemp <= 0.0f ) {
     return;
   }
 
   valve_->setConfiguredTemp(newTemp);
-  // to allow control via webinterface and mqtt, remove retained message
-  m_messageQueue.push({&setConfiguredTempTopic_, ""});
+}
+
+void open_heat::network::MQTT::handleSetModemSleep(const String& payload)
+{
+  const auto newTime = std::strtoul(payload.c_str(), nullptr, 10);
+  if (newTime == 0) {
+    return;
+  }
+
+  if (newTime == rtc::read().modemSleepTime) {
+    return;
+  }
+
+  rtc::setModemSleepTime(newTime);
+  Logger::log(Logger::INFO, "Set new modem sleep time %lu", newTime);
 }
 
 void open_heat::network::MQTT::publish(const String& topic, const String& message)
@@ -196,7 +226,6 @@ void open_heat::network::MQTT::connect()
     static_cast<int>(std::chrono::milliseconds(std::chrono::seconds(1)).count()));
 
   mqttClient_.begin(config.MQTT.Server, config.MQTT.Port, wiFiClient_);
-  // Large timeout to allow large sleeps
   const char* username = nullptr;
   const char* password = nullptr;
 
@@ -218,51 +247,37 @@ void open_heat::network::MQTT::connect()
     return;
   }
 
+  setTopic(config.MQTT.Topic, "log", logTopic_);
+
   Logger::log(
     Logger::INFO,
     "MQTT topic: %s, topic len: %i",
     config.MQTT.Topic,
     std::strlen(config.MQTT.Topic));
 
-  logTopic_ = config.MQTT.Topic;
-  logTopic_ += "log";
+  setTopic(config.MQTT.Topic, "temperature/target/get", getConfiguredTempTopic_);
+  setTopic(config.MQTT.Topic, "temperature/target/set", setConfiguredTempTopic_);
+  setTopic(config.MQTT.Topic, "temperature/measured/get", getMeasuredTempTopic_);
+  setTopic(config.MQTT.Topic, "humidity/measured/get", getMeasuredHumidTopic_);
+  setTopic(config.MQTT.Topic, "modemsleep/set", setModemSleepTopic_);
+  setTopic(config.MQTT.Topic, "modemsleep/get", getModemSleepTopic_);
+  setTopic(config.MQTT.Topic, "battery/", getBatteryTopic_);
+  setTopic(config.MQTT.Topic, "mode/get", getModeTopic_);
+  setTopic(config.MQTT.Topic, "mode/set", setModeTopic_);
+  setTopic(config.MQTT.Topic, "debug/enable", debugEnableTopic_);
 
-  setConfiguredTempTopic_ = config.MQTT.Topic;
-  setConfiguredTempTopic_ += "temperature/target/set";
+  subscribe(debugEnableTopic_);
+  subscribe(setModeTopic_);
+  subscribe(setModemSleepTopic_);
   subscribe(setConfiguredTempTopic_);
 
-  getConfiguredTempTopic_ = config.MQTT.Topic;
-  getConfiguredTempTopic_ += "temperature/target/get";
-
-  getMeasuredTempTopic_ = config.MQTT.Topic;
-  getMeasuredTempTopic_ += "temperature/measured/get";
-
-  getMeasuredHumidTopic_ = config.MQTT.Topic;
-  getMeasuredHumidTopic_ += "humidity/measured/get";
-
-  getBatteryTopic_ = config.MQTT.Topic;
-  getBatteryTopic_ += "battery/";
-
-  getModeTopic_ = config.MQTT.Topic;
-  getModeTopic_ += "mode/get";
-
-  setModeTopic_ = config.MQTT.Topic;
-  setModeTopic_ += "mode/set";
-  subscribe(setModeTopic_);
-
-  debugEnableTopic_ = config.MQTT.Topic;
-  debugEnableTopic_ += "debug/enable";
-  subscribe(debugEnableTopic_);
-
   if (!DISABLE_ALL_LOGGING) {
-    debugLogLevel_ = config.MQTT.Topic;
-    debugLogLevel_ += "debug/loglevel";
-    subscribe(debugLogLevel_);
+    setTopic(config.MQTT.Topic, "debug/loglevel", debugLogLevelTopic_);
+    subscribe(debugLogLevelTopic_);
   }
 
   if (config.WindowPins.Ground > 0 && config.WindowPins.Vin > 0) {
-    windowStateTopic_ = config.MQTT.Topic;
-    windowStateTopic_ += "window/get";
+    setTopic(config.MQTT.Topic, "window/get", windowStateTopic_);
     subscribe(windowStateTopic_);
   }
 }
@@ -301,4 +316,13 @@ void open_heat::network::MQTT::sendMessageQueue()
 
     m_messageQueue.pop();
   }
+}
+
+void open_heat::network::MQTT::setTopic(
+  const String& baseTopic,
+  const String& subTopic,
+  String& out)
+{
+  out = baseTopic;
+  out += subTopic;
 }

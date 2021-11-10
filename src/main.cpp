@@ -55,13 +55,6 @@ open_heat::network::MQTT mqtt_(
   &valve_,
   &battery_);
 
-unsigned long lastLogMillis_ = 0;
-
-void setupSerial()
-{
-;
-}
-
 void setupPins()
 {
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Running setupPins");
@@ -202,11 +195,6 @@ void loop()
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LED_OFF);
     delay(100);
-
-    if (open_heat::rtc::offsetMillis() - lastLogMillis_ > 60 * 1000) {
-      open_heat::Logger::log(open_heat::Logger::DEBUG, "DEBUG MODE: Sleep disabled");
-      lastLogMillis_ = open_heat::rtc::offsetMillis();
-    }
 
     return;
   }
