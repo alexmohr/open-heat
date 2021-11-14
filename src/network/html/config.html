@@ -26,8 +26,14 @@
                 <h3>WiFi Configuration</h3>
             </div>
             <div class="content">
+
                 <label for="ssid">SSID</label>
-                <input id="ssid" name="ssid" class="inputLarge" value="%SSID%"/>
+                <input class="inputLarge" id="ssid" name="ssid"
+                       list="networkList" type="text" value="%SSID%"/>
+
+                <datalist id="networkList">
+                    %NETWORK_LIST%
+                </datalist>
                 <br>
                 <label for="wifiPassword">Password</label>
                 <input id="wifiPassword" name="wifiPassword" class="inputLarge"

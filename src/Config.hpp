@@ -6,9 +6,12 @@
 #ifndef WIFIMANAGERCONFIG_HPP_
 #define WIFIMANAGERCONFIG_HPP_
 
+// disable formater, cstdin must be included first
+// formatter:off
+#include <cstdint>
+// formatter:on
 #include <hardware/pins.h>
 #include <pins_arduino.h>
-#include <cstdint>
 
 static constexpr uint8_t MIN_AP_PASSWORD_SIZE = 8;
 static constexpr uint8_t SSID_MAX_LEN = 32;
@@ -76,14 +79,9 @@ typedef struct Config {
   char Hostname[HOST_NAME_MAX_LEN]{};
   float SetTemperature{18};
   OperationMode Mode{OFF};
-  PinSettings MotorPins{
-    DEFAULT_MOTOR_GROUND,
-    DEFAULT_MOTOR_VIN
-  };
+  PinSettings MotorPins{DEFAULT_MOTOR_GROUND, DEFAULT_MOTOR_VIN};
   PinSettings WindowPins{};
-  int8_t TempVin{
-    DEFAULT_TEMP_VIN
-  };
+  int8_t TempVin{DEFAULT_TEMP_VIN};
 } Config;
 
 #endif // WIFIMANAGERCONFIG_HPP_

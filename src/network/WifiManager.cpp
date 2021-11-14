@@ -57,6 +57,7 @@ bool WifiManager::loadAPsFromConfig()
 
 [[noreturn]] bool WifiManager::showConfigurationPortal()
 {
+  auto accessPoints = getApList();
   Logger::log(Logger::DEBUG, "Starting access point");
 
   DNSServer dnsServer;
@@ -70,7 +71,7 @@ bool WifiManager::loadAPsFromConfig()
   const auto hostname = "OpenHeat";
   WiFi.setHostname(hostname);
 
-  IPAddress ip = WiFi.softAPIP();
+  const auto ip = WiFi.softAPIP();
   Logger::log(Logger::INFO, "IP address: %s", ip.toString().c_str());
 
   const auto dnsPort = 53;
@@ -81,6 +82,7 @@ bool WifiManager::loadAPsFromConfig()
 
   Logger::log(Logger::INFO, "Starting Config Portal");
   webServer_.setup(hostname);
+  webServer_.setApList(std::move(accessPoints));
 
   Logger::log(Logger::INFO, "Waiting for user configuration");
   // WebServer will restart ESP after configuration is done
@@ -88,6 +90,21 @@ bool WifiManager::loadAPsFromConfig()
     dnsServer.processNextRequest();
     delay(100);
   }
+}
+std::vector<String> WifiManager::getApList() const
+{
+  Logger::log(Logger::DEBUG, "Searching for available networks");
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  const auto apCount = WiFi.scanNetworks();
+  std::vector<String> accessPoints;
+  for (auto i = 0; i < apCount; ++i) {
+    const auto ssid = WiFi.SSID(i);
+    Logger::log(Logger::DEBUG, "Found SSID '%s'", ssid.c_str());
+    accessPoints.push_back(std::move(ssid));
+  }
+
+  return accessPoints;
 }
 
 bool WifiManager::checkWifi()

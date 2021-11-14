@@ -23,8 +23,9 @@ class WifiManager {
   bool checkWifi();
 
   private:
-      [[noreturn]] bool showConfigurationPortal();
+  [[noreturn]] bool showConfigurationPortal();
   bool loadAPsFromConfig();
+  std::vector<String> getApList() const;
 
   uint8_t connectMultiWiFi();
 

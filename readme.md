@@ -165,8 +165,6 @@ scan-build-11 make
 The case is designed to hold to valve, a dual 18650 battery holder and an 60x40mm circuit board. 
 At this moment the case has not been printed nor tested yet. 
 
-## Installation
-
 ## Contributions
 As this project is still in a very early stage no contributions will be accepted at the moment.
 

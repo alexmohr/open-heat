@@ -34,6 +34,7 @@ class WebServer {
 
   public:
   void setup(const char* const hostname);
+  void setApList(std::vector<String>&& apList);
   void loop();
 
   static void installUpdateHandlePost(AsyncWebServerRequest* request, Config& config);
@@ -50,6 +51,7 @@ class WebServer {
 
   bool m_setupDone = false;
   String m_hostname;
+  std::vector<String> m_apList;
 
   static constexpr const char* CONTENT_TYPE_HTML = "text/html";
   enum HtmlReturnCode {

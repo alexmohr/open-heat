@@ -334,7 +334,7 @@ String WebServer::indexHTMLProcessor(const String& var)
   }
 
   // Header
-  else if (var == F("HOSTNAME")) {
+  else if (var == F("HOST_NAME")) {
     return config.Hostname;
   }
 
@@ -380,6 +380,12 @@ String WebServer::indexHTMLProcessor(const String& var)
     return String(config.WifiCredentials.wifi_ssid);
   } else if (var == F("WIFI_PASSWORD")) {
     return String(config.WifiCredentials.wifi_pw);
+  } else if (var == F("NETWORK_LIST")) {
+    String networks;
+    for (const auto& ap : m_apList) {
+      networks += "<option value=\"" + ap + "\"></option>";
+    }
+    return networks;
   }
 
   // update settings
@@ -401,13 +407,6 @@ bool WebServer::isCaptivePortal(AsyncWebServerRequest* request)
 
   const auto hostHeader = request->getHeader("host")->value();
   const auto hostIsIp = isIp(hostHeader);
-  Logger::log(
-    Logger::DEBUG,
-    "host header: %s, isIP: %i, hostname: %s, wifi ip: %s",
-    hostHeader.c_str(),
-    hostIsIp,
-    m_hostname.c_str(),
-    WiFi.softAPIP().toString().c_str());
 
   const auto captive
     = !hostIsIp && (hostHeader != m_hostname || hostHeader != m_hostname + ".local");
@@ -415,7 +414,6 @@ bool WebServer::isCaptivePortal(AsyncWebServerRequest* request)
     return false;
   }
 
-  Logger::log(Logger::INFO, "Sending redirect for captive portal");
   AsyncWebServerResponse* response = request->beginResponse(HTTP_FOUND, "text/plain", "");
   response->addHeader("Location", "http://" + WiFi.softAPIP().toString());
   request->send(response);
@@ -438,6 +436,11 @@ bool WebServer::isIp(const String& str)
     }
   }
   return true;
+}
+
+void WebServer::setApList(std::vector<String>&& apList)
+{
+  m_apList = std::move(apList);
 }
 
 } // namespace network

@@ -20,23 +20,16 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="add mqtt topic to configure sleep time">
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="format code">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/scripts/format.sh" beforeDir="false" afterPath="$PROJECT_DIR$/scripts/format.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/Config.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Config.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/RTCMemory.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/RTCMemory.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Serial.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Serial.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WebServer.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.hpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/network/WifiManager.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/Battery.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/Battery.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/sensors/Battery.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/Battery.hpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/network/html/config.html" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/html/config.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -296,14 +289,7 @@
       <workItem from="1636707545811" duration="2253000" />
       <workItem from="1636803995945" duration="435000" />
       <workItem from="1636815953960" duration="2243000" />
-      <workItem from="1636903580027" duration="3765000" />
-    </task>
-    <task id="LOCAL-00002" summary="Add clion idea folder to simplify sharing configs.">
-      <created>1609720936001</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1609720936001</updated>
+      <workItem from="1636903580027" duration="7098000" />
     </task>
     <task id="LOCAL-00003" summary="Fixed infinite recursion in logger">
       <created>1609720955525</created>
@@ -641,7 +627,14 @@
       <option name="project" value="LOCAL" />
       <updated>1636578499820</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="format code">
+      <created>1636909470539</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1636909470539</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -660,7 +653,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix build" />
     <MESSAGE value="Updated algorithm, state and temp changes from web ui are now published via mqtt" />
     <MESSAGE value="add pin configuration" />
     <MESSAGE value="add pin config." />
@@ -685,7 +677,8 @@
     <MESSAGE value="change valve time to 90s" />
     <MESSAGE value="re-enable mqtt logger and remove read messages&#10;read messages are remove from temperature and mode set.&#10;This allows to use the webinterface and mqtt without interfering with each other." />
     <MESSAGE value="add mqtt topic to configure sleep time" />
-    <option name="LAST_COMMIT_MESSAGE" value="add mqtt topic to configure sleep time" />
+    <MESSAGE value="format code" />
+    <option name="LAST_COMMIT_MESSAGE" value="format code" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
