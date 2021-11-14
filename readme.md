@@ -31,7 +31,8 @@ To extend the battery lifetime this project is using the following batteries
 
 Battery holder:
 * https://de.aliexpress.com/item/32969695165.html
-  Battery:
+
+Battery:
 * https://de.aliexpress.com/item/1005003394481523.html
 
 To monitor their voltage the ADC of the ESP is used. 
@@ -40,7 +41,7 @@ For details, see the schematics.
 Please note that at this point it's not possible to configure the resistance
 values via the web interface. 
 Please note that a nodemcu already comes with a voltage divider for the ADC.
-To use the battery management you have to desolder these resistors
+To use the battery management you have to de-solder these resistors
 
 ## Building
 Run `init.sh` to properly initialize the project. 
@@ -54,14 +55,6 @@ Connect to the WiFi OpenHeatESP... with password "OpenHeat".
 Open 192.168.4.1 in your browser and start configuration. 
 Save config and the ESP will reboot and connect to your Wifi.
 
-Or the command below could be run:
-```bash
-SSID=core
-PW="PW"
-HOST="HOST"
-curl http://192.168.4.1/wifisave?s=$SSID&p=$PW&s1=$SSID&p1=&Hostname=$HOST&UpdateUsername=admin&UpdatePassword=letmein&ip=%28IP+unset%29&gw=192.168.2.1&sn=255.255.255.0&dns1=192.168.2.1&dns2=8.8.8.8
-
-```
 
 ## Uploading
 ```bash

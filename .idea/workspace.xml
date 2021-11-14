@@ -16,26 +16,19 @@
   </component>
   <component name="CMakeSettings">
     <configurations>
-      <configuration PROFILE_NAME="nodemcuv2" ENABLED="true" CONFIG_NAME="nodemcuv2" />
-      <configuration PROFILE_NAME="esp32" ENABLED="true" CONFIG_NAME="esp32" />
-      <configuration PROFILE_NAME="nodemcuv2-debug" ENABLED="true" CONFIG_NAME="nodemcuv2" GENERATION_OPTIONS="-DCMAKE_BUILD_TYPE=nodemcuv2debug" />
-      <configuration PROFILE_NAME="esp12e" ENABLED="true" CONFIG_NAME="esp12e" />
+      <configuration PROFILE_NAME="nodemcuv2" ENABLED="true" CONFIG_NAME="nodemcuv2" GENERATION_OPTIONS="-DCMAKE_BUILD_TYPE=nodemcuv2" />
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="re-enable mqtt logger and remove read messages&#10;read messages are remove from temperature and mode set.&#10;This allows to use the webinterface and mqtt without interfering with each other.">
-      <change afterPath="$PROJECT_DIR$/src/Serial.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/Serial.hpp" afterDir="false" />
+    <list default="true" id="48c5276e-a071-43e2-bb2b-7311631ed02d" name="Default Changelist" comment="add mqtt topic to configure sleep time">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Filesystem.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Filesystem.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/Logger.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/Logger.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/heating/RadiatorValve.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/MQTT.hpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/MQTT.hpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WebServer.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WebServer.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/network/WifiManager.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/network/WifiManager.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/platformio.ini" beforeDir="false" afterPath="$PROJECT_DIR$/platformio.ini" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/readme.md" beforeDir="false" afterPath="$PROJECT_DIR$/readme.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad-cache.lib" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad-cache.lib" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad.sch" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad.sch" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/kicad/kicad.sch-bak" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/kicad/kicad.sch-bak" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/schematics/wiring.png" beforeDir="false" afterPath="$PROJECT_DIR$/schematics/wiring.png" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/sensors/Battery.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/sensors/Battery.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -46,6 +39,14 @@
     <option name="clangTidyViaClangd" value="false" />
   </component>
   <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:nodemcuv2" />
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Python Script" />
+        <option value="HTML File" />
+      </list>
+    </option>
+  </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -83,6 +84,7 @@
     <option name="showLibraryContents" value="true" />
   </component>
   <component name="PropertiesComponent">
+    <property name="DefaultHtmlFileTemplate" value="HTML File" />
     <property name="NEW_TOOLWINDOW_STRIPE_DEFAULTS" value="true" />
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
@@ -98,7 +100,7 @@
     <property name="cf.first.check.clang-format" value="false" />
     <property name="cidr.known.project.marker" value="true" />
     <property name="cmake.loaded.for.project" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../../mbient/trace-icc-service" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/src/network/html" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.path.for.package.eslint" value="project" />
     <property name="node.js.path.for.package.tslint" value="project" />
@@ -106,19 +108,19 @@
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
     <property name="run.code.analysis.last.selected.profile" value="pProject Default" />
-    <property name="settings.editor.selected.configurable" value="CMakeSettings" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/src/network/html" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/src/network/html" />
       <recent name="$PROJECT_DIR$/src" />
     </key>
   </component>
   <component name="RunManager" selected="PlatformIO.PlatformIO Upload">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
     <configuration name="Z_DUMMY_TARGET" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Z_DUMMY_TARGET" CONFIG_NAME="nodemcuv2" RUN_TARGET_PROJECT_NAME="open-heat" RUN_TARGET_NAME="Z_DUMMY_TARGET">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
@@ -127,6 +129,11 @@
     <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="PlatformIO Debug" type="platformio" factoryName="PlatformIO Debug" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="open-heat" TARGET_NAME="Debug" CONFIG_NAME="nodemcuv2">
@@ -278,13 +285,10 @@
       <workItem from="1636287487996" duration="10713000" />
       <workItem from="1636314246206" duration="2217000" />
       <workItem from="1636357968118" duration="13894000" />
-    </task>
-    <task id="LOCAL-00001" summary="tmp">
-      <created>1609719192415</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1609719192415</updated>
+      <workItem from="1636707545811" duration="2253000" />
+      <workItem from="1636803995945" duration="435000" />
+      <workItem from="1636815953960" duration="2243000" />
+      <workItem from="1636903580027" duration="2549000" />
     </task>
     <task id="LOCAL-00002" summary="Add clion idea folder to simplify sharing configs.">
       <created>1609720936001</created>
@@ -622,7 +626,14 @@
       <option name="project" value="LOCAL" />
       <updated>1636403837986</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="add mqtt topic to configure sleep time">
+      <created>1636578499819</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1636578499820</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -641,7 +652,6 @@
     <option name="oldMeFiltersMigrated" value="true" />
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="greatly improved regulation algorithm" />
     <MESSAGE value="fix build" />
     <MESSAGE value="Updated algorithm, state and temp changes from web ui are now published via mqtt" />
     <MESSAGE value="add pin configuration" />
@@ -666,7 +676,8 @@
     <MESSAGE value="remove esp32 stuff, as this won't be supported ever" />
     <MESSAGE value="change valve time to 90s" />
     <MESSAGE value="re-enable mqtt logger and remove read messages&#10;read messages are remove from temperature and mode set.&#10;This allows to use the webinterface and mqtt without interfering with each other." />
-    <option name="LAST_COMMIT_MESSAGE" value="re-enable mqtt logger and remove read messages&#10;read messages are remove from temperature and mode set.&#10;This allows to use the webinterface and mqtt without interfering with each other." />
+    <MESSAGE value="add mqtt topic to configure sleep time" />
+    <option name="LAST_COMMIT_MESSAGE" value="add mqtt topic to configure sleep time" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -683,7 +694,7 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
           <url>file://$PROJECT_DIR$/src/Filesystem.cpp</url>
-          <line>60</line>
+          <line>62</line>
           <option name="timeStamp" value="6" />
         </line-breakpoint>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
