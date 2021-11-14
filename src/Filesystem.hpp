@@ -7,11 +7,12 @@
 #define FILESYSTEM_HPP_
 
 #include <Config.hpp>
+#include <hardware/ESP8266.h>
 
 namespace open_heat {
 class Filesystem {
   public:
-  void setup();
+  bool setup();
   Config& getConfig();
   void clearConfig();
 

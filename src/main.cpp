@@ -7,17 +7,17 @@
 #include <Logger.hpp>
 
 #include <Filesystem.hpp>
+#include <Serial.hpp>
+#include <hardware/DoubleResetDetector.hpp>
+#include <hardware/esp_err.h>
 #include <network/MQTT.hpp>
 #include <network/WebServer.hpp>
 #include <network/WifiManager.hpp>
 #include <sensors/Battery.hpp>
-#include <Serial.hpp>
-#include <hardware/esp_err.h>
 
 // external voltage
 ADC_MODE(ADC_TOUT);
 
-DNSServer dnsServer_;
 DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
 
 #if TEMP_SENSOR == BME280
@@ -42,11 +42,7 @@ open_heat::sensors::WindowSensor windowSensor_(&filesystem_, &valve_);
 
 open_heat::Serial m_serial;
 
-open_heat::network::WifiManager wifiManager_(
-  &filesystem_,
-  webServer_.getWebServer(),
-  &dnsServer_,
-  &drd_);
+open_heat::network::WifiManager wifiManager_(&filesystem_, webServer_);
 
 open_heat::network::MQTT mqtt_(
   &filesystem_,
@@ -74,7 +70,7 @@ void setupPins()
     digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
   } else {
     open_heat::Logger::log(
-      open_heat::Logger::ERROR, "Motor pin vin invalid: %i\n", config.MotorPins.Vin);
+      open_heat::Logger::ERROR, "Motor pin vin invalid: %i", config.MotorPins.Vin);
   }
   if (config.MotorPins.Ground > 1) {
     pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
@@ -82,9 +78,7 @@ void setupPins()
 
   } else {
     open_heat::Logger::log(
-      open_heat::Logger::ERROR,
-      "Motor pin ground invalid: %i\n",
-      config.MotorPins.Ground);
+      open_heat::Logger::ERROR, "Motor pin ground invalid: %i", config.MotorPins.Ground);
   }
 
   // enable temp sensor
@@ -93,7 +87,7 @@ void setupPins()
     digitalWrite(static_cast<uint8_t>(config.TempVin), HIGH);
   } else {
     open_heat::Logger::log(
-      open_heat::Logger::ERROR, "Temp pin vin invalid: %i\n", config.TempVin);
+      open_heat::Logger::ERROR, "Temp pin vin invalid: %i", config.TempVin);
   }
 }
 
@@ -102,27 +96,34 @@ void logVersions()
   open_heat::Logger::log(open_heat::Logger::DEBUG, "Board: %s", ARDUINO_BOARD);
   open_heat::Logger::log(
     open_heat::Logger::DEBUG, "Build date: %s, %s", __DATE__, __TIME__);
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG, "WifiManager Version: %s", ESP_ASYNC_WIFIMANAGER_VERSION);
 }
 
-bool isDoubleReset(const open_heat::rtc::Memory& rtcMem)
+bool isDoubleReset()
 {
-  open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
-  while (open_heat::rtc::offsetMillis() < 5 * 1000) {
-    // Call the double reset detector loop method every so often,
-    // so that it can recognise when the timeout expires.
-    // You can also call drd.stop() when you wish to no longer
-    // consider the next reset as a double reset.
-    drd_.loop();
-    delay(1000);
+  if (ESP.getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
+    open_heat::Logger::log(
+      open_heat::Logger::DEBUG,
+      "no double reset, resetInfo: %s",
+      ESP.getResetInfo().c_str());
+    return false;
   }
-  open_heat::rtc::setDrdDisabled(true);
+
+  const auto drdDetected = drd_.detectDoubleReset();
+
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "DRD detected: %i", drdDetected);
+
+  const auto millisSinceReset
+    = open_heat::rtc::read().lastResetTime - open_heat::rtc::offsetMillis();
+
+  open_heat::Logger::log(
+    open_heat::Logger::DEBUG,
+    "millis since reset: %lu, last reset time %lu, offset millis: %lu",
+    millisSinceReset,
+    open_heat::rtc::read().lastResetTime,
+    open_heat::rtc::offsetMillis());
+
   const auto doubleReset
-    = (drd_.detectDoubleReset()
-       || (ESP.getResetInfoPtr()->reason == REASON_EXT_SYS_RST &&
-           open_heat::rtc::read().lastResetTime - open_heat::rtc::offsetMillis() > 10 * 1000))
-    && !rtcMem.drdDisabled;
+    = (drdDetected || millisSinceReset < 10 * 1000) && !open_heat::rtc::read().drdDisabled;
 
   open_heat::rtc::setDrdDisabled(doubleReset);
   return doubleReset;
@@ -136,20 +137,22 @@ void setup()
 
   open_heat::Logger::setup();
   logVersions();
-  filesystem_.setup();
+  const auto configValid = filesystem_.setup();
 
-  const auto rtcMem = open_heat::rtc::read();
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "canary value: %#16x", rtcMem.canary);
-
-  if (rtcMem.canary == open_heat::rtc::CANARY) {
+  if (ESP.getResetInfoPtr()->reason == REASON_DEEP_SLEEP_AWAKE) {
     open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
     drd_.stop();
   } else {
     open_heat::rtc::init(filesystem_);
   }
-  open_heat::rtc::setLastResetTime(open_heat::rtc::offsetMillis());
+
+  const auto offsetMillis = open_heat::rtc::offsetMillis();
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Set last reset time to %lu", offsetMillis);
+  open_heat::rtc::setLastResetTime(offsetMillis);
 
   setupPins();
+
+  const auto doubleReset = isDoubleReset();
 
   if (!tempSensor_->setup()) {
     // blink led 10 times to indicate temp sensor error
@@ -158,24 +161,26 @@ void setup()
       delay(250);
       digitalWrite(LED_PIN, LED_ON);
     }
-    open_heat::Logger::log(
-      open_heat::Logger::ERROR, "Failed to init temp sensor");
+    open_heat::Logger::log(open_heat::Logger::ERROR, "Failed to init temp sensor");
   }
 
   valve_.setup();
 
-  if (open_heat::rtc::read().debug) {
-    webServer_.setup();
-  }
-
-  const auto doubleReset = isDoubleReset(rtcMem);
-
-  if (mqtt_.needLoop() || doubleReset) {
+  if (mqtt_.needLoop() || doubleReset || configValid) {
     wifiManager_.setup(doubleReset);
     mqtt_.setup();
   }
 
+  if (!configValid) {
+    mqtt_.enableDebug(true);
+  }
+
+  if (open_heat::rtc::read().debug) {
+    webServer_.setup(nullptr);
+  }
+
   drd_.stop();
+  open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 
   loop();
 }
@@ -185,6 +190,7 @@ void loop()
   // open_heat::sensors::WindowSensor::loop();
   const auto mqttSleep = mqtt_.loop();
   const auto valveSleep = valve_.loop();
+  drd_.loop();
 
   open_heat::Logger::log(
     open_heat::Logger::INFO, "DEBUG: %i", open_heat::rtc::read().debug);

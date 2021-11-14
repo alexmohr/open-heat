@@ -33,10 +33,9 @@ static constexpr uint8_t LED_OFF = LOW;
 #define FileFS LittleFS
 #define FS_Name "LittleFS"
 
-// Double reset detector
-#define ESP_DRD_USE_LITTLEFS true
-#define ESP_DRD_USE_SPIFFS false
-
 // For ESP8266, this better be 2200 to enable connect the 1st time
 #define WIFI_MULTI_1ST_CONNECT_WAITING_MS 2200L
+
+#define WIFI_MULTI_CONNECT_WAITING_MS 100L
+
 #endif

@@ -5,6 +5,7 @@
 
 #include "Config.hpp"
 #include "Filesystem.hpp"
+
 #include <cstdint>
 
 #ifndef OPEN_HEAT_RTCMEMORY_H
@@ -12,10 +13,9 @@
 namespace open_heat {
 namespace rtc {
 
-static constexpr uint64_t CANARY = 0xDEADBEEFCAFEBABE;
-
 struct Memory {
-  uint64_t canary = 0;
+  // todo Memory(const Memory&) = delete;
+
   uint64_t valveNextCheckMillis = 0;
   uint64_t mqttNextCheckMillis = 0;
   uint64_t millisOffset = 0;
@@ -56,6 +56,7 @@ void setRestoreMode(bool val);
 void setDrdDisabled(bool val);
 void setDebug(bool val);
 void setLastResetTime(uint64_t val);
+void setModemSleepTime(unsigned long val);
 
 Memory read();
 void init(Filesystem& filesystem);
@@ -63,7 +64,6 @@ void init(Filesystem& filesystem);
 uint64_t offsetMillis();
 void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem);
 
-void setModemSleepTime(unsigned long time);
 
 } // namespace rtc
 } // namespace open_heat

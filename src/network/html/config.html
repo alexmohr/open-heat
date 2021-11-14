@@ -1,0 +1,153 @@
+<html lang='en'>
+<head>
+    <title>WiFi Configuration portal</title>
+    <meta charset='utf-8'>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div class="flex-container">
+    <div class="flex-nav"></div>
+</div>
+<div class="featured">
+    <h1><a href="/">Open Heat</a></h1>
+</div>
+<form method='POST' style="margin: 20px" action='/'
+      enctype='multipart/form-data'>
+
+    <input
+            type='submit' value="Update settings & Reboot"
+            class="btn btnLarge">
+
+    <div class="flex-container animated zoomIn">
+        <div class="flex-card">
+            <div class="hero">
+                <h3>WiFi Configuration</h3>
+            </div>
+            <div class="content">
+                <label for="ssid">SSID</label>
+                <input id="ssid" name="ssid" class="inputLarge" value="%SSID%"/>
+                <br>
+                <label for="wifiPassword">Password</label>
+                <input id="wifiPassword" name="wifiPassword" class="inputLarge"
+                       value="%WIFI_PASSWORD%"
+                       type="password"/>
+
+                <br>
+                <label for="hostname">Hostname</label>
+                <input id="hostname" class="inputLarge"
+                       name="hostName"
+                       value="%HOST_NAME%">
+            </div>
+
+        </div>
+
+        <div class="flex-card">
+
+            <div class="hero">
+                <h3>MQTT</h3>
+            </div>
+
+            <div class="content">
+                <label for="mqttHost">Host</label>
+                <input
+                        id="mqttHost" class="inputMedium"
+                        name="mqttHost" value="%MQTT_HOST%"> :
+                <input size="3"
+                       id="mqttPort"
+                       class="inputSmall"
+                       name="mqttPort"
+                       value="%MQTT_PORT%"><br>
+                <label
+                        for="mqttTopic">Topic</label>
+                <input
+                        id="mqttTopic" class="inputLarge" name="mqttTopic"
+                        value="%MQTT_TOPIC%"><br><label
+                    for="mqttUsername">Username</label>
+                <input
+                        id="mqttUsername" class="inputLarge"
+                        name="mqttUsername" value="%MQTT_USER%"><br>
+                <label
+                        for="mqttPassword">Password</label>
+                <input
+                        id="mqttPassword" class="inputLarge" name="mqttPassword"
+                        value="%MQTT_PW%"><br>
+            </div>
+
+        </div>
+
+        <div class="flex-card">
+
+            <div class="hero">
+                <h3>Motor Pins</h3>
+            </div>
+            <div class="content">
+                <label for="motorGround">Ground</label>
+                <input id="motorGround"
+                       class="inputLarge" name="motorGround"
+                       value="%PIN_MOTOR_GROUND%"><br>
+                <label
+                        for="motorVIN">Power</label>
+                <input id="motorVIN"
+                       class="inputLarge"
+                       name="motorVIN"
+                       value="%PIN_MOTOR_VIN%"><br>
+
+
+            </div>
+        </div>
+
+        <div class="flex-card">
+            <div class="hero">
+                <h3>Temp Pins</h3>
+            </div>
+            <div class="content">
+                <label for="tempVIN">Power</label> <input
+                    id="tempVIN" class="inputLarge"
+                    name="tempVIN" value="%PIN_TEMP_VIN%"><br>
+            </div>
+        </div>
+        <div class="flex-card">
+            <div class="hero">
+                <h3>Window Pins</h3>
+            </div>
+            <div class="content">
+                <label for="windowGround">Ground</label>
+                <input id="windowGround"
+                       class="inputLarge" name="windowGround"
+                       value="%PIN_WINDOW_GROUND%"><br>
+                <label
+                        for="windowVin">Power</label>
+                <input id="windowVin"
+                       class="inputLarge"
+                       name="windowVIN"
+                       value="%PIN_WINDOW_VIN%">
+            </div>
+        </div>
+
+        <div class="flex-card">
+            <div class="hero">
+                <h3>Update</h3>
+            </div>
+            <div class="content">
+                <label for="updateUsername">Username</label>
+                <input id="updateUsername"
+                       class="inputLarge" name="updateUsername"
+                       value="%UPDATE_USERNAME%"><br>
+                <label
+                        for="updatePassword">Password</label>
+                <input id="updatePassword"
+                       name="updatePassword"
+                       class="inputLarge"
+                       type="password"
+                       value="%UPDATE_PASSWORD%">
+                <br/><br/>
+                <p>These values can only be changed in config mode</p>
+            </div>
+        </div>
+
+</form>
+</body>
+
+</html>

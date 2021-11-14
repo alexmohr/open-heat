@@ -6,8 +6,10 @@
 #ifndef WIFIMANAGERCONFIG_HPP_
 #define WIFIMANAGERCONFIG_HPP_
 
-#include "hardware/HAL.hpp"
-#include <ESPAsync_WiFiManager.h>
+#include <cstdint>
+#include <hardware/pins.h>
+#include <pins_arduino.h>
+
 
 static constexpr uint8_t MIN_AP_PASSWORD_SIZE = 8;
 static constexpr uint8_t SSID_MAX_LEN = 32;
@@ -45,12 +47,7 @@ static constexpr const char* DEFAULT_PW = "letmein";
 typedef struct {
   char wifi_ssid[SSID_MAX_LEN];
   char wifi_pw[PASS_MAX_LEN];
-} WiFi_Credentials;
-
-typedef struct {
-  String wifi_ssid;
-  String wifi_pw;
-} WiFi_Credentials_String;
+} WiFiCredentials;
 
 typedef struct MQTTSettings {
   char Server[MQTT_SERVER_NAME_MAX_SIZE]{};
@@ -67,15 +64,14 @@ typedef struct UpdateSettings {
 
 // pins are signed to indicate unused with < 0
 typedef struct PinSettings {
-  int8 Ground{};
-  int8 Vin{};
+  int8_t Ground{};
+  int8_t Vin{};
 } PinSettings;
 
 enum OperationMode { HEAT, OFF, FULL_OPEN, UNKNOWN };
 
 typedef struct Config {
-  WiFi_Credentials WifiCredentials[NUM_WIFI_CREDENTIALS]{{"", ""}, {"", ""}};
-  WiFi_STA_IPConfig StaticIp;
+  WiFiCredentials WifiCredentials{"", ""};
   MQTTSettings MQTT{};
   UpdateSettings Update{};
   char Hostname[HOST_NAME_MAX_LEN]{};
@@ -83,7 +79,7 @@ typedef struct Config {
   OperationMode Mode{OFF};
   PinSettings MotorPins{};
   PinSettings WindowPins{};
-  int8 TempVin;
+  int8_t TempVin;
 } Config;
 
 #endif // WIFIMANAGERCONFIG_HPP_

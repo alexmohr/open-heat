@@ -101,7 +101,7 @@ It offers the following topics, all of them are prefixed with the configured top
   * This feature is intended to set the sleep time overnight to something like 1h
     to save battery
 
-The battery percentage assumes a voltage between 3.1 and 3.9 volts
+The battery percentage assumes a voltage between 3.1 and 4.2 volts
 
 Example configuration for home assistant:
 ```yaml
@@ -187,7 +187,6 @@ As this project is still in a very early stage no contributions will be accepted
 * [ESP AsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP)
 * [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
 * [ESP_DoubleResetDetector](https://github.com/khoih-prog/ESP_DoubleResetDetector)
-* [ESPAsync_WiFiManager](https://github.com/khoih-prog/ESPAsync_WiFiManager)
 * [Adafruit BME280 Library](https://github.com/adafruit/Adafruit_BME280_Library/)
 * [MQTT](https://github.com/256dpi/arduino-mqtt)
 

@@ -14,10 +14,10 @@ bool _lock = false;
 
 void printRTCMemory(const Memory& rtcMemory)
 {
-  const auto msg = " canary " + std::to_string(rtcMemory.canary)
-    + "\nvalveNextCheckMillis " + std::to_string(rtcMemory.valveNextCheckMillis)
-    + "\nmqttNextCheckMillis " + std::to_string(rtcMemory.mqttNextCheckMillis)
-    + "\nmillisOffset " + std::to_string(rtcMemory.millisOffset) + "\nlastMeasuredTemp "
+  const auto msg = +"valveNextCheckMillis "
+    + std::to_string(rtcMemory.valveNextCheckMillis) + "\nmqttNextCheckMillis "
+    + std::to_string(rtcMemory.mqttNextCheckMillis) + "\nmillisOffset "
+    + std::to_string(rtcMemory.millisOffset) + "\nlastMeasuredTemp "
     + std::to_string(rtcMemory.lastMeasuredTemp) + "\nlastPredictedTemp "
     + std::to_string(rtcMemory.lastPredictedTemp) + "\nsetTemp "
     + std::to_string(rtcMemory.setTemp) + "\ncurrentRotateTime "
@@ -80,154 +80,95 @@ void init(Filesystem& filesystem)
   const auto& config = filesystem.getConfig();
   rtcMem.setTemp = config.SetTemperature;
   rtcMem.mode = config.Mode;
-  rtcMem.canary = CANARY;
 
   writeRTCMemory(rtcMem);
 }
-void setLastResetTime(uint64_t val)
+
+void updateMemory(std::function<void(Memory& mem)> setField)
 {
   lockMem();
   auto mem = readWithoutLock();
-  mem.lastResetTime = val;
+  setField(mem);
   writeRTCMemory(mem);
   unlockMem();
+}
+
+void setLastResetTime(uint64_t val)
+{
+  updateMemory([&val](Memory& mem) { mem.lastResetTime = val; });
 }
 void setValveNextCheckMillis(uint64_t val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.valveNextCheckMillis = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.valveNextCheckMillis = val; });
 }
 void setMqttNextCheckMillis(uint64_t val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.mqttNextCheckMillis = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.mqttNextCheckMillis = val; });
 }
 void setMillisOffset(uint64_t val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.millisOffset = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.millisOffset = val; });
 }
 void setLastMeasuredTemp(float val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.lastMeasuredTemp = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.lastMeasuredTemp = val; });
 }
 void setLastPredictedTemp(float val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.lastPredictedTemp = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.lastPredictedTemp = val; });
 }
 void setSetTemp(float val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.setTemp = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.setTemp = val; });
 }
 void setCurrentRotateTime(int val, const int absoluteLimit)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  if (val < -absoluteLimit) {
-    val = -absoluteLimit;
-  } else if (val > absoluteLimit) {
-    val = absoluteLimit;
-  }
+  updateMemory([&val, absoluteLimit](Memory& mem) {
+    if (val < -absoluteLimit) {
+      val = -absoluteLimit;
+    } else if (val > absoluteLimit) {
+      val = absoluteLimit;
+    }
 
-  mem.currentRotateTime = val;
-  writeRTCMemory(mem);
-  unlockMem();
+    mem.currentRotateTime = val;
+  });
 }
 void setTurnOff(bool val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.turnOff = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.turnOff = val; });
 }
 void setOpenFully(bool val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.openFully = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.openFully = val; });
 }
 void setMode(OperationMode val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.mode = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.mode = val; });
 }
 void setLastMode(OperationMode val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.lastMode = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.lastMode = val; });
 }
 void setIsWindowOpen(bool val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.isWindowOpen = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.isWindowOpen = val; });
 }
 void setRestoreMode(bool val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.restoreMode = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.restoreMode = val; });
 }
 void setDrdDisabled(bool val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.drdDisabled = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.drdDisabled = val; });
 }
 void setDebug(bool val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.debug = val;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.debug = val; });
 }
-void setModemSleepTime(unsigned long time)
+void setModemSleepTime(unsigned long val)
 {
-  lockMem();
-  auto mem = readWithoutLock();
-  mem.modemSleepTime = time;
-  writeRTCMemory(mem);
-  unlockMem();
+  updateMemory([&val](Memory& mem) { mem.modemSleepTime = val; });
 }
-
-
 
 uint64_t offsetMillis()
 {

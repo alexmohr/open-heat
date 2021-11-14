@@ -50,7 +50,10 @@ void open_heat::network::MQTT::setup()
   });
 
   if (!loggerAdded_) {
-    Logger::addPrinter([](const Logger::Level level, const std::string& message) {
+    Logger::addPrinter([this](const Logger::Level level, const std::string& message) {
+      if (!configValid_) {
+        return;
+      }
       String buffer = Logger::levelToText(level, false);
       buffer += F(" ");
       buffer += message.c_str();
@@ -76,6 +79,7 @@ unsigned long open_heat::network::MQTT::loop()
 {
   if (!configValid_) {
     Logger::log(Logger::ERROR, "Config is not valid, no mqtt loop!");
+    enableDebug(true);
     return 0UL;
   }
 
@@ -174,7 +178,7 @@ void open_heat::network::MQTT::handleSetMode(const String& payload)
 void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
 {
   const auto newTemp = static_cast<float>(std::strtod(payload.c_str(), nullptr));
-  if (newTemp <= 0.0f ) {
+  if (newTemp <= 0.0f) {
     return;
   }
 
