@@ -202,8 +202,7 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
   }
 
   if (rtc::read().currentRotateTime < 0) {
-    auto remainingTime
-      = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+    auto remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
     if (remainingTime < 0) {
       remainingTime = 0;
     }
@@ -240,8 +239,7 @@ void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
   }
 
   if (rtc::read().currentRotateTime > 0) {
-    auto remainingTime
-      = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+    auto remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
     if (remainingTime < 0) {
       remainingTime = 0;
     }
@@ -306,13 +304,13 @@ void open_heat::heating::RadiatorValve::setMode(const OperationMode mode)
   case OFF:
     rtc::setTurnOff(true);
     break;
-    case FULL_OPEN:
-      rtc::setOpenFully(true);
-      rtc::setMode(HEAT);
-      case HEAT:
-        rtc::setValveNextCheckMillis(rtc::offsetMillis());
-        default:
-          break;
+  case FULL_OPEN:
+    rtc::setOpenFully(true);
+    rtc::setMode(HEAT);
+  case HEAT:
+    rtc::setValveNextCheckMillis(rtc::offsetMillis());
+  default:
+    break;
   }
 
   for (const auto& handler : opModeChangedHandler_) {

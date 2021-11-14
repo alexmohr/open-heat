@@ -55,7 +55,7 @@ bool WifiManager::loadAPsFromConfig()
   return true;
 }
 
-bool WifiManager::showConfigurationPortal()
+[[noreturn]] bool WifiManager::showConfigurationPortal()
 {
   Logger::log(Logger::DEBUG, "Starting access point");
 
@@ -83,6 +83,7 @@ bool WifiManager::showConfigurationPortal()
   webServer_.setup(hostname);
 
   Logger::log(Logger::INFO, "Waiting for user configuration");
+  // WebServer will restart ESP after configuration is done
   while (true) {
     dnsServer.processNextRequest();
     delay(100);

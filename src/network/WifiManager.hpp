@@ -12,21 +12,18 @@
 #include <Config.hpp>
 #include <Filesystem.hpp>
 
-
 namespace open_heat {
 namespace network {
 class WifiManager {
   public:
-      WifiManager(Filesystem* filesystem, WebServer& webServer) :
-      webServer_(webServer),
-      wifiMulti_(WIFI_MULTI()),
-      filesystem_(filesystem){};
+  WifiManager(Filesystem* filesystem, WebServer& webServer) :
+      webServer_(webServer), wifiMulti_(WIFI_MULTI()), filesystem_(filesystem){};
 
   void setup(bool doubleReset);
   bool checkWifi();
 
   private:
-  bool showConfigurationPortal();
+      [[noreturn]] bool showConfigurationPortal();
   bool loadAPsFromConfig();
 
   uint8_t connectMultiWiFi();
@@ -37,7 +34,6 @@ class WifiManager {
   WIFI_MULTI wifiMulti_{};
   Filesystem* filesystem_{};
 };
-
 
 } // namespace network
 } // namespace open_heat

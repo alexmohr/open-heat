@@ -12,8 +12,9 @@ class Battery {
   void loop();
   float percentage();
   float voltage();
+
   private:
-      double m_voltage;
+  double m_voltage;
 };
 } // namespace open_heat::sensors
 

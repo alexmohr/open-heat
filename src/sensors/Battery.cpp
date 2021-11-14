@@ -14,7 +14,6 @@ void Battery::setup()
 {
 }
 
-
 void Battery::loop()
 {
   const auto iterations = 100;
@@ -32,7 +31,6 @@ void Battery::loop()
   m_voltage = sum / static_cast<double>(iterations) / 1000.0;
   m_voltage = (m_voltage * (R1 + R2)) / R2;
 }
-
 
 float Battery::percentage()
 {

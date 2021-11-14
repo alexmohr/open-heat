@@ -122,8 +122,8 @@ bool isDoubleReset()
     open_heat::rtc::read().lastResetTime,
     open_heat::rtc::offsetMillis());
 
-  const auto doubleReset
-    = (drdDetected || millisSinceReset < 10 * 1000) && !open_heat::rtc::read().drdDisabled;
+  const auto doubleReset = (drdDetected || millisSinceReset < 10 * 1000)
+    && !open_heat::rtc::read().drdDisabled;
 
   open_heat::rtc::setDrdDisabled(doubleReset);
   return doubleReset;
@@ -147,7 +147,8 @@ void setup()
   }
 
   const auto offsetMillis = open_heat::rtc::offsetMillis();
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Set last reset time to %lu", offsetMillis);
+  open_heat::Logger::log(
+    open_heat::Logger::DEBUG, "Set last reset time to %lu", offsetMillis);
   open_heat::rtc::setLastResetTime(offsetMillis);
 
   setupPins();

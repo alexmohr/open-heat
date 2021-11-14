@@ -64,7 +64,6 @@ void init(Filesystem& filesystem);
 uint64_t offsetMillis();
 void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem);
 
-
 } // namespace rtc
 } // namespace open_heat
 

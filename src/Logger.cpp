@@ -70,8 +70,7 @@ void Logger::log(Level level, const char* format, ...)
 
   va_list args;
   va_start(args, format);
-  vsnprintf(
-    logBuffer_.data(), logBuffer_.size(), format, args);
+  vsnprintf(logBuffer_.data(), logBuffer_.size(), format, args);
   va_end(args);
 
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {
@@ -114,7 +113,7 @@ void Logger::defaultLog(const std::string& message)
   Serial.println(message.c_str());
 }
 
-const char* Logger::levelToText(Logger::Level level, bool color)
+const char* Logger::levelToText(const Logger::Level level, const bool color)
 {
   if (color) {
     return COLORED_LOG_LEVEL_STRINGS[level];

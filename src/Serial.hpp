@@ -5,11 +5,11 @@
 
 #ifndef OPEN_HEAT_SERIAL_H
 #define OPEN_HEAT_SERIAL_H
-namespace  open_heat {
+namespace open_heat {
 class Serial {
   public:
-      static void setup();
+  static void setup();
 };
-}
+} // namespace open_heat
 
 #endif // OPEN_HEAT_SERIAL_H

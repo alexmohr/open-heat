@@ -409,7 +409,8 @@ bool WebServer::isCaptivePortal(AsyncWebServerRequest* request)
     m_hostname.c_str(),
     WiFi.softAPIP().toString().c_str());
 
-  const auto captive = !hostIsIp && (hostHeader != m_hostname || hostHeader != m_hostname + ".local");
+  const auto captive
+    = !hostIsIp && (hostHeader != m_hostname || hostHeader != m_hostname + ".local");
   if (!captive) {
     return false;
   }

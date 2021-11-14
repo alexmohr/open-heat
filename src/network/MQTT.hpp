@@ -30,7 +30,7 @@ class MQTT {
   {
     valve_ = valve;
     filesystem_ = filesystem;
-    battery_  = battery;
+    battery_ = battery;
   }
 
   public:

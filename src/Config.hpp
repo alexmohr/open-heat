@@ -6,10 +6,9 @@
 #ifndef WIFIMANAGERCONFIG_HPP_
 #define WIFIMANAGERCONFIG_HPP_
 
-#include <cstdint>
 #include <hardware/pins.h>
 #include <pins_arduino.h>
-
+#include <cstdint>
 
 static constexpr uint8_t MIN_AP_PASSWORD_SIZE = 8;
 static constexpr uint8_t SSID_MAX_LEN = 32;
@@ -29,8 +28,8 @@ static constexpr uint8_t UPDATE_MAX_PW_LEN = 64;
 
 static constexpr uint8_t HOST_NAME_MAX_LEN = 32;
 
-static constexpr uint8_t DEFAULT_MOTOR_GROUND = D6;
-static constexpr uint8_t DEFAULT_MOTOR_VIN = D5;
+static constexpr int8_t DEFAULT_MOTOR_GROUND = D6;
+static constexpr int8_t DEFAULT_MOTOR_VIN = D5;
 
 static constexpr int8_t DEFAULT_TEMP_VIN = D7;
 // On devboard defaults are D8 and D7
@@ -77,9 +76,14 @@ typedef struct Config {
   char Hostname[HOST_NAME_MAX_LEN]{};
   float SetTemperature{18};
   OperationMode Mode{OFF};
-  PinSettings MotorPins{};
+  PinSettings MotorPins{
+    DEFAULT_MOTOR_GROUND,
+    DEFAULT_MOTOR_VIN
+  };
   PinSettings WindowPins{};
-  int8_t TempVin;
+  int8_t TempVin{
+    DEFAULT_TEMP_VIN
+  };
 } Config;
 
 #endif // WIFIMANAGERCONFIG_HPP_

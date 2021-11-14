@@ -52,7 +52,12 @@ class WebServer {
   String m_hostname;
 
   static constexpr const char* CONTENT_TYPE_HTML = "text/html";
-  enum HtmlReturnCode { HTTP_OK = 200, HTTP_FOUND = 302, HTTP_DENIED = 403, HTTP_NOT_FOUND = 404 };
+  enum HtmlReturnCode {
+    HTTP_OK = 200,
+    HTTP_FOUND = 302,
+    HTTP_DENIED = 403,
+    HTTP_NOT_FOUND = 404
+  };
 
   static void installUpdateHandleUpload(
     const String& filename,
@@ -78,7 +83,6 @@ class WebServer {
   String indexHTMLProcessor(const String& var);
   static void reset(AsyncWebServerRequest* request, AsyncResponseStream* response);
   static bool isIp(const String& str);
-
 };
 
 } // namespace network
