@@ -4,28 +4,34 @@
 //
 
 #include "WebServer.hpp"
+#include "generated/html/config.hpp"
+#include "generated/html/index.hpp"
+#include "generated/html/redirect_15.hpp"
+#include "generated/html/redirect_now.hpp"
 #include <cstring>
+#include <functional>
 
 namespace open_heat {
 namespace network {
 
-static constexpr char HTML_INDEX[] PROGMEM
-= R"(<html lang='en'><head> <title>Open Heat</title> <meta charset='utf-8'> <meta name="viewport" content="width=device-width, user-scalable=no"> <script>if (!!window.EventSource){const logEvents=new EventSource('/logEvents'); logEvents.addEventListener('message', function (e){const div=document.getElementById('logDiv'); const paragraph=document.createElement("p"); const text=document.createTextNode(e.data); const str=JSON.stringify(e.data); if (str.includes("[DEBUG]") || str.includes("[TRACE]")){paragraph.className="logDebug";}else if (str.includes("[INFO]")){paragraph.className="logInfo";}else{paragraph.className="logError";}paragraph.appendChild(text); div.insertBefore(paragraph, div.firstChild);}, false);}</script> <style>html{background-color: #212121;}p{font-weight: 500;}a:visited{text-decoration: none; color: #E0E0E0;}a{text-decoration: none;}*{margin: 0; padding: 0; color: #E0E0E0; overflow-x: hidden;}body{font-size: 16px; font-family: 'Roboto', sans-serif; font-weight: 300; color: #4a4a4a;}input{width: 120px; background: #121212; border: none; border-radius: 4px; padding: 1rem; height: 50px; margin: 0.25em; font-size: 1rem; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);}.input-group-text{width: 120px; background: #121212; border: none; border-radius: 4px; padding: 1rem; height: 50px; margin-left: -0.5em; z-index: -1; font-size: 1rem; box-shadow: 0 10px 20px -20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);}.inputMedium{width: 155px;}.inputSmall{width: 85px;}.inputLarge{width: 260px;}label{margin-right: 1em; font-size: 1.15rem; display: inline-block; width: 85px;}.break{flex-basis: 100%%; height: 0;}.btn{background: #303F9F; color: #EEEEEE; border-radius: 4px;}.btnLarge{width: 262px;}.flex-container{display: flex; flex-wrap: wrap;}.flex-nav{flex-grow: 1; flex-shrink: 0; background: #303F9F; height: 3rem;}.flex-menu{padding: 1rem 2rem; float: right;}.featured{background: #3F51B5; color: #ffffff; padding: 1em;}.featured h1{font-size: 2rem; margin-bottom: 1rem; font-weight: 300;}.flex-card{overflow-y: hidden; flex: 1; flex-shrink: 0; flex-basis: 400px; display: flex; flex-wrap: wrap; background: #212121; margin: .5rem; box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);}.flex-card div{flex: 100%%;}.fit-content{height: fit-content;}.flex-card .hero{position: relative; color: #ffffff; height: 70px; background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)) no-repeat; background-size: cover;}.flex-card .hero h3{position: absolute; bottom: 15px; left: 0; padding: 0 1rem;}.content{min-height: 100%%; min-width: 400px;}.flex-card .content{color: #BDBDBD; padding: 1.5rem 1rem 2rem 1rem;}.logInfo{color: #2E7D32;}.logDebug{color: #757575;}.logError{color: #b71c1c;}</style></head><body><div class="flex-container"> <div class="flex-nav"></div></div><div class="featured"> <h1><a href="/">Open Heat</a></h1></div><div class="flex-container animated zoomIn"> <div class="flex-card"> <div class="fit-content"> <div class="hero"> <h3>Temperature</h3> </div><div class="content"> <label for="currentTemp">Measured</label> <input class="inputSmall" readonly="readonly" id="currentTemp" value="%CURRENT_TEMP%"> <span class="input-group-text">°C</span><br><form method='POST' action='/' enctype='multipart/form-data'> <label for="setTemp">Set</label> <input class="inputSmall" id="setTemp" name="setTemp" type="number" value="%SET_TEMP%"> <span class="input-group-text">°C</span> <input type='submit' value='Confirm' class="btn"> </form> <form method='POST' action='/toggle' enctype='multipart/form-data'> <label></label> <input type='submit' value='%TURN_ON_OFF%' class="btn btnLarge"></form> <form method='POST' action='/fullOpen' enctype='multipart/form-data'><label></label> <input type='submit' value='Open valve fully' class="btn btnLarge"> </form> </div></div><div class="fit-content"> <div class="hero"> <h3>Battery</h3> </div><div class="content"> <label for="batteryVoltage">Voltage</label> <input class="inputSmall" readonly="readonly" id="batteryVoltage" value="%BATTERY_VOLTAGE%"> <span class="input-group-text">V</span><br><label for="batteryPercentage">Percent</label> <input class="inputSmall" readonly="readonly" id="batteryPercentage" value="%BATTERY_PERCENTAGE%"> <span class="input-group-text">%%</span><br></div></div></div><div class="flex-card"> <div class="hero"> <h3>Settings</h3> </div><div class="content"> <h3>Network</h3> <form method='POST' action='/' enctype='multipart/form-data'><label for="netHost">Hostname</label> <input id="netHost" class="inputLarge" name="netHost" value="%HOSTNAME%"><br><h3>MQTT</h3> <label for="mqttHost">Host</label> <input id="mqttHost" class="inputMedium" name="mqttHost" value="%MQTT_HOST%"> : <input size="3" id="mqttPort" class="inputSmall" name="mqttPort" value="%MQTT_PORT%"><br><label for="mqttTopic">Topic</label> <input id="mqttTopic" class="inputLarge" name="mqttTopic" value="%MQTT_TOPIC%"><br><label for="mqttUsername">Username</label> <input id="mqttUsername" class="inputLarge" name="mqttUsername" value="%MQTT_USER%"><br><label for="mqttPassword">Password</label> <input id="mqttPassword" class="inputLarge" name="mqttPassword" value="%MQTT_PW%"><br><h3>Motor Pins</h3> <label for="motorGround">Ground</label> <input id="motorGround" class="inputLarge" name="motorGround" value="%PIN_MOTOR_GROUND%"><br><label for="motorVIN">Power</label> <input id="motorVIN" class="inputLarge" name="motorVIN" value="%PIN_MOTOR_VIN%"><br><h3>Temp Pins</h3> <label for="tempVIN">Power</label> <input id="tempVIN" class="inputLarge" name="tempVIN" value="%PIN_TEMP_VIN%"><br><h3>Window Pins</h3> <label for="windowGround">Ground</label> <input id="windowGround" class="inputLarge" name="windowGround" value="%PIN_WINDOW_GROUND%"><br><label for="windowVin">Power</label> <input id="windowVin" class="inputLarge" name="windowVIN" value="%PIN_WINDOW_VIN%"><br><br><br><input type='submit' value="Update settings & Reboot" class="btn btnLarge"> </form> </div></div><div class="flex-card"> <div class="hero"> <h3>System</h3> </div><div class="content"> <h3>Firmware update</h3> <form method='POST' action='/installUpdate' enctype='multipart/form-data'><input type='file' class="input inputLarge" accept='.bin,.bin.gz' name='firmware'> <input type='submit' value='Update' class="btn"></form> <br></div></div><div class="break"></div><div class="flex-card"> <div class="hero"> <h3>Log</h3> </div><div class="content" id="logDiv"></div></div></div></body></html>)";
-
-static const char HTML_REDIRECT_15[] PROGMEM
-  = R"(<html><style>html{background-color:#424242;font-size:16px;font-family:'Roboto',sans-serif;font-weight:300;color:#4a4a4a;color:#fefefe;text-align:center}</style><head><meta http-equiv="refresh" content="15;/" /></head><body><h1>Operation %s, reloading in 15 seconds...</h1></body></html>)";
-
-static const char HTML_REDIRECT_NOW[] PROGMEM
-  = R"(<html><head><meta http-equiv="refresh" content="0;/" /></head></html>)";
-
-String logBuffer_;
-
-void open_heat::network::WebServer::setup()
+void open_heat::network::WebServer::setup(const char* const hostname)
 {
-  if (isSetup_) {
+  if (m_setupDone) {
+    Logger::log(Logger::DEBUG, "Webserver setup already done");
     return;
   }
-  isSetup_ = true;
+
+  if (hostname != nullptr) {
+    m_serveIndex = HTML_CONFIG;
+    Logger::log(Logger::INFO, "Serving configuration portal");
+    m_hostname = String(hostname);
+  } else {
+    Logger::log(Logger::INFO, "Serving webinterface");
+    m_serveIndex = HTML_INDEX;
+    m_hostname = "";
+  }
+
+  m_setupDone = true;
 
   auto& config = filesystem_.getConfig();
   MDNS.begin(config.Hostname);
@@ -36,28 +42,36 @@ void open_heat::network::WebServer::setup()
   const char* togglePath = "/toggle";
   const char* fullOpen = "/fullOpen";
 
-  asyncWebServer_.on(fullOpen, HTTP_POST, [this](AsyncWebServerRequest* request) {
-    fullOpenHandlePost(request);
-  });
+  asyncWebServer_.on(
+    fullOpen,
+    HTTP_POST,
+    std::bind(&WebServer::fullOpenHandlePost, this, std::placeholders::_1));
 
-  asyncWebServer_.on(togglePath, HTTP_POST, [this](AsyncWebServerRequest* request) {
-    togglePost(request);
+  asyncWebServer_.on(
+    togglePath,
+    HTTP_POST,
+    std::bind(&WebServer::togglePost, this, std::placeholders::_1));
+
+  asyncWebServer_.on(
+    rootPath,
+    HTTP_POST,
+    std::bind(&WebServer::rootHandlePost, this, std::placeholders::_1));
+
+  asyncWebServer_.onNotFound(
+    std::bind(&WebServer::onNotFound, this, std::placeholders::_1));
+
+  asyncWebServer_.on(rootPath, HTTP_GET, [this](AsyncWebServerRequest* request) {
+    if (!isCaptivePortal(request)) {
+      rootHandleGet(request);
+    }
   });
 
   asyncWebServer_.on(togglePath, HTTP_GET, [this](AsyncWebServerRequest* request) {
     request->send(HTTP_OK, CONTENT_TYPE_HTML, HTML_REDIRECT_NOW);
   });
 
-  asyncWebServer_.on(rootPath, HTTP_POST, [this](AsyncWebServerRequest* request) {
-    rootHandlePost(request);
-  });
-
-  asyncWebServer_.on(rootPath, HTTP_GET, [this](AsyncWebServerRequest* request) {
-    rootHandleGet(request);
-  });
-
   asyncWebServer_.on(installUpdatePath, HTTP_GET, [](AsyncWebServerRequest* request) {
-    request->send(403, CONTENT_TYPE_HTML, "Access denied");
+    request->send(HTTP_DENIED, CONTENT_TYPE_HTML, "Access denied");
   });
 
   asyncWebServer_.on(
@@ -74,47 +88,12 @@ void open_heat::network::WebServer::setup()
       size_t len,
       bool final) { installUpdateHandleUpload(filename, index, data, len, final); });
 
-  setupEvents();
-
   asyncWebServer_.begin();
-  // Logger::log(Logger::DEBUG, "Web server ready");
-}
-
-void WebServer::setupEvents()
-{
-  /*Logger::addPrinter(
-    [this](Logger::Level level, const char* module, const char* message) {
-      eventsLogPrinter(level, module, message);
-    });
-
-  asyncWebServer_.addHandler(&logEvents_);*/
-}
-
-void WebServer::eventsLogPrinter(
-  const Logger::Level& level,
-  const char* module,
-  const char* message)
-{
-  /*logBuffer_ = LOG_LEVEL_STRINGS[level];
-  logBuffer_ += F(" ");
-
-  if (std::strlen(module) > 0) {
-    logBuffer_ += F(": ");
-    logBuffer_ += module;
-    logBuffer_ += F(": ");
-  }
-
-  logBuffer_ += message;
-  logEvents_.send(logBuffer_.c_str());*/
+  Logger::log(Logger::DEBUG, "Web server ready");
 }
 
 void open_heat::network::WebServer::loop()
 {
-}
-
-AsyncWebServer& open_heat::network::WebServer::getWebServer()
-{
-  return asyncWebServer_;
 }
 
 void WebServer::installUpdateHandlePost(
@@ -193,7 +172,8 @@ void WebServer::installUpdateHandleUpload(
 
 void WebServer::rootHandleGet(AsyncWebServerRequest* const request)
 {
-  request->send_P(HTTP_OK, CONTENT_TYPE_HTML, HTML_INDEX, [this](const String& data) {
+  Logger::log(Logger::DEBUG, "Received request for /");
+  request->send_P(HTTP_OK, CONTENT_TYPE_HTML, m_serveIndex, [this](const String& data) {
     return indexHTMLProcessor(data);
   });
 }
@@ -208,7 +188,7 @@ void WebServer::rootHandlePost(AsyncWebServerRequest* const request)
     reset(request, response);
     request->send(response);
   } else {
-    request->send_P(HTTP_OK, CONTENT_TYPE_HTML, HTML_INDEX, [this](const String& data) {
+    request->send_P(HTTP_OK, CONTENT_TYPE_HTML, m_serveIndex, [this](const String& data) {
       return indexHTMLProcessor(data);
     });
   }
@@ -228,12 +208,16 @@ bool WebServer::updateConfig(AsyncWebServerRequest* const request)
   char windowGroundBuf[4]{};
 
   std::vector<std::tuple<const char*, char*>> params = {
+    std::tuple<const char*, char*>{"ssid", config.WifiCredentials.wifi_ssid},
+    std::tuple<const char*, char*>{"wifiPassword", config.WifiCredentials.wifi_pw},
+    std::tuple<const char*, char*>{"updatePassword", config.Update.Password},
+    std::tuple<const char*, char*>{"updateUsername", config.Update.Username},
     std::tuple<const char*, char*>{"mqttHost", config.MQTT.Server},
     std::tuple<const char*, char*>{"mqttTopic", config.MQTT.Topic},
     std::tuple<const char*, char*>{"mqttUsername", config.MQTT.Username},
     std::tuple<const char*, char*>{"mqttPassword", config.MQTT.Password},
     std::tuple<const char*, char*>{"mqttPort", portBuf},
-    std::tuple<const char*, char*>{"netHost", config.Hostname},
+    std::tuple<const char*, char*>{"hostname", config.Hostname},
     std::tuple<const char*, char*>{"motorGround", motorGroundBuf},
     std::tuple<const char*, char*>{"motorVIN", motorVinBuf},
     std::tuple<const char*, char*>{"tempVIN", tempVinBuf},
@@ -318,7 +302,7 @@ bool WebServer::updateField(
 
 void WebServer::togglePost(AsyncWebServerRequest* const pRequest)
 {
-  const auto newMode = valve_.getMode() != HEAT ? HEAT : OFF;
+  const auto newMode = valve_.getMode() == HEAT ? OFF : HEAT;
   valve_.setMode(newMode);
 
   pRequest->send(HTTP_OK, CONTENT_TYPE_HTML, HTML_REDIRECT_NOW);
@@ -350,7 +334,7 @@ String WebServer::indexHTMLProcessor(const String& var)
   }
 
   // Header
-  else if (var == F("HOSTNAME")) {
+  else if (var == F("HOST_NAME")) {
     return config.Hostname;
   }
 
@@ -391,8 +375,72 @@ String WebServer::indexHTMLProcessor(const String& var)
     return String(battery_.percentage());
   }
 
+  // Wi-Fi settings
+  else if (var == F("SSID")) {
+    return String(config.WifiCredentials.wifi_ssid);
+  } else if (var == F("WIFI_PASSWORD")) {
+    return String(config.WifiCredentials.wifi_pw);
+  } else if (var == F("NETWORK_LIST")) {
+    String networks;
+    for (const auto& ap : m_apList) {
+      networks += "<option value=\"" + ap + "\"></option>";
+    }
+    return networks;
+  }
+
+  // update settings
+  else if (var == F("UPDATE_USERNAME")) {
+    return String(config.Update.Username);
+  } else if (var == F("UPDATE_PASSWORD")) {
+    return String(config.Update.Password);
+  }
+
   Logger::log(Logger::WARNING, "Invalid template: %s", var.c_str());
   return String();
+}
+
+bool WebServer::isCaptivePortal(AsyncWebServerRequest* request)
+{
+  if (m_hostname.isEmpty()) {
+    return false;
+  }
+
+  const auto hostHeader = request->getHeader("host")->value();
+  const auto hostIsIp = isIp(hostHeader);
+
+  const auto captive
+    = !hostIsIp && (hostHeader != m_hostname || hostHeader != m_hostname + ".local");
+  if (!captive) {
+    return false;
+  }
+
+  AsyncWebServerResponse* response = request->beginResponse(HTTP_FOUND, "text/plain", "");
+  response->addHeader("Location", "http://" + WiFi.softAPIP().toString());
+  request->send(response);
+  return true;
+}
+
+void WebServer::onNotFound(AsyncWebServerRequest* request)
+{
+  if (isCaptivePortal(request)) {
+    return;
+  }
+
+  request->send(HTTP_NOT_FOUND, CONTENT_TYPE_HTML, HTML_REDIRECT_NOW);
+}
+bool WebServer::isIp(const String& str)
+{
+  for (const auto& c : str) {
+    if (c != '.' && (c < '0' || c > '9')) {
+      return false;
+    }
+  }
+  return true;
+}
+
+void WebServer::setApList(std::vector<String>&& apList)
+{
+  m_apList = std::move(apList);
 }
 
 } // namespace network

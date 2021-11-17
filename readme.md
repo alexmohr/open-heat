@@ -31,7 +31,8 @@ To extend the battery lifetime this project is using the following batteries
 
 Battery holder:
 * https://de.aliexpress.com/item/32969695165.html
-  Battery:
+
+Battery:
 * https://de.aliexpress.com/item/1005003394481523.html
 
 To monitor their voltage the ADC of the ESP is used. 
@@ -40,7 +41,7 @@ For details, see the schematics.
 Please note that at this point it's not possible to configure the resistance
 values via the web interface. 
 Please note that a nodemcu already comes with a voltage divider for the ADC.
-To use the battery management you have to desolder these resistors
+To use the battery management you have to de-solder these resistors
 
 ## Building
 Run `init.sh` to properly initialize the project. 
@@ -54,14 +55,6 @@ Connect to the WiFi OpenHeatESP... with password "OpenHeat".
 Open 192.168.4.1 in your browser and start configuration. 
 Save config and the ESP will reboot and connect to your Wifi.
 
-Or the command below could be run:
-```bash
-SSID=core
-PW="PW"
-HOST="HOST"
-curl http://192.168.4.1/wifisave?s=$SSID&p=$PW&s1=$SSID&p1=&Hostname=$HOST&UpdateUsername=admin&UpdatePassword=letmein&ip=%28IP+unset%29&gw=192.168.2.1&sn=255.255.255.0&dns1=192.168.2.1&dns2=8.8.8.8
-
-```
 
 ## Uploading
 ```bash
@@ -101,7 +94,7 @@ It offers the following topics, all of them are prefixed with the configured top
   * This feature is intended to set the sleep time overnight to something like 1h
     to save battery
 
-The battery percentage assumes a voltage between 3.1 and 3.9 volts
+The battery percentage assumes a voltage between 3.1 and 4.2 volts
 
 Example configuration for home assistant:
 ```yaml
@@ -163,16 +156,14 @@ Logs are displayed in the web ui at the bottom of the page.
 
 ## Code analysis
 ````
-cmake .. -DCMAKE_BUILD_TYPE=nodemcuv2 --CMAKE_EXPORT_COMPILE_COMMANDS=YES ..
-~/dev/public/llvm-project/build/bin/scan-build make
+cmake -DCMAKE_BUILD_TYPE=nodemcuv2 --CMAKE_EXPORT_COMPILE_COMMANDS=YES ..
+scan-build-11 make
 ````
 
 ## Case 
 
 The case is designed to hold to valve, a dual 18650 battery holder and an 60x40mm circuit board. 
 At this moment the case has not been printed nor tested yet. 
-
-## Installation
 
 ## Contributions
 As this project is still in a very early stage no contributions will be accepted at the moment.
@@ -187,7 +178,6 @@ As this project is still in a very early stage no contributions will be accepted
 * [ESP AsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP)
 * [AsyncTCP](https://github.com/me-no-dev/AsyncTCP)
 * [ESP_DoubleResetDetector](https://github.com/khoih-prog/ESP_DoubleResetDetector)
-* [ESPAsync_WiFiManager](https://github.com/khoih-prog/ESPAsync_WiFiManager)
 * [Adafruit BME280 Library](https://github.com/adafruit/Adafruit_BME280_Library/)
 * [MQTT](https://github.com/256dpi/arduino-mqtt)
 

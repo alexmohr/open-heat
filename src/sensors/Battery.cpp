@@ -14,7 +14,6 @@ void Battery::setup()
 {
 }
 
-
 void Battery::loop()
 {
   const auto iterations = 100;
@@ -26,13 +25,12 @@ void Battery::loop()
   }
 
   // todo add configuration for these?
-  float R1 = 100'000.0; // resistance of R1 (100K)
-  float R2 = 33'000.0; // resistance of R2 (33K)
+  double R1 = 10'000'000.0; // resistance of R1 (10M)
+  double R2 = 3'300'000.0; // resistance of R2 (3.3M)
 
-  m_voltage = sum / iterations / 1000.0;
+  m_voltage = sum / static_cast<double>(iterations) / 1000.0;
   m_voltage = (m_voltage * (R1 + R2)) / R2;
 }
-
 
 float Battery::percentage()
 {

@@ -6,7 +6,6 @@
 #ifndef WEBSERVER_HPP_
 #define WEBSERVER_HPP_
 
-#include "hardware/HAL.hpp"
 #include <ESPAsyncWebServer.h>
 #include <Filesystem.hpp>
 #include <Logger.hpp>
@@ -27,19 +26,19 @@ class WebServer {
       tempSensor_(tempSensor),
       battery_(battery),
       valve_(valve),
-      asyncWebServer_(AsyncWebServer(80)),
-      logEvents_(AsyncEventSource("/logEvents"))
+      asyncWebServer_(AsyncWebServer(80))
   {
   }
 
+  WebServer(const WebServer&) = delete;
+
   public:
-  void setup();
+  void setup(const char* const hostname);
+  void setApList(std::vector<String>&& apList);
   void loop();
 
   static void installUpdateHandlePost(AsyncWebServerRequest* request, Config& config);
   void fullOpenHandlePost(AsyncWebServerRequest* request);
-
-  AsyncWebServer& getWebServer();
 
   private:
   Filesystem& filesystem_;
@@ -48,10 +47,19 @@ class WebServer {
   open_heat::heating::RadiatorValve& valve_;
 
   AsyncWebServer asyncWebServer_;
-  AsyncEventSource logEvents_;
+  const char* m_serveIndex;
+
+  bool m_setupDone = false;
+  String m_hostname;
+  std::vector<String> m_apList;
 
   static constexpr const char* CONTENT_TYPE_HTML = "text/html";
-  enum HtmlReturnCode { HTTP_OK = 200, HTTP_DENIED = 403, HTTP_NOT_FOUND = 404 };
+  enum HtmlReturnCode {
+    HTTP_OK = 200,
+    HTTP_FOUND = 302,
+    HTTP_DENIED = 403,
+    HTTP_NOT_FOUND = 404
+  };
 
   static void installUpdateHandleUpload(
     const String& filename,
@@ -71,15 +79,12 @@ class WebServer {
   void togglePost(AsyncWebServerRequest* pRequest);
   bool updateConfig(AsyncWebServerRequest* request);
 
-  String indexHTMLProcessor(const String& var);
-  void setupEvents();
-  void eventsLogPrinter(
-    const open_heat::Logger::Level& level,
-    const char* module,
-    const char* message);
-  static void reset(AsyncWebServerRequest* request, AsyncResponseStream* response);
+  bool isCaptivePortal(AsyncWebServerRequest* pRequest);
+  void onNotFound(AsyncWebServerRequest* request);
 
-  bool isSetup_ = false;
+  String indexHTMLProcessor(const String& var);
+  static void reset(AsyncWebServerRequest* request, AsyncResponseStream* response);
+  static bool isIp(const String& str);
 };
 
 } // namespace network

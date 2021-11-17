@@ -10,10 +10,10 @@
 
 namespace open_heat {
 
-void Filesystem::setup()
+bool Filesystem::setup()
 {
   if (setup_) {
-    return;
+    return true;
   }
 
   // Format FileFS if not yet
@@ -33,13 +33,15 @@ void Filesystem::setup()
 
   Logger::log(Logger::DEBUG, "FS setup done");
 
-  if (isConfigValid()) {
+  auto configValid = isConfigValid();
+  if (configValid) {
     initConfig();
   } else {
     clearConfig();
   }
 
   setup_ = true;
+  return configValid;
 }
 
 void Filesystem::listFiles()

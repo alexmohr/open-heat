@@ -13,9 +13,6 @@ namespace network {
 
 void WifiManager::setup(bool doubleReset)
 {
-  const auto& config = filesystem_->getConfig();
-  ESPAsync_WiFiManager espWifiManager(&webServer_, dnsServer_, config.Hostname);
-
   // Check if any config is valid.
   auto startConfigPortal = !loadAPsFromConfig();
   if (doubleReset) {
@@ -27,7 +24,7 @@ void WifiManager::setup(bool doubleReset)
     // Starts access point
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LED_ON);
-    while (!showConfigurationPortal(&espWifiManager)) {
+    while (!showConfigurationPortal()) {
       Logger::log(Logger::WARNING, "Configuration did not yield valid wifi, retrying");
     }
     digitalWrite(LED_PIN, LED_OFF);
@@ -38,141 +35,76 @@ void WifiManager::setup(bool doubleReset)
 
 bool WifiManager::loadAPsFromConfig()
 {
-  auto anyConfigValid = false;
-  for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
-    // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
-    auto& config = filesystem_->getConfig();
-    if (
-      (std::strlen(config.WifiCredentials[i].wifi_ssid) == 0)
-      || (std::strlen(config.WifiCredentials[i].wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
-      Logger::log(Logger::DEBUG, "Wifi config in slot %i is invalid", i);
-      continue;
-    }
-
-    anyConfigValid = true;
-    Logger::log(
-      Logger::Level::TRACE,
-      "Wifi config in slot %i is valid: SSID: %s, PW: %s",
-      i,
-      config.WifiCredentials[i].wifi_ssid,
-      config.WifiCredentials[i].wifi_pw);
-
-    wifiMulti_.addAP(
-      config.WifiCredentials[i].wifi_ssid, config.WifiCredentials[i].wifi_pw);
+  // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
+  auto& config = filesystem_->getConfig();
+  if (
+    (std::strlen(config.WifiCredentials.wifi_ssid) == 0)
+    || (std::strlen(config.WifiCredentials.wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
+    Logger::log(Logger::DEBUG, "Wifi config is invalid");
+    return false;
   }
 
-  return anyConfigValid;
+  Logger::log(
+    Logger::Level::TRACE,
+    "Wifi config is valid: SSID: %s, PW: %s",
+    config.WifiCredentials.wifi_ssid,
+    config.WifiCredentials.wifi_pw);
+
+  wifiMulti_.addAP(config.WifiCredentials.wifi_ssid, config.WifiCredentials.wifi_pw);
+
+  return true;
 }
 
-bool WifiManager::showConfigurationPortal(ESPAsync_WiFiManager* espWifiManager)
+[[noreturn]] bool WifiManager::showConfigurationPortal()
 {
-  Logger::log(Logger::INFO, "Starting Config Portal");
+  auto accessPoints = getApList();
+  Logger::log(Logger::DEBUG, "Starting access point");
 
-#if !USE_DHCP_IP
-  // Set (static IP, Gateway, Subnetmask, DNS1 and DNS2) or (IP, Gateway,
-  // Subnetmask). New in v1.0.5 New in v1.4.0
-  initSTAIPConfigStruct(staticIpConfig_);
-  espWifiManager->setSTAStaticIPConfig(staticIpConfig_);
-#endif
-
-  initAdditionalParams();
-  for (auto& param : additionalParameters_) {
-    espWifiManager->addParameter(param);
-  }
+  DNSServer dnsServer;
+  dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
 
   // SSID and PW for Config Portal
   const String ssid = "OpenHeat_ESP_" + String(ESP_getChipId(), HEX);
   const char* password = "OpenHeat";
+  WiFi.softAP(ssid, password);
 
-  espWifiManager->setConfigPortalChannel(0);
-  espWifiManager->setConfigPortalTimeout(0);
-  const auto& config = filesystem_->getConfig();
+  const auto hostname = "OpenHeat";
+  WiFi.setHostname(hostname);
 
-  wifiMulti_.cleanAPlist();
-  espWifiManager->startConfigPortal(ssid.c_str(), password);
+  const auto ip = WiFi.softAPIP();
+  Logger::log(Logger::INFO, "IP address: %s", ip.toString().c_str());
 
-  for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
-    const String tempSSID = espWifiManager->getSSID(i);
-    const String tempPW = espWifiManager->getPW(i);
-
-    // Re-insert old config if user did not enter new credentials
-    if (tempSSID.isEmpty() && tempPW.isEmpty()) {
-      Logger::log(Logger::DEBUG, "WiFi config slot %i restored from config", i);
-      wifiMulti_.addAP(
-        config.WifiCredentials[i].wifi_ssid, config.WifiCredentials[i].wifi_pw);
-    } else {
-      Logger::log(Logger::DEBUG, "WiFi config slot %i updated from portal", i);
-      wifiMulti_.addAP(tempSSID.c_str(), tempPW.c_str());
-    }
+  const auto dnsPort = 53;
+  if (!dnsServer.start(dnsPort, "*", WiFi.softAPIP())) {
+    // No socket available
+    Logger::log(Logger::ERROR, "Can't start dns server");
   }
 
-  updateConfig(espWifiManager);
-  return connectMultiWiFi() == WL_CONNECTED;
-}
+  Logger::log(Logger::INFO, "Starting Config Portal");
+  webServer_.setup(hostname);
+  webServer_.setApList(std::move(accessPoints));
 
-void WifiManager::updateConfig(ESPAsync_WiFiManager* espWifiManager)
-{
-  updateWifiCredentials(espWifiManager);
-
-  auto& config = filesystem_->getConfig();
-  clearSettings(config);
-  updateSettings(config);
-}
-
-void WifiManager::updateSettings(Config& config)
-{
-  // Update
-  std::strcpy(config.Update.Username, paramUpdateUsername_.getValue());
-  std::strcpy(config.Update.Password, paramUpdatePassword_.getValue());
-
-  filesystem_->persistConfig();
-}
-
-void WifiManager::clearSettings(Config& config)
-{
-  // Clear settings - Host
-  std::memset(&config.Hostname, 0, sizeof(config.Hostname));
-
-  // Clear settings - MQTT
-  std::memset(&config.MQTT.Server, 0, sizeof(config.MQTT.Server));
-  std::memset(&config.MQTT.Topic, 0, sizeof(config.MQTT.Topic));
-  std::memset(&config.MQTT.Username, 0, sizeof(config.MQTT.Username));
-  std::memset(&config.MQTT.Password, 0, sizeof(config.MQTT.Password));
-
-  // Clear settings - Update
-  std::memset(&config.Update.Username, 0, sizeof(config.Update.Username));
-  std::memset(&config.Update.Password, 0, sizeof(config.Update.Password));
-}
-
-void WifiManager::updateWifiCredentials(ESPAsync_WiFiManager* espWifiManager) const
-{
-  auto& config = filesystem_->getConfig();
-  String tempSSID;
-  String tempPW;
-  for (uint8_t i = 0; i < NUM_WIFI_CREDENTIALS; i++) {
-    tempSSID.clear();
-    tempPW.clear();
-
-    tempSSID = espWifiManager->getSSID(i);
-    tempPW = espWifiManager->getPW(i);
-
-    auto ssidLen = tempSSID.length();
-    auto pwLen = tempPW.length();
-    if (
-      (ssidLen <= SSID_MAX_LEN) && (pwLen <= PASS_MAX_LEN) && (ssidLen > 0)
-      && (pwLen >= MIN_AP_PASSWORD_SIZE)) {
-
-      std::memset(&config.WifiCredentials[i], 0, sizeof(WiFi_Credentials));
-      std::strcpy((config.WifiCredentials[i].wifi_ssid), tempSSID.c_str());
-      std::strcpy((config.WifiCredentials[i].wifi_pw), tempPW.c_str());
-    }
-    Logger::log(
-      Logger::DEBUG,
-      "WiFi config slot %i: SSID: %s, PW: %s",
-      i,
-      config.WifiCredentials[i].wifi_ssid,
-      config.WifiCredentials[i].wifi_pw);
+  Logger::log(Logger::INFO, "Waiting for user configuration");
+  // WebServer will restart ESP after configuration is done
+  while (true) {
+    dnsServer.processNextRequest();
+    delay(100);
   }
+}
+std::vector<String> WifiManager::getApList() const
+{
+  Logger::log(Logger::DEBUG, "Searching for available networks");
+  WiFi.mode(WIFI_STA);
+  WiFi.disconnect();
+  const auto apCount = WiFi.scanNetworks();
+  std::vector<String> accessPoints;
+  for (auto i = 0; i < apCount; ++i) {
+    const auto ssid = WiFi.SSID(i);
+    Logger::log(Logger::DEBUG, "Found SSID '%s'", ssid.c_str());
+    accessPoints.push_back(std::move(ssid));
+  }
+
+  return accessPoints;
 }
 
 bool WifiManager::checkWifi()
@@ -198,16 +130,6 @@ uint8_t WifiManager::connectMultiWiFi()
 
   // STA = client mode
   WiFi.mode(WIFI_STA);
-
-#if !USE_DHCP_IP
-#if USE_CONFIGURABLE_DNS
-  // Set static IP, Gateway, Subnetmask, DNS1 and DNS2. New in v1.0.5
-  WiFi.config(stationIP, gatewayIP, netMask, dns1IP, dns2IP);
-#else
-  // Set static IP, Gateway, Subnetmask, Use auto DNS1 and DNS2.
-  WiFi.config(stationIP, gatewayIP, netMask);
-#endif
-#endif
 
   int i = 0;
   uint8_t status = wifiMulti_.run();
@@ -247,37 +169,6 @@ uint8_t WifiManager::connectMultiWiFi()
   }
 
   return status;
-}
-
-void WifiManager::initSTAIPConfigStruct(WiFi_STA_IPConfig& ipConfig)
-{
-  ipConfig._sta_static_ip = stationIP;
-  ipConfig._sta_static_gw = gatewayIP;
-  ipConfig._sta_static_sn = netMask;
-#if USE_CONFIGURABLE_DNS
-  ipConfig._sta_static_dns1 = dns1IP;
-  ipConfig._sta_static_dns2 = dns2IP;
-#endif
-}
-
-void WifiManager::initAdditionalParams()
-{
-  auto& config = filesystem_->getConfig();
-  WMParam_Data paramData;
-
-  // Host
-  paramHostname_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, config.Hostname);
-  paramHostname_.setWMParam_Data(paramData);
-
-  // Update
-  paramUpdateUsername_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, config.Update.Username);
-  paramUpdateUsername_.setWMParam_Data(paramData);
-
-  paramUpdatePassword_.getWMParam_Data(paramData);
-  std::strcpy(paramData._value, config.Update.Password);
-  paramUpdatePassword_.setWMParam_Data(paramData);
 }
 
 } // namespace network
