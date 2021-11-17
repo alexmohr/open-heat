@@ -217,7 +217,7 @@ bool WebServer::updateConfig(AsyncWebServerRequest* const request)
     std::tuple<const char*, char*>{"mqttUsername", config.MQTT.Username},
     std::tuple<const char*, char*>{"mqttPassword", config.MQTT.Password},
     std::tuple<const char*, char*>{"mqttPort", portBuf},
-    std::tuple<const char*, char*>{"netHost", config.Hostname},
+    std::tuple<const char*, char*>{"hostname", config.Hostname},
     std::tuple<const char*, char*>{"motorGround", motorGroundBuf},
     std::tuple<const char*, char*>{"motorVIN", motorVinBuf},
     std::tuple<const char*, char*>{"tempVIN", tempVinBuf},
@@ -302,7 +302,7 @@ bool WebServer::updateField(
 
 void WebServer::togglePost(AsyncWebServerRequest* const pRequest)
 {
-  const auto newMode = valve_.getMode() != HEAT ? HEAT : OFF;
+  const auto newMode = valve_.getMode() == HEAT ? OFF : HEAT;
   valve_.setMode(newMode);
 
   pRequest->send(HTTP_OK, CONTENT_TYPE_HTML, HTML_REDIRECT_NOW);
