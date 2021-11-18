@@ -33,10 +33,12 @@ class MQTT {
     battery_ = battery;
   }
 
+  MQTT(const MQTT&) = delete;
+
   public:
   void setup();
   static bool needLoop();
-  unsigned long loop();
+  uint64_t loop();
 
   static void enableDebug(bool value);
 

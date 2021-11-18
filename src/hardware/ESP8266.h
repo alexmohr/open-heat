@@ -33,9 +33,5 @@ static constexpr uint8_t LED_OFF = LOW;
 #define FileFS LittleFS
 #define FS_Name "LittleFS"
 
-// For ESP8266, this better be 2200 to enable connect the 1st time
-#define WIFI_MULTI_1ST_CONNECT_WAITING_MS 2200L
-
-#define WIFI_MULTI_CONNECT_WAITING_MS 100L
 
 #endif

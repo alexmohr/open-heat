@@ -172,7 +172,7 @@ As this project is still in a very early stage no contributions will be accepted
 * Big thanks to @Anycubic for continued bug reports, testing and several improvements and ideas
 * Special thanks to traumflug and their regulator implementation in [ISTAtrol](https://github.com/Traumflug/ISTAtrol/blob/master/firmware/main.c).
   Although it was heavily modified and improved the I-Regulator still forms the base of the valve control.
-
+* WiFi Manager is inspired by https://github.com/roberttidey/WiFiManager/blob/feature_fastconnect/WiFiManager.cpp
 ### Libraries
 * [ESP Async WebServer](https://github.com/me-no-dev/ESPAsyncWebServer)
 * [ESP AsyncTCP](https://github.com/me-no-dev/ESPAsyncTCP)

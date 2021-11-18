@@ -38,8 +38,8 @@ bool WifiManager::loadAPsFromConfig()
   // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
   auto& config = filesystem_->getConfig();
   if (
-    (std::strlen(config.WifiCredentials.wifi_ssid) == 0)
-    || (std::strlen(config.WifiCredentials.wifi_pw) < MIN_AP_PASSWORD_SIZE)) {
+    (std::strlen(config.WifiCredentials.ssid) == 0)
+    || (std::strlen(config.WifiCredentials.password) < MIN_AP_PASSWORD_SIZE)) {
     Logger::log(Logger::DEBUG, "Wifi config is invalid");
     return false;
   }
@@ -47,10 +47,8 @@ bool WifiManager::loadAPsFromConfig()
   Logger::log(
     Logger::Level::TRACE,
     "Wifi config is valid: SSID: %s, PW: %s",
-    config.WifiCredentials.wifi_ssid,
-    config.WifiCredentials.wifi_pw);
-
-  wifiMulti_.addAP(config.WifiCredentials.wifi_ssid, config.WifiCredentials.wifi_pw);
+    config.WifiCredentials.ssid,
+    config.WifiCredentials.password);
 
   return true;
 }
@@ -123,37 +121,51 @@ bool WifiManager::checkWifi()
   return false;
 }
 
-uint8_t WifiManager::connectMultiWiFi()
+wl_status_t WifiManager::connectMultiWiFi()
 {
   WiFi.forceSleepWake();
-  Logger::log(Logger::INFO, "Connecting MultiWifi...");
+  Logger::log(Logger::INFO, "Connecting WiFi...");
+  const auto startTime = rtc::offsetMillis();
+
+  const auto& config = filesystem_->getConfig();
 
   // STA = client mode
   WiFi.mode(WIFI_STA);
+  WiFi.setHostname(config.Hostname);
+
+  fastConfig connectConfig{};
+  const auto hasFastConfig
+    = getFastConnectConfig(config.WifiCredentials.ssid, connectConfig);
+  wl_status_t status;
+  if (hasFastConfig) {
+    Logger::log(Logger::DEBUG, "Using fast connect");
+    status = WiFi.begin(
+      config.WifiCredentials.ssid,
+      config.WifiCredentials.password,
+      connectConfig.channel,
+      connectConfig.bssid,
+      true);
+  } else {
+    Logger::log(Logger::DEBUG, "Using standard connect");
+    status = WiFi.begin(config.WifiCredentials.ssid, config.WifiCredentials.password);
+  }
 
   int i = 0;
-  uint8_t status = wifiMulti_.run();
-
-  delay(WIFI_MULTI_1ST_CONNECT_WAITING_MS);
-
-  while ((i++ < 10) && (status != WL_CONNECTED)) {
-    status = wifiMulti_.run();
-
+  while ((i++ < 60) && (status != WL_CONNECTED)) {
+    delay(100);
+    status = WiFi.status();
     if (status == WL_CONNECTED) {
       break;
     }
-    delay(WIFI_MULTI_CONNECT_WAITING_MS);
   }
 
-  auto connectTime
-    = (i * WIFI_MULTI_CONNECT_WAITING_MS) + WIFI_MULTI_1ST_CONNECT_WAITING_MS;
-
+  const auto connectTime = rtc::offsetMillis() - startTime;
   if (status == WL_CONNECTED) {
     //@formatter:off
     Logger::log(
       Logger::INFO,
       "Wifi connected:\n"
-      "\tTime: %i\n"
+      "\ttime: %llu\n"
       "\tSSID: %s\n"
       "\tRSSI=%i\n"
       "\tChannel: %i\n"
@@ -165,10 +177,28 @@ uint8_t WifiManager::connectMultiWiFi()
       WiFi.localIP().toString().c_str());
     //@formatter:on
   } else {
-    Logger::log(Logger::WARNING, "WiFi connect timeout: %i", connectTime);
+    Logger::log(Logger::WARNING, "WiFi connect timeout");
   }
 
   return status;
+}
+
+bool WifiManager::getFastConnectConfig(const String& ssid, fastConfig& config)
+{
+  // adopted from
+  // https://github.com/roberttidey/WiFiManager/blob/feature_fastconnect/WiFiManager.cpp
+  int networksFound = WiFi.scanNetworks();
+  int32_t scan_rssi = -200;
+  for (auto i = 0; i < networksFound; i++) {
+    if (ssid == WiFi.SSID(i)) {
+      if (WiFi.RSSI(i) > scan_rssi) {
+        config.bssid = WiFi.BSSID(i);
+        config.channel = WiFi.channel(i);
+        return true;
+      }
+    }
+  }
+  return false;
 }
 
 } // namespace network

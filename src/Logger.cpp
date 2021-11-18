@@ -4,13 +4,14 @@
 //
 
 #include "Logger.hpp"
+#include "RTCMemory.hpp"
 #include <cstdarg>
 #include <cstring>
 #include <sstream>
 
 namespace open_heat {
 // ToDo this could be moved into progmem if more RAM is needed
-std::array<char, 512> logBuffer_;
+std::array<char, 768> logBuffer_;
 
 static constexpr const char COLORED_LEVEL_TRACE[] MEM_TYPE = "\033[1;37m[TRACE] ";
 static constexpr const char COLORED_LEVEL_DEBUG[] MEM_TYPE = "\033[1;37m[DEBUG] ";
@@ -70,7 +71,9 @@ void Logger::log(Level level, const char* format, ...)
 
   va_list args;
   va_start(args, format);
-  vsnprintf(logBuffer_.data(), logBuffer_.size(), format, args);
+  const auto time = rtc::offsetMillis();
+  const auto offset = std::sprintf(logBuffer_.data(), "[%010llu] ", time);
+  vsnprintf(logBuffer_.data() + offset, logBuffer_.size(), format, args);
   va_end(args);
 
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {

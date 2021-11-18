@@ -21,10 +21,8 @@ void printRTCMemory(const Memory& rtcMemory)
     + std::to_string(rtcMemory.lastMeasuredTemp) + "\nlastPredictedTemp "
     + std::to_string(rtcMemory.lastPredictedTemp) + "\nsetTemp "
     + std::to_string(rtcMemory.setTemp) + "\ncurrentRotateTime "
-    + std::to_string(rtcMemory.currentRotateTime) + "\nturnOff "
-    + std::to_string(rtcMemory.turnOff) + "\nopenFully "
-    + std::to_string(rtcMemory.openFully) + "\nmode " + std::to_string(rtcMemory.mode)
-    + "\nlastMode " + std::to_string(rtcMemory.lastMode) + "\nisWindowOpen "
+    + std::to_string(rtcMemory.currentRotateTime) + "\nturnOff " + "\nlastMode "
+    + std::to_string(rtcMemory.lastMode) + "\nisWindowOpen "
     + std::to_string(rtcMemory.isWindowOpen) + "\nrestoreMode "
     + std::to_string(rtcMemory.restoreMode) + "\ndrdDisabled "
     + std::to_string(rtcMemory.drdDisabled);
@@ -34,7 +32,6 @@ void printRTCMemory(const Memory& rtcMemory)
 
 void writeRTCMemory(const Memory& rtcMemory)
 {
-  Logger::log(Logger::DEBUG, "Updating RTCMemory");
   // printRTCMemory(rtcMemory);
   if (!ESP.rtcUserMemoryWrite(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
     Logger::log(Logger::ERROR, "Failed to write RTC user memory");
@@ -133,14 +130,6 @@ void setCurrentRotateTime(int val, const int absoluteLimit)
     mem.currentRotateTime = val;
   });
 }
-void setTurnOff(bool val)
-{
-  updateMemory([&val](Memory& mem) { mem.turnOff = val; });
-}
-void setOpenFully(bool val)
-{
-  updateMemory([&val](Memory& mem) { mem.openFully = val; });
-}
 void setMode(OperationMode val)
 {
   updateMemory([&val](Memory& mem) { mem.mode = val; });
@@ -172,7 +161,7 @@ void setModemSleepTime(unsigned long val)
 
 uint64_t offsetMillis()
 {
-  const auto mem = read();
+  const auto mem = readWithoutLock();
   const auto ms = millis() + mem.millisOffset;
   return ms;
 }
@@ -192,7 +181,7 @@ void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
   open_heat::Logger::log(open_heat::Logger::INFO, "Sleeping for %lu ms", timeInMs);
   setMillisOffset(offsetMillis() + timeInMs);
 
-  ESP.deepSleep(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);
+  ESP.deepSleepInstant(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);
   delay(1);
 }
 

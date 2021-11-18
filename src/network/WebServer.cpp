@@ -208,8 +208,8 @@ bool WebServer::updateConfig(AsyncWebServerRequest* const request)
   char windowGroundBuf[4]{};
 
   std::vector<std::tuple<const char*, char*>> params = {
-    std::tuple<const char*, char*>{"ssid", config.WifiCredentials.wifi_ssid},
-    std::tuple<const char*, char*>{"wifiPassword", config.WifiCredentials.wifi_pw},
+    std::tuple<const char*, char*>{"ssid", config.WifiCredentials.ssid},
+    std::tuple<const char*, char*>{"wifiPassword", config.WifiCredentials.password},
     std::tuple<const char*, char*>{"updatePassword", config.Update.Password},
     std::tuple<const char*, char*>{"updateUsername", config.Update.Username},
     std::tuple<const char*, char*>{"mqttHost", config.MQTT.Server},
@@ -377,9 +377,9 @@ String WebServer::indexHTMLProcessor(const String& var)
 
   // Wi-Fi settings
   else if (var == F("SSID")) {
-    return String(config.WifiCredentials.wifi_ssid);
+    return String(config.WifiCredentials.ssid);
   } else if (var == F("WIFI_PASSWORD")) {
-    return String(config.WifiCredentials.wifi_pw);
+    return String(config.WifiCredentials.password);
   } else if (var == F("NETWORK_LIST")) {
     String networks;
     for (const auto& ap : m_apList) {

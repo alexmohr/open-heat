@@ -65,17 +65,13 @@ void open_heat::network::MQTT::setup()
 
 bool open_heat::network::MQTT::needLoop()
 {
-  if (rtc::read().debug) {
-    return true;
-  }
-
   if (rtc::offsetMillis() < rtc::read().mqttNextCheckMillis) {
     return false;
   }
   return true;
 }
 
-unsigned long open_heat::network::MQTT::loop()
+uint64_t open_heat::network::MQTT::loop()
 {
   if (!configValid_) {
     Logger::log(Logger::ERROR, "Config is not valid, no mqtt loop!");
@@ -109,6 +105,8 @@ unsigned long open_heat::network::MQTT::loop()
   sendMessageQueue();
 
   rtc::setMqttNextCheckMillis(rtc::offsetMillis() + rtc::read().modemSleepTime);
+
+  mqttClient_.loop();
 
   return rtc::read().mqttNextCheckMillis;
 }
