@@ -8,6 +8,8 @@
 namespace open_heat::sensors {
 class Battery {
   public:
+  Battery() = default;
+  Battery(const Battery&) = delete;
   void setup();
   void loop();
   float percentage();

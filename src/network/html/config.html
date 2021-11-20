@@ -43,8 +43,7 @@
                 <br>
                 <label for="hostname">Hostname</label>
                 <input id="hostname" class="inputLarge"
-                       name="hostName"
-                       value="%HOST_NAME%">
+                       name="hostname" value="%HOST_NAME%">
             </div>
 
         </div>
@@ -99,17 +98,21 @@
                        class="inputLarge"
                        name="motorVIN"
                        value="%PIN_MOTOR_VIN%"><br>
-
-
             </div>
         </div>
 
         <div class="flex-card">
             <div class="hero">
-                <h3>Temp Pins</h3>
+                <h3>Temperature Sensor</h3>
             </div>
             <div class="content">
-                <label for="tempVIN">Power</label> <input
+                <label for="sensorType">Type</label>
+                <select id="sensorType" class="inputLarge">
+                    <option %SENSOR_BME_SELECTED% value="bme280">BME280</option>
+                    <option %SENSOR_BMP_SELECTED% value="bmp280">BMP280</option>
+                </select><br/>
+                <label for="tempVIN">Power</label>
+                <input
                     id="tempVIN" class="inputLarge"
                     name="tempVIN" value="%PIN_TEMP_VIN%"><br>
             </div>

@@ -3,32 +3,31 @@
 // Licensed under the terms of the GNU General Public License v3.0
 //
 
-#ifndef BME280_HPP_
-#define BME280_HPP_
+#ifndef OPEN_HEAT_BMP280_H
+#define OPEN_HEAT_BMP280_H
+
 #include "BMBase.hpp"
-#include "Humidity.hpp"
 #include "Temperature.hpp"
-#include <Adafruit_BME280.h>
+#include <Adafruit_BMP280.h>
 
 namespace open_heat {
 namespace sensors {
-class BME280 : public BMBase, public Temperature, public Humidity {
+
+class BMP280 : public BMBase, public Temperature {
   public:
-  BME280() = default;
-  BME280(const BME280&) = delete;
+  BMP280() = default;
+  BMP280(const BMP280&) = delete;
 
   bool setup() override;
 
   float temperature() override;
-  float humidity() override;
 
   protected:
   void sleep() override;
   void wake() override;
 
-  private:
-  Adafruit_BME280 m_bme;
+  Adafruit_BMP280 m_bmp;
 };
 } // namespace sensors
 } // namespace open_heat
-#endif // BME280_HPP_
+#endif // OPEN_HEAT_BMP280_H

@@ -7,52 +7,41 @@
 #include <Logger.hpp>
 #include <RTCMemory.hpp>
 
-float open_heat::sensors::BME280::getTemperature()
+namespace open_heat {
+namespace sensors {
+
+float BME280::temperature()
 {
   wake();
-  const auto temp = bme_.readTemperature();
+  const auto temp = m_bme.readTemperature();
   sleep();
 
   open_heat::rtc::setLastMeasuredTemp(temp);
   return temp;
 }
 
-float open_heat::sensors::BME280::getHumidity()
+float BME280::humidity()
 {
   wake();
-  const auto humid = bme_.readHumidity();
+  const auto humid = m_bme.readHumidity();
   sleep();
   return humid;
 }
 
-bool open_heat::sensors::BME280::setup()
+bool BME280::setup()
 {
-  const auto maxRetries = 5;
-  auto retries = 0;
-  auto initResult = false;
-  while (retries < maxRetries) {
-    initResult = bme_.begin(BME280_ADDRESS_ALTERNATE);
-    Logger::log(Logger::INFO, "BME280 init result: %d, try: %d", initResult, ++retries);
-    if (initResult) {
-      break;
-    }
-    delay(100);
-  }
-
-  sleep();
-  return initResult;
+  Logger::log(Logger::INFO, "Setting up BME280");
+  return BMBase::init([this]() { return m_bme.begin(BME280_ADDRESS_ALTERNATE); });
 }
 
-void open_heat::sensors::BME280::loop()
+void BME280::sleep()
 {
+  m_bme.setSampling(Adafruit_BME280::MODE_SLEEP);
 }
 
-void open_heat::sensors::BME280::sleep()
+void BME280::wake()
 {
-  bme_.setSampling(Adafruit_BME280::MODE_SLEEP);
+  m_bme.setSampling(Adafruit_BME280::MODE_NORMAL);
 }
-
-void open_heat::sensors::BME280::wake()
-{
-  bme_.setSampling(Adafruit_BME280::MODE_NORMAL);
-}
+} // namespace sensors
+} // namespace open_heat

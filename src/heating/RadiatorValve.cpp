@@ -8,7 +8,7 @@
 #include <RTCMemory.hpp>
 
 open_heat::heating::RadiatorValve::RadiatorValve(
-  open_heat::sensors::ITemperatureSensor& tempSensor,
+  open_heat::sensors::Temperature*& tempSensor,
   open_heat::Filesystem& filesystem) :
     m_filesystem(filesystem), m_temperatureSensor(tempSensor)
 {
@@ -41,7 +41,7 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   Logger::log(Logger::DEBUG, "trying to reach temperature: %f", rtcData.setTemp);
 
   // also updates last measured temp
-  const auto measuredTemp = m_temperatureSensor.getTemperature();
+  const auto measuredTemp = m_temperatureSensor->temperature();
   const float predictPart
     = PREDICTION_STEEPNESS * (measuredTemp - rtcData.lastMeasuredTemp);
   const float predictTemp = measuredTemp + predictPart;

@@ -6,7 +6,7 @@
 #ifndef WIFIMANAGERCONFIG_HPP_
 #define WIFIMANAGERCONFIG_HPP_
 
-// disable formater, cstdin must be included first
+// disable formatter, cstdin must be included first
 // formatter:off
 #include <cstdint>
 // formatter:on
@@ -71,6 +71,7 @@ typedef struct PinSettings {
 } PinSettings;
 
 enum OperationMode { HEAT, OFF, FULL_OPEN, UNKNOWN };
+enum TemperatureSensor { BME, BMP };
 
 typedef struct Config {
   WiFiCredentials WifiCredentials{"", ""};
@@ -82,6 +83,8 @@ typedef struct Config {
   PinSettings MotorPins{DEFAULT_MOTOR_GROUND, DEFAULT_MOTOR_VIN};
   PinSettings WindowPins{};
   int8_t TempVin{DEFAULT_TEMP_VIN};
+  TemperatureSensor TempSensor{TemperatureSensor::BME};
+
 } Config;
 
 #endif // WIFIMANAGERCONFIG_HPP_

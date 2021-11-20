@@ -13,7 +13,7 @@ namespace sensors {
 
 class WindowSensor {
   public:
-  WindowSensor(Filesystem* filesystem, heating::RadiatorValve* valve);
+  WindowSensor(Filesystem* filesystem, heating::RadiatorValve*& valve);
 
   void setup();
   static void loop();

@@ -7,14 +7,14 @@
 #define OPEN_HEAT_RADIATORVALVE_HPP
 
 #include <Filesystem.hpp>
-#include <sensors/ITemperatureSensor.hpp>
+#include <sensors/Temperature.hpp>
 #include <chrono>
 namespace open_heat {
 namespace heating {
 
 class RadiatorValve {
   public:
-  RadiatorValve(sensors::ITemperatureSensor& tempSensor, Filesystem& filesystem);
+  RadiatorValve(sensors::Temperature*& tempSensor, Filesystem& filesystem);
   RadiatorValve(const RadiatorValve&) = delete;
 
   uint64_t loop();
@@ -54,7 +54,7 @@ class RadiatorValve {
 
   Filesystem& m_filesystem;
 
-  sensors::ITemperatureSensor& m_temperatureSensor;
+  sensors::Temperature*& m_temperatureSensor;
 
   static constexpr unsigned long m_checkIntervalMillis
     = static_cast<unsigned long>(5 * 60 * 1000);

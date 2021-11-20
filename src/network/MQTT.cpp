@@ -7,59 +7,59 @@
 #include <RTCMemory.hpp>
 #include <cstring>
 
-open_heat::heating::RadiatorValve* open_heat::network::MQTT::valve_;
-open_heat::sensors::Battery* open_heat::network::MQTT::battery_;
-open_heat::Filesystem* open_heat::network::MQTT::filesystem_;
-MQTTClient open_heat::network::MQTT::mqttClient_;
+open_heat::heating::RadiatorValve* open_heat::network::MQTT::m_valve;
+open_heat::sensors::Battery* open_heat::network::MQTT::m_battery;
+open_heat::Filesystem* open_heat::network::MQTT::m_filesystem;
+MQTTClient open_heat::network::MQTT::m_mqttClient;
 
-String open_heat::network::MQTT::getModeTopic_;
-String open_heat::network::MQTT::setModeTopic_;
+String open_heat::network::MQTT::m_getModeTopic;
+String open_heat::network::MQTT::m_setModeTopic;
 
-String open_heat::network::MQTT::setConfiguredTempTopic_;
-String open_heat::network::MQTT::getConfiguredTempTopic_;
-String open_heat::network::MQTT::getMeasuredTempTopic_;
-String open_heat::network::MQTT::getMeasuredHumidTopic_;
-String open_heat::network::MQTT::getBatteryTopic_;
+String open_heat::network::MQTT::m_setConfiguredTempTopic;
+String open_heat::network::MQTT::m_getConfiguredTempTopic;
+String open_heat::network::MQTT::m_getMeasuredTempTopic;
+String open_heat::network::MQTT::m_getMeasuredHumidTopic;
+String open_heat::network::MQTT::m_getBatteryTopic;
 
-String open_heat::network::MQTT::setModemSleepTopic_;
-String open_heat::network::MQTT::getModemSleepTopic_;
+String open_heat::network::MQTT::m_setModemSleepTopic;
+String open_heat::network::MQTT::m_getModemSleepTopic;
 
-String open_heat::network::MQTT::debugEnableTopic_;
-String open_heat::network::MQTT::debugLogLevelTopic_;
+String open_heat::network::MQTT::m_debugEnableTopic;
+String open_heat::network::MQTT::m_debugLogLevelTopic;
 
-String open_heat::network::MQTT::windowStateTopic_;
+String open_heat::network::MQTT::m_windowStateTopic;
 
-String open_heat::network::MQTT::logTopic_;
+String open_heat::network::MQTT::m_logTopic;
 std::queue<open_heat::network::MQTT::message> open_heat::network::MQTT::m_messageQueue;
 
 void open_heat::network::MQTT::setup()
 {
   Logger::log(Logger::INFO, "Running MQTT setup");
-  mqttClient_.onMessage(&MQTT::messageReceivedCallback);
+  m_mqttClient.onMessage(&MQTT::messageReceivedCallback);
 
-  valve_->registerModeChangedHandler([this](OperationMode mode) {
-    m_messageQueue.push({&getModeTopic_, heating::RadiatorValve::modeToCharArray(mode)});
+  m_valve->registerModeChangedHandler([this](OperationMode mode) {
+    m_messageQueue.push({&m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
   });
 
-  valve_->registerSetTempChangedHandler([this](float temp) {
-    m_messageQueue.push({&getConfiguredTempTopic_, String(temp)});
+  m_valve->registerSetTempChangedHandler([this](float temp) {
+    m_messageQueue.push({&m_getConfiguredTempTopic, String(temp)});
   });
 
-  valve_->registerWindowChangeHandler([this](bool state) {
-    m_messageQueue.push({&windowStateTopic_, String(state)});
+  m_valve->registerWindowChangeHandler([this](bool state) {
+    m_messageQueue.push({&m_windowStateTopic, String(state)});
   });
 
-  if (!loggerAdded_) {
+  if (!m_loggerAdded) {
     Logger::addPrinter([this](const Logger::Level level, const std::string& message) {
-      if (!configValid_) {
+      if (!m_configValid) {
         return;
       }
       String buffer = Logger::levelToText(level, false);
       buffer += F(" ");
       buffer += message.c_str();
-      m_messageQueue.push({&logTopic_, buffer});
+      m_messageQueue.push({&m_logTopic, buffer});
     });
-    loggerAdded_ = true;
+    m_loggerAdded = true;
   }
 }
 
@@ -73,7 +73,7 @@ bool open_heat::network::MQTT::needLoop()
 
 uint64_t open_heat::network::MQTT::loop()
 {
-  if (!configValid_) {
+  if (!m_configValid) {
     Logger::log(Logger::ERROR, "Config is not valid, no mqtt loop!");
     enableDebug(true);
     return 0UL;
@@ -83,30 +83,35 @@ uint64_t open_heat::network::MQTT::loop()
     return rtc::read().mqttNextCheckMillis;
   }
 
-  wifi_.checkWifi();
-  if (!mqttClient_.connected()) {
+  m_wifi.checkWifi();
+  if (!m_mqttClient.connected()) {
     connect();
   }
 
-  mqttClient_.loop();
+  m_mqttClient.loop();
 
   // drain message queue for old messages
   sendMessageQueue();
 
-  publish(getMeasuredTempTopic_, String(tempSensor_.getTemperature()));
-  publish(getMeasuredHumidTopic_, String(tempSensor_.getHumidity()));
-  publish(getModemSleepTopic_, String(rtc::read().modemSleepTime));
+  if (m_humiditySensor != nullptr) {
+    publish(m_getMeasuredHumidTopic, String(m_humiditySensor->humidity()));
+  }
+  if (m_tempSensor != nullptr) {
+    publish(m_getMeasuredTempTopic, String(m_tempSensor->temperature()));
+  }
 
-  battery_->loop();
-  publish(getBatteryTopic_ + "percent", String(battery_->percentage()));
-  publish(getBatteryTopic_ + "voltage", String(battery_->voltage()));
+  publish(m_getModemSleepTopic, String(rtc::read().modemSleepTime));
+
+  m_battery->loop();
+  publish(m_getBatteryTopic + "percent", String(m_battery->percentage()));
+  publish(m_getBatteryTopic + "voltage", String(m_battery->voltage()));
 
   // drain message queue for new messages
   sendMessageQueue();
 
   rtc::setMqttNextCheckMillis(rtc::offsetMillis() + rtc::read().modemSleepTime);
 
-  mqttClient_.loop();
+  m_mqttClient.loop();
 
   return rtc::read().mqttNextCheckMillis;
 }
@@ -126,15 +131,15 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
     return;
   }
 
-  if (topic == setConfiguredTempTopic_) {
+  if (topic == m_setConfiguredTempTopic) {
     handleSetConfigTemp(payload);
-  } else if (topic == setModeTopic_) {
+  } else if (topic == m_setModeTopic) {
     handleSetMode(payload);
-  } else if (topic == setModemSleepTopic_) {
+  } else if (topic == m_setModemSleepTopic) {
     handleSetModemSleep(payload);
-  } else if (topic == debugEnableTopic_) {
+  } else if (topic == m_debugEnableTopic) {
     handleDebug(payload);
-  } else if (topic == debugLogLevelTopic_) {
+  } else if (topic == m_debugLogLevelTopic) {
     handleLogLevel(payload);
   }
 }
@@ -170,7 +175,7 @@ void open_heat::network::MQTT::handleSetMode(const String& payload)
     return;
   }
 
-  valve_->setMode(mode);
+  m_valve->setMode(mode);
 }
 
 void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
@@ -180,7 +185,7 @@ void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
     return;
   }
 
-  valve_->setConfiguredTemp(newTemp);
+  m_valve->setConfiguredTemp(newTemp);
 }
 
 void open_heat::network::MQTT::handleSetModemSleep(const String& payload)
@@ -202,16 +207,16 @@ void open_heat::network::MQTT::publish(const String& topic, const String& messag
 {
   Logger::log(
     Logger::DEBUG, "MQTT send '%s' in topic '%s'", message.c_str(), topic.c_str());
-  if (!mqttClient_.publish(topic, message)) {
-    Logger::log(Logger::ERROR, "Mqtt publish failed: %i", mqttClient_.lastError());
+  if (!m_mqttClient.publish(topic, message)) {
+    Logger::log(Logger::ERROR, "Mqtt publish failed: %i", m_mqttClient.lastError());
   }
 }
 
 void open_heat::network::MQTT::connect()
 {
-  const auto& config = filesystem_->getConfig();
+  const auto& config = m_filesystem->getConfig();
   if ((std::strlen(config.MQTT.Server) == 0 || config.MQTT.Port == 0)) {
-    if (configValid_) {
+    if (m_configValid) {
       Logger::log(
         Logger::ERROR,
         "MQTT Server (%s) or port (%i) not set up",
@@ -220,14 +225,14 @@ void open_heat::network::MQTT::connect()
       enableDebug(true);
     }
 
-    configValid_ = false;
+    m_configValid = false;
     return;
   }
 
-  mqttClient_.setTimeout(
+  m_mqttClient.setTimeout(
     static_cast<int>(std::chrono::milliseconds(std::chrono::seconds(1)).count()));
 
-  mqttClient_.begin(config.MQTT.Server, config.MQTT.Port, wiFiClient_);
+  m_mqttClient.begin(config.MQTT.Server, config.MQTT.Port, m_wifiClient);
   const char* username = nullptr;
   const char* password = nullptr;
 
@@ -239,7 +244,7 @@ void open_heat::network::MQTT::connect()
     password = config.MQTT.Password;
   }
 
-  if (!mqttClient_.connect(config.Hostname, username, password)) {
+  if (!m_mqttClient.connect(config.Hostname, username, password)) {
     Logger::log(
       Logger::ERROR,
       "Failed to connect to mqtt server host %s, user: %s, pw: %s",
@@ -249,7 +254,7 @@ void open_heat::network::MQTT::connect()
     return;
   }
 
-  setTopic(config.MQTT.Topic, "log", logTopic_);
+  setTopic(config.MQTT.Topic, "log", m_logTopic);
 
   Logger::log(
     Logger::INFO,
@@ -257,41 +262,41 @@ void open_heat::network::MQTT::connect()
     config.MQTT.Topic,
     std::strlen(config.MQTT.Topic));
 
-  setTopic(config.MQTT.Topic, "temperature/target/get", getConfiguredTempTopic_);
-  setTopic(config.MQTT.Topic, "temperature/target/set", setConfiguredTempTopic_);
-  setTopic(config.MQTT.Topic, "temperature/measured/get", getMeasuredTempTopic_);
-  setTopic(config.MQTT.Topic, "humidity/measured/get", getMeasuredHumidTopic_);
-  setTopic(config.MQTT.Topic, "modemsleep/set", setModemSleepTopic_);
-  setTopic(config.MQTT.Topic, "modemsleep/get", getModemSleepTopic_);
-  setTopic(config.MQTT.Topic, "battery/", getBatteryTopic_);
-  setTopic(config.MQTT.Topic, "mode/get", getModeTopic_);
-  setTopic(config.MQTT.Topic, "mode/set", setModeTopic_);
-  setTopic(config.MQTT.Topic, "debug/enable", debugEnableTopic_);
+  setTopic(config.MQTT.Topic, "temperature/target/get", m_getConfiguredTempTopic);
+  setTopic(config.MQTT.Topic, "temperature/target/set", m_setConfiguredTempTopic);
+  setTopic(config.MQTT.Topic, "temperature/measured/get", m_getMeasuredTempTopic);
+  setTopic(config.MQTT.Topic, "humidity/measured/get", m_getMeasuredHumidTopic);
+  setTopic(config.MQTT.Topic, "modemsleep/set", m_setModemSleepTopic);
+  setTopic(config.MQTT.Topic, "modemsleep/get", m_getModemSleepTopic);
+  setTopic(config.MQTT.Topic, "battery/", m_getBatteryTopic);
+  setTopic(config.MQTT.Topic, "mode/get", m_getModeTopic);
+  setTopic(config.MQTT.Topic, "mode/set", m_setModeTopic);
+  setTopic(config.MQTT.Topic, "debug/enable", m_debugEnableTopic);
 
-  subscribe(debugEnableTopic_);
-  subscribe(setModeTopic_);
-  subscribe(setModemSleepTopic_);
-  subscribe(setConfiguredTempTopic_);
+  subscribe(m_debugEnableTopic);
+  subscribe(m_setModeTopic);
+  subscribe(m_setModemSleepTopic);
+  subscribe(m_setConfiguredTempTopic);
 
   if (!DISABLE_ALL_LOGGING) {
-    setTopic(config.MQTT.Topic, "debug/loglevel", debugLogLevelTopic_);
-    subscribe(debugLogLevelTopic_);
+    setTopic(config.MQTT.Topic, "debug/loglevel", m_debugLogLevelTopic);
+    subscribe(m_debugLogLevelTopic);
   }
 
   if (config.WindowPins.Ground > 0 && config.WindowPins.Vin > 0) {
-    setTopic(config.MQTT.Topic, "window/get", windowStateTopic_);
-    subscribe(windowStateTopic_);
+    setTopic(config.MQTT.Topic, "window/get", m_windowStateTopic);
+    subscribe(m_windowStateTopic);
   }
 }
 
 void open_heat::network::MQTT::subscribe(const String& topic)
 {
-  if (mqttClient_.subscribe(topic)) {
+  if (m_mqttClient.subscribe(topic)) {
     Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", topic.c_str());
   } else {
     Logger::log(Logger::ERROR, "MQTT failed to subscribe to topic: %s", topic.c_str());
     Logger::log(
-      Logger::ERROR, "MQTT last error: %i", static_cast<int>(mqttClient_.lastError()));
+      Logger::ERROR, "MQTT last error: %i", static_cast<int>(m_mqttClient.lastError()));
   }
 }
 
@@ -302,16 +307,16 @@ void open_heat::network::MQTT::enableDebug(bool value)
   }
 
   rtc::setDebug(value);
-  open_heat::rtc::wifiDeepSleep(1, value, *filesystem_);
+  open_heat::rtc::wifiDeepSleep(1, value, *m_filesystem);
 }
 
 void open_heat::network::MQTT::sendMessageQueue()
 {
   while (!m_messageQueue.empty()) {
     const auto msg = m_messageQueue.front();
-    if (*msg.topic == logTopic_) {
+    if (*msg.topic == m_logTopic) {
       // do not log again
-      mqttClient_.publish(*msg.topic, msg.message);
+      m_mqttClient.publish(*msg.topic, msg.message);
     } else {
       publish(*msg.topic, msg.message);
     }

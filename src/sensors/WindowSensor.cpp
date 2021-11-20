@@ -8,6 +8,7 @@
 namespace open_heat {
 namespace sensors {
 
+// this is probably broken
 Filesystem* WindowSensor::filesystem_ = nullptr;
 heating::RadiatorValve* WindowSensor::valve_ = nullptr;
 bool WindowSensor::validate_ = false;
@@ -16,7 +17,7 @@ bool WindowSensor::isOpen_ = false;
 // unsigned int WindowSensor::minMillisBetweenEvents_{500};
 unsigned long WindowSensor::lastChangeMillis_;
 
-WindowSensor::WindowSensor(Filesystem* filesystem, heating::RadiatorValve* valve)
+WindowSensor::WindowSensor(Filesystem* filesystem, heating::RadiatorValve*& valve)
 {
   filesystem_ = filesystem;
   valve_ = valve;

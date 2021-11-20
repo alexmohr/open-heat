@@ -11,7 +11,7 @@
 #include <Logger.hpp>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/Battery.hpp>
-#include <sensors/ITemperatureSensor.hpp>
+#include <sensors/Temperature.hpp>
 
 namespace open_heat {
 namespace network {
@@ -19,11 +19,11 @@ class WebServer {
   public:
   WebServer(
     Filesystem& filesystem,
-    sensors::ITemperatureSensor& tempSensor,
+    sensors::Temperature*& tempSensor,
     sensors::Battery& battery,
     open_heat::heating::RadiatorValve& valve) :
       filesystem_(filesystem),
-      tempSensor_(tempSensor),
+      m_tempSensor(tempSensor),
       battery_(battery),
       valve_(valve),
       asyncWebServer_(AsyncWebServer(80))
@@ -42,7 +42,7 @@ class WebServer {
 
   private:
   Filesystem& filesystem_;
-  sensors::ITemperatureSensor& tempSensor_;
+  sensors::Temperature*& m_tempSensor;
   sensors::Battery& battery_;
   open_heat::heating::RadiatorValve& valve_;
 
@@ -51,7 +51,7 @@ class WebServer {
 
   bool m_setupDone = false;
   String m_hostname;
-  std::vector<String> m_apList;
+  std::vector<String> m_accessPointList;
 
   static constexpr const char* CONTENT_TYPE_HTML = "text/html";
   enum HtmlReturnCode {

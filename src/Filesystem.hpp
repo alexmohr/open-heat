@@ -12,6 +12,9 @@
 namespace open_heat {
 class Filesystem {
   public:
+  Filesystem() = default;
+  Filesystem(const Filesystem&) = delete;
+
   bool setup();
   Config& getConfig();
   void clearConfig();
