@@ -15,8 +15,9 @@ namespace heating {
 class RadiatorValve {
   public:
   RadiatorValve(sensors::ITemperatureSensor& tempSensor, Filesystem& filesystem);
+  RadiatorValve(const RadiatorValve&) = delete;
 
-  unsigned long loop();
+  uint64_t loop();
   void setup();
   float getConfiguredTemp() const;
   void setConfiguredTemp(float temp);
@@ -37,20 +38,10 @@ class RadiatorValve {
   void enablePins();
   void updateConfig();
 
-  Filesystem& filesystem_;
+  void setNextCheckTimeNow();
 
-  static constexpr int VALVE_FULL_ROTATE_TIME = 90'000;
-  sensors::ITemperatureSensor& tempSensor_;
-
-  static constexpr unsigned long checkIntervalMillis_
-    = static_cast<unsigned long>(2.5 * 60 * 1000);
-
-  std::vector<std::function<void(OperationMode)>> opModeChangedHandler_{};
-  std::vector<std::function<void(bool)>> windowStateHandler_{};
-  std::vector<std::function<void(float)>> setTempChangedHandler_{};
-
-  // Wait 3 minutes before heating again after window opened
-  const unsigned long sleepMillisAfterWindowClose_{3 * 60 * 1000};
+  static constexpr int VALVE_FULL_ROTATE_TIME = 40'000;
+  static constexpr int SLEEP_MILLIS_AFTER_WINDOW_CLOSE = 3 * 60 * 1000;
 
   /**
     When deciding about valve movements, the regulation algorithm tries to
@@ -60,6 +51,24 @@ class RadiatorValve {
     Unit:  1
   */
   static constexpr float PREDICTION_STEEPNESS = 2;
+
+  Filesystem& m_filesystem;
+
+  sensors::ITemperatureSensor& m_temperatureSensor;
+
+  static constexpr unsigned long m_checkIntervalMillis
+    = static_cast<unsigned long>(5 * 60 * 1000);
+
+  std::vector<std::function<void(OperationMode)>> m_OpModeChangeHandler{};
+  std::vector<std::function<void(bool)>> m_windowStateHandler{};
+  std::vector<std::function<void(float)>> m_setTempChangeHandler{};
+  unsigned int remainingRotateTime(unsigned int rotateTime) const;
+  void rotateValve(
+    unsigned int rotateTime,
+    const PinSettings& config,
+    int vinState,
+    int groundState);
+  uint64_t nextCheckTime() const;
 };
 } // namespace heating
 } // namespace open_heat

@@ -91,13 +91,6 @@ void setupPins()
   }
 }
 
-void logVersions()
-{
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Board: %s", ARDUINO_BOARD);
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG, "Build date: %s, %s", __DATE__, __TIME__);
-}
-
 bool isDoubleReset()
 {
   if (ESP.getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
@@ -105,6 +98,7 @@ bool isDoubleReset()
       open_heat::Logger::DEBUG,
       "no double reset, resetInfo: %s",
       ESP.getResetInfo().c_str());
+    open_heat::rtc::setDrdDisabled(true);
     return false;
   }
 
@@ -136,13 +130,18 @@ void setup()
   }
 
   open_heat::Logger::setup();
-  logVersions();
   const auto configValid = filesystem_.setup();
 
   if (ESP.getResetInfoPtr()->reason == REASON_DEEP_SLEEP_AWAKE) {
     open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
-    drd_.stop();
+
+    if (!open_heat::rtc::read().drdDisabled) {
+      drd_.stop();
+      open_heat::rtc::setDrdDisabled(true);
+    }
+
   } else {
+    // system reset
     open_heat::rtc::init(filesystem_);
   }
 
@@ -167,7 +166,7 @@ void setup()
 
   valve_.setup();
 
-  if (mqtt_.needLoop() || doubleReset || configValid) {
+  if (mqtt_.needLoop() || doubleReset) {
     wifiManager_.setup(doubleReset);
     mqtt_.setup();
   }
@@ -190,11 +189,10 @@ void loop()
 {
   // open_heat::sensors::WindowSensor::loop();
   const auto mqttSleep = mqtt_.loop();
+
+  // must be after mqtt to process received commands
   const auto valveSleep = valve_.loop();
   drd_.loop();
-
-  open_heat::Logger::log(
-    open_heat::Logger::INFO, "DEBUG: %i", open_heat::rtc::read().debug);
 
   // do not sleep if debug is enabled.
   if (open_heat::rtc::read().debug) {
@@ -231,9 +229,6 @@ void loop()
   } else {
     idleTime = nextCheckMillis - open_heat::rtc::offsetMillis();
   }
-
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG, "Starting deep sleep for: %lu", idleTime);
 
   // Wait before forcing sleep to send messages.
   delay(50);

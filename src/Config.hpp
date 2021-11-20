@@ -47,8 +47,8 @@ static constexpr const char* DEFAULT_USER = "admin";
 static constexpr const char* DEFAULT_PW = "letmein";
 
 typedef struct {
-  char wifi_ssid[SSID_MAX_LEN];
-  char wifi_pw[PASS_MAX_LEN];
+  char ssid[SSID_MAX_LEN];
+  char password[PASS_MAX_LEN];
 } WiFiCredentials;
 
 typedef struct MQTTSettings {

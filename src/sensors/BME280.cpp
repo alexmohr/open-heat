@@ -5,12 +5,15 @@
 
 #include "BME280.hpp"
 #include <Logger.hpp>
+#include <RTCMemory.hpp>
 
 float open_heat::sensors::BME280::getTemperature()
 {
   wake();
   const auto temp = bme_.readTemperature();
   sleep();
+
+  open_heat::rtc::setLastMeasuredTemp(temp);
   return temp;
 }
 
@@ -27,9 +30,12 @@ bool open_heat::sensors::BME280::setup()
   const auto maxRetries = 5;
   auto retries = 0;
   auto initResult = false;
-  while (!initResult && retries < maxRetries) {
+  while (retries < maxRetries) {
     initResult = bme_.begin(BME280_ADDRESS_ALTERNATE);
     Logger::log(Logger::INFO, "BME280 init result: %d, try: %d", initResult, ++retries);
+    if (initResult) {
+      break;
+    }
     delay(100);
   }
 
