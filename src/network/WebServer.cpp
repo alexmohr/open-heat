@@ -207,6 +207,8 @@ bool WebServer::updateConfig(AsyncWebServerRequest* const request)
   char windowVinBuf[4]{};
   char windowGroundBuf[4]{};
 
+  char sensorTypeBuf[10]{};
+
   std::vector<std::tuple<const char*, char*>> params = {
     std::tuple<const char*, char*>{"ssid", config.WifiCredentials.ssid},
     std::tuple<const char*, char*>{"wifiPassword", config.WifiCredentials.password},
@@ -222,7 +224,8 @@ bool WebServer::updateConfig(AsyncWebServerRequest* const request)
     std::tuple<const char*, char*>{"motorVIN", motorVinBuf},
     std::tuple<const char*, char*>{"tempVIN", tempVinBuf},
     std::tuple<const char*, char*>{"windowGround", windowGroundBuf},
-    std::tuple<const char*, char*>{"windowVIN", windowVinBuf}};
+    std::tuple<const char*, char*>{"windowVIN", windowVinBuf},
+    std::tuple<const char*, char*>{"sensorType", sensorTypeBuf}};
 
   for (const auto& param : params) {
     updateConfig |= updateField(
@@ -255,6 +258,15 @@ bool WebServer::updateConfig(AsyncWebServerRequest* const request)
     if (std::strlen(windowGroundBuf) > 0) {
       config.WindowPins.Ground
         = static_cast<int8>(std::strtol(windowGroundBuf, nullptr, 10));
+    }
+    if (std::strlen(sensorTypeBuf) > 0) {
+      String sensorType(sensorTypeBuf);
+      sensorType.toLowerCase();
+      if (sensorType == "bmp280") {
+        config.TempSensor = BMP;
+      } else {
+        config.TempSensor = BME;
+      }
     }
 
     filesystem_.persistConfig();
@@ -315,7 +327,7 @@ String WebServer::indexHTMLProcessor(const String& var)
 
   // Temp
   if (var == F("CURRENT_TEMP")) {
-    return String(tempSensor_.getTemperature());
+    return String(m_tempSensor->temperature());
   } else if (var == F("SET_TEMP")) {
     return String(setTemp);
   }
@@ -354,9 +366,13 @@ String WebServer::indexHTMLProcessor(const String& var)
     return String(config.MotorPins.Ground);
   }
 
-  // Temp Pins
+  // Temperature sensor
   else if (var == F("PIN_TEMP_VIN")) {
     return String(config.TempVin);
+  } else if (var == F("sensor_bme_selected") || var == F("SENSOR_BME_SELECTED")) {
+    return config.TempSensor == BME ? "selected" : "";
+  } else if (var == F("sensor_bmp_selected") || var == F("SENSOR_BMP_SELECTED")) {
+    return config.TempSensor == BMP ? "selected" : "";
   }
 
   // Window pins
@@ -382,7 +398,7 @@ String WebServer::indexHTMLProcessor(const String& var)
     return String(config.WifiCredentials.password);
   } else if (var == F("NETWORK_LIST")) {
     String networks;
-    for (const auto& ap : m_apList) {
+    for (const auto& ap : m_accessPointList) {
       networks += "<option value=\"" + ap + "\"></option>";
     }
     return networks;
@@ -440,7 +456,7 @@ bool WebServer::isIp(const String& str)
 
 void WebServer::setApList(std::vector<String>&& apList)
 {
-  m_apList = std::move(apList);
+  m_accessPointList = std::move(apList);
 }
 
 } // namespace network

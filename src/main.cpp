@@ -15,41 +15,38 @@
 #include <network/WifiManager.hpp>
 #include <sensors/Battery.hpp>
 
+#include "RTCMemory.hpp"
+#include <sensors/BME280.hpp>
+#include <sensors/BMP280.hpp>
+#include <sensors/WindowSensor.hpp>
+
 // external voltage
 ADC_MODE(ADC_TOUT);
 
-DoubleResetDetector drd_(DRD_TIMEOUT, DRD_ADDRESS);
+DoubleResetDetector g_drd(DRD_TIMEOUT, DRD_ADDRESS);
 
-#if TEMP_SENSOR == BME280
-#include "RTCMemory.hpp"
-#include <sensors/BME280.hpp>
-#include <sensors/WindowSensor.hpp>
-open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::BME280();
-#elif TEMP_SENSOR == TP100
-#include <sensors/TP100.hpp>
-open_heat::sensors::ITemperatureSensor* tempSensor_ = new open_heat::sensors::TP100();
-#else
-#error "Not supported temp sensor"
-#endif
+open_heat::sensors::Temperature* g_tempSensor = nullptr;
+open_heat::sensors::Humidity* g_humidSensor = nullptr;
 
-open_heat::Filesystem filesystem_;
+open_heat::Filesystem g_filesystem;
 
-open_heat::heating::RadiatorValve valve_(*tempSensor_, filesystem_);
-open_heat::sensors::Battery battery_;
+open_heat::heating::RadiatorValve g_valve(g_tempSensor, g_filesystem);
+open_heat::sensors::Battery g_battery;
 
-open_heat::network::WebServer webServer_(filesystem_, *tempSensor_, battery_, valve_);
-open_heat::sensors::WindowSensor windowSensor_(&filesystem_, &valve_);
+open_heat::network::WebServer g_webServer(g_filesystem, g_tempSensor, g_battery, g_valve);
+// open_heat::sensors::WindowSensor g_windowSensor(g_filesystem, g_valve);
 
-open_heat::Serial m_serial;
+open_heat::Serial g_serial;
 
-open_heat::network::WifiManager wifiManager_(&filesystem_, webServer_);
+open_heat::network::WifiManager g_wifiManager_(g_filesystem, g_webServer);
 
-open_heat::network::MQTT mqtt_(
-  &filesystem_,
-  wifiManager_,
-  *tempSensor_,
-  &valve_,
-  &battery_);
+open_heat::network::MQTT g_mqtt(
+  &g_filesystem,
+  g_wifiManager_,
+  g_tempSensor,
+  g_humidSensor,
+  &g_valve,
+  &g_battery);
 
 void setupPins()
 {
@@ -64,7 +61,7 @@ void setupPins()
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LED_OFF);
 
-  const auto& config = filesystem_.getConfig();
+  const auto& config = g_filesystem.getConfig();
   if (config.MotorPins.Vin > 1) {
     pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
     digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
@@ -91,6 +88,35 @@ void setupPins()
   }
 }
 
+void setupTemperatureSensor()
+{
+  open_heat::Logger::log(open_heat::Logger::DEBUG, "Running setupTemperatureSensor");
+  const auto& config = g_filesystem.getConfig();
+
+  open_heat::sensors::Sensor* sensor;
+  if (config.TempSensor == BME) {
+    auto bme = new open_heat::sensors::BME280();
+    g_humidSensor = bme;
+    g_tempSensor = bme;
+    sensor = reinterpret_cast<open_heat::sensors::Sensor*>(bme);
+  } else {
+    auto bmp = new open_heat::sensors::BMP280();
+    g_humidSensor = nullptr;
+    g_tempSensor = bmp;
+    sensor = reinterpret_cast<open_heat::sensors::Sensor*>(bmp);
+  }
+
+  if (!sensor->setup()) {
+    // blink led 10 times to indicate temp sensor error
+    for (auto i = 0; i < 10; ++i) {
+      digitalWrite(LED_PIN, LED_OFF);
+      delay(250);
+      digitalWrite(LED_PIN, LED_ON);
+    }
+    open_heat::Logger::log(open_heat::Logger::ERROR, "Failed to init temp sensor");
+  }
+}
+
 bool isDoubleReset()
 {
   if (ESP.getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
@@ -102,7 +128,7 @@ bool isDoubleReset()
     return false;
   }
 
-  const auto drdDetected = drd_.detectDoubleReset();
+  const auto drdDetected = g_drd.detectDoubleReset();
 
   open_heat::Logger::log(open_heat::Logger::DEBUG, "DRD detected: %i", drdDetected);
 
@@ -126,23 +152,23 @@ bool isDoubleReset()
 void setup()
 {
   if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF && !DISABLE_ALL_LOGGING) {
-    m_serial.setup();
+    g_serial.setup();
   }
 
   open_heat::Logger::setup();
-  const auto configValid = filesystem_.setup();
+  const auto configValid = g_filesystem.setup();
 
   if (ESP.getResetInfoPtr()->reason == REASON_DEEP_SLEEP_AWAKE) {
     open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
 
     if (!open_heat::rtc::read().drdDisabled) {
-      drd_.stop();
+      g_drd.stop();
       open_heat::rtc::setDrdDisabled(true);
     }
 
   } else {
     // system reset
-    open_heat::rtc::init(filesystem_);
+    open_heat::rtc::init(g_filesystem);
   }
 
   const auto offsetMillis = open_heat::rtc::offsetMillis();
@@ -151,35 +177,26 @@ void setup()
   open_heat::rtc::setLastResetTime(offsetMillis);
 
   setupPins();
+  setupTemperatureSensor();
 
   const auto doubleReset = isDoubleReset();
 
-  if (!tempSensor_->setup()) {
-    // blink led 10 times to indicate temp sensor error
-    for (auto i = 0; i < 10; ++i) {
-      digitalWrite(LED_PIN, LED_OFF);
-      delay(250);
-      digitalWrite(LED_PIN, LED_ON);
-    }
-    open_heat::Logger::log(open_heat::Logger::ERROR, "Failed to init temp sensor");
-  }
+  g_valve.setup();
 
-  valve_.setup();
-
-  if (mqtt_.needLoop() || doubleReset) {
-    wifiManager_.setup(doubleReset);
-    mqtt_.setup();
+  if (g_mqtt.needLoop() || doubleReset) {
+    g_wifiManager_.setup(doubleReset);
+    g_mqtt.setup();
   }
 
   if (!configValid) {
-    mqtt_.enableDebug(true);
+    g_mqtt.enableDebug(true);
   }
 
   if (open_heat::rtc::read().debug) {
-    webServer_.setup(nullptr);
+    g_webServer.setup(nullptr);
   }
 
-  drd_.stop();
+  g_drd.stop();
   open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
 
   loop();
@@ -188,11 +205,11 @@ void setup()
 void loop()
 {
   // open_heat::sensors::WindowSensor::loop();
-  const auto mqttSleep = mqtt_.loop();
+  const auto mqttSleep = g_mqtt.loop();
 
   // must be after mqtt to process received commands
-  const auto valveSleep = valve_.loop();
-  drd_.loop();
+  const auto valveSleep = g_valve.loop();
+  g_drd.loop();
 
   // do not sleep if debug is enabled.
   if (open_heat::rtc::read().debug) {
@@ -232,5 +249,5 @@ void loop()
 
   // Wait before forcing sleep to send messages.
   delay(50);
-  open_heat::rtc::wifiDeepSleep(idleTime, enableWifi, filesystem_);
+  open_heat::rtc::wifiDeepSleep(idleTime, enableWifi, g_filesystem);
 }

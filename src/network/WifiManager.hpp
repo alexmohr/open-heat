@@ -16,8 +16,8 @@ namespace open_heat {
 namespace network {
 class WifiManager {
   public:
-  WifiManager(Filesystem* filesystem, WebServer& webServer) :
-      webServer_(webServer), filesystem_(filesystem){};
+  WifiManager(Filesystem& filesystem, WebServer& webServer) :
+      m_webServer(webServer), m_fileSystem(filesystem){};
 
   void setup(bool doubleReset);
   bool checkWifi();
@@ -35,10 +35,10 @@ class WifiManager {
 
   wl_status_t connectMultiWiFi();
 
-  unsigned char reconnectCount_ = 0;
+  unsigned char m_reconnectCount = 0;
 
-  WebServer& webServer_;
-  Filesystem* filesystem_{};
+  WebServer& m_webServer;
+  Filesystem& m_fileSystem;
 };
 
 } // namespace network

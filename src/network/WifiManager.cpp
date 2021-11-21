@@ -36,7 +36,7 @@ void WifiManager::setup(bool doubleReset)
 bool WifiManager::loadAPsFromConfig()
 {
   // Don't permit NULL SSID and password len < // MIN_AP_PASSWORD_SIZE (8)
-  auto& config = filesystem_->getConfig();
+  auto& config = m_fileSystem.getConfig();
   if (
     (std::strlen(config.WifiCredentials.ssid) == 0)
     || (std::strlen(config.WifiCredentials.password) < MIN_AP_PASSWORD_SIZE)) {
@@ -79,8 +79,8 @@ bool WifiManager::loadAPsFromConfig()
   }
 
   Logger::log(Logger::INFO, "Starting Config Portal");
-  webServer_.setup(hostname);
-  webServer_.setApList(std::move(accessPoints));
+  m_webServer.setup(hostname);
+  m_webServer.setApList(std::move(accessPoints));
 
   Logger::log(Logger::INFO, "Waiting for user configuration");
   // WebServer will restart ESP after configuration is done
@@ -113,11 +113,11 @@ bool WifiManager::checkWifi()
 
   Logger::log(Logger::WARNING, "WIFi disconnected, reconnecting...");
   if (connectMultiWiFi() == WL_CONNECTED) {
-    reconnectCount_ = 0;
+    m_reconnectCount = 0;
     return true;
   }
 
-  Logger::log(Logger::WARNING, "WiFi reconnection failed, %i times", ++reconnectCount_);
+  Logger::log(Logger::WARNING, "WiFi reconnection failed, %i times", ++m_reconnectCount);
   return false;
 }
 
@@ -127,7 +127,7 @@ wl_status_t WifiManager::connectMultiWiFi()
   Logger::log(Logger::INFO, "Connecting WiFi...");
   const auto startTime = rtc::offsetMillis();
 
-  const auto& config = filesystem_->getConfig();
+  const auto& config = m_fileSystem.getConfig();
 
   // STA = client mode
   WiFi.mode(WIFI_STA);
