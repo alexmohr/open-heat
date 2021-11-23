@@ -86,8 +86,8 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     return nextCheckTime();
   }
 
-  const auto rotateFactorOpen = 1500.0f;
-  const auto rotateFactorClose = rotateFactorOpen + 200.0f;
+  const auto rotateFactorOpen = 1200.0f;
+  const auto rotateFactorClose = rotateFactorOpen + 300.0f;
   const auto predictedTempTooLow = predictTemp < (rtcData.setTemp - hysteresis);
   const auto rotateFactor = predictedTempTooLow ? rotateFactorOpen : rotateFactorClose;
 
