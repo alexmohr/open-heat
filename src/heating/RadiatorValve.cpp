@@ -49,8 +49,10 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   const auto temperatureChange = measuredTemp - rtcData.lastMeasuredTemp;
   const auto minTemperatureChange = 0.2;
 
-  const auto hysteresis = 0.2f;
-  const auto predictDiff = rtcData.setTemp - predictTemp - hysteresis;
+  const auto openHysteresis = 0.3f;
+  const auto closeHysteresis = 0.2f;
+  unsigned short openTime = 350U;
+  unsigned short closeTime = 200U;
   const auto absTempDiff
     = std::max(rtcData.setTemp, predictTemp) - std::min(rtcData.setTemp, predictTemp);
 
@@ -60,14 +62,13 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     Logger::INFO,
     "Valve loop\n"
     "\tpredictTemp %.2f in %lu ms\n"
-    "\tpredictPart: %.2f, predictionError: %.2f, predictDiff: %.2f\n"
+    "\tpredictPart: %.2f, predictionError: %.2f\n"
     "\tmeasuredTemp: %.2f, lastMeasuredTemp %.2f, setTemp %.2f \n"
     "\ttemperatureChange %.2f, absTempDiff: %.2f",
     predictTemp,
     m_checkIntervalMillis,
     predictPart,
     predictionError,
-    predictDiff,
     measuredTemp,
     rtcData.lastMeasuredTemp,
     rtcData.setTemp,
@@ -75,42 +76,70 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     absTempDiff);
 
   if (0 == predictTemp) {
-    const auto nextCheck = rtc::offsetMillis() + m_checkIntervalMillis;
-    rtc::setValveNextCheckMillis(nextCheck);
+    const auto nextCheck = nextCheckTime();
     Logger::log(Logger::DEBUG, "Skipping temperature setting, predictTemp = 0");
     return nextCheck;
   }
 
-  if (absTempDiff < hysteresis) {
-    Logger::log(Logger::INFO, "Predicated temperature is in tolerance, not changing");
-    return nextCheckTime();
-  }
+  const float largeTempDiff = 3;
 
-  const auto rotateFactorOpen = 1200.0f;
-  const auto rotateFactorClose = rotateFactorOpen + 300.0f;
-  const auto predictedTempTooLow = predictTemp < (rtcData.setTemp - hysteresis);
-  const auto rotateFactor = predictedTempTooLow ? rotateFactorOpen : rotateFactorClose;
+  // Act according to the prediction.
+  if (predictTemp < (rtcData.setTemp - openHysteresis)) {
+    if (temperatureChange < minTemperatureChange) {
 
-  // limit valve rotate time to something sane
-  const auto maxRotateTime = 10'000;
-  auto rotateTime = std::abs(predictDiff) * rotateFactor;
-  if (rotateTime > maxRotateTime) {
-    rotateTime = maxRotateTime;
-  }
+      const auto predictDiff = rtcData.setTemp - predictTemp - openHysteresis;
+      Logger::log(Logger::INFO, "Open predict diff: %f", predictDiff);
 
-  const auto temperatureChangedEnough
-    = (predictedTempTooLow && temperatureChange >= (minTemperatureChange))
-    || (!predictedTempTooLow && temperatureChange <= (-minTemperatureChange));
+      if (
+        rtcData.setTemp - predictTemp > largeTempDiff
+        && rtcData.setTemp - measuredTemp > largeTempDiff) {
+        openTime *= 10;
+      } else if (predictDiff >= 2) {
+        openTime = 3000;
+      } else if (predictDiff >= 1.5) {
+        openTime = 2500;
+      } else if (predictDiff >= 1) {
+        openTime = 1500;
+      } else if (predictDiff >= 0.5) {
+        openTime = 1000;
+      }
 
-  if (temperatureChangedEnough) {
-    Logger::log(Logger::INFO, "Temperature changed enough by %.2f", temperatureChange);
-    return nextCheckTime();
-  }
+      openValve(openTime);
+    } else {
+      Logger::log(
+        Logger::INFO,
+        "RISE, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+        rtcData.lastMeasuredTemp,
+        measuredTemp,
+        temperatureChange);
+    }
 
-  if (predictedTempTooLow) {
-    openValve(rotateTime);
+  } else if (predictTemp > (rtcData.setTemp + closeHysteresis)) {
+    if (temperatureChange >= -minTemperatureChange) {
+
+      const auto predictDiff = rtcData.setTemp - predictTemp - closeHysteresis;
+      Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
+      if (predictDiff <= 2) {
+        closeTime = 5000;
+      } else if (predictDiff <= 1.5) {
+        closeTime = 4000;
+      } else if (predictDiff <= 1) {
+        closeTime = 2500;
+      } else if (predictDiff <= 0.5) {
+        closeTime = 1500;
+      }
+
+      closeValve(closeTime);
+    } else {
+      Logger::log(
+        Logger::INFO,
+        "SINK, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+        rtc::read().lastMeasuredTemp,
+        measuredTemp,
+        temperatureChange);
+    }
   } else {
-    closeValve(rotateTime);
+    Logger::log(Logger::INFO, "Temperature is in tolerance, not changing");
   }
 
   return nextCheckTime();
