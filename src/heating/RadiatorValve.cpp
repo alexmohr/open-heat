@@ -51,8 +51,6 @@ uint64_t open_heat::heating::RadiatorValve::loop()
 
   const auto openHysteresis = 0.3f;
   const auto closeHysteresis = 0.2f;
-  unsigned short openTime = 350U;
-  unsigned short closeTime = 200U;
   const auto absTempDiff
     = std::max(rtcData.setTemp, predictTemp) - std::min(rtcData.setTemp, predictTemp);
 
@@ -81,30 +79,10 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     return nextCheck;
   }
 
-  const float largeTempDiff = 3;
-
   // Act according to the prediction.
   if (predictTemp < (rtcData.setTemp - openHysteresis)) {
     if (temperatureChange < minTemperatureChange) {
-
-      const auto predictDiff = rtcData.setTemp - predictTemp - openHysteresis;
-      Logger::log(Logger::INFO, "Open predict diff: %f", predictDiff);
-
-      if (
-        rtcData.setTemp - predictTemp > largeTempDiff
-        && rtcData.setTemp - measuredTemp > largeTempDiff) {
-        openTime *= 10;
-      } else if (predictDiff >= 2) {
-        openTime = 3000;
-      } else if (predictDiff >= 1.5) {
-        openTime = 2500;
-      } else if (predictDiff >= 1) {
-        openTime = 1500;
-      } else if (predictDiff >= 0.5) {
-        openTime = 1000;
-      }
-
-      openValve(openTime);
+      handleTempTooLow(rtcData, measuredTemp, predictTemp, openHysteresis);
     } else {
       Logger::log(
         Logger::INFO,
@@ -116,20 +94,7 @@ uint64_t open_heat::heating::RadiatorValve::loop()
 
   } else if (predictTemp > (rtcData.setTemp + closeHysteresis)) {
     if (temperatureChange >= -minTemperatureChange) {
-
-      const auto predictDiff = rtcData.setTemp - predictTemp - closeHysteresis;
-      Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
-      if (predictDiff <= 2) {
-        closeTime = 5000;
-      } else if (predictDiff <= 1.5) {
-        closeTime = 4000;
-      } else if (predictDiff <= 1) {
-        closeTime = 2500;
-      } else if (predictDiff <= 0.5) {
-        closeTime = 1500;
-      }
-
-      closeValve(closeTime);
+      handleTempTooHigh(rtcData, predictTemp, closeHysteresis);
     } else {
       Logger::log(
         Logger::INFO,
@@ -144,14 +109,63 @@ uint64_t open_heat::heating::RadiatorValve::loop()
 
   return nextCheckTime();
 }
-uint64_t open_heat::heating::RadiatorValve::nextCheckTime() const
+
+void open_heat::heating::RadiatorValve::handleTempTooHigh(
+  const open_heat::rtc::Memory& rtcData,
+  const float predictTemp,
+  const float closeHysteresis)
+{
+  auto closeTime = 200U;
+  const auto predictDiff = rtcData.setTemp - predictTemp - closeHysteresis;
+  Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
+  if (predictDiff <= 2) {
+    closeTime = 5000;
+  } else if (predictDiff <= 1.5) {
+    closeTime = 4000;
+  } else if (predictDiff <= 1) {
+    closeTime = 2500;
+  } else if (predictDiff <= 0.5) {
+    closeTime = 1500;
+  }
+
+  closeValve(closeTime);
+}
+
+void open_heat::heating::RadiatorValve::handleTempTooLow(
+  const open_heat::rtc::Memory& rtcData,
+  const float measuredTemp,
+  const float predictTemp,
+  const float openHysteresis)
+{
+  auto openTime = 350U;
+  const float largeTempDiff = 3;
+  const auto predictDiff = rtcData.setTemp - predictTemp - openHysteresis;
+  Logger::log(Logger::INFO, "Open predict diff: %f", predictDiff);
+
+  if (
+    rtcData.setTemp - predictTemp > largeTempDiff
+    && rtcData.setTemp - measuredTemp > largeTempDiff) {
+    openTime *= 10;
+  } else if (predictDiff >= 2) {
+    openTime = 3000;
+  } else if (predictDiff >= 1.5) {
+    openTime = 2500;
+  } else if (predictDiff >= 1) {
+    openTime = 1500;
+  } else if (predictDiff >= 0.5) {
+    openTime = 1000;
+  }
+
+  openValve(openTime);
+}
+uint64_t open_heat::heating::RadiatorValve::nextCheckTime()
 {
   const auto nextCheck = rtc::offsetMillis() + m_checkIntervalMillis;
   rtc::setValveNextCheckMillis(nextCheck);
   return nextCheck;
 }
 
-float open_heat::heating::RadiatorValve::getConfiguredTemp() const
+float open_heat::heating::RadiatorValve::getConfiguredTemp()
 {
   return rtc::read().setTemp;
 }
