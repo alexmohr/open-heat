@@ -275,7 +275,10 @@ void open_heat::heating::RadiatorValve::rotateValve(
   enablePins();
   digitalWrite(static_cast<uint8_t>(config.Vin), vinState);
   digitalWrite(static_cast<uint8_t>(config.Ground), groundState);
-  delay(rotateTime);
+
+  // assume it takes 20 milliseconds to spin up the motor
+  static const auto spinUpTime = 20U;
+  delay(rotateTime + spinUpTime);
   disablePins();
   Logger::log(Logger::DEBUG, "Rotating valve done");
 }
