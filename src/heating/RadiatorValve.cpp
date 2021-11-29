@@ -30,8 +30,8 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   if (rtc::read().mode == OFF || rtc::read().mode == FULL_OPEN) {
     const auto nextCheck = std::numeric_limits<uint64_t>::max();
     rtc::setValveNextCheckMillis(nextCheck);
-    rtc::read().mode == OFF ? closeValve(VALVE_FULL_ROTATE_TIME)
-                            : openValve(VALVE_FULL_ROTATE_TIME);
+    rtc::read().mode == OFF ? closeValve(VALVE_FULL_ROTATE_TIME * 2)
+                            : openValve(VALVE_FULL_ROTATE_TIME * 2);
 
     Logger::log(Logger::DEBUG, "Heating is turned off, disabled heating");
     return nextCheck;
