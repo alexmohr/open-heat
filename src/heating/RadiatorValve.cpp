@@ -27,14 +27,18 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   }
 
   // heating disabled
-  if (rtc::read().mode != HEAT) {
+  if (rtc::read().mode == OFF || rtc::read().mode == FULL_OPEN) {
     const auto nextCheck = std::numeric_limits<uint64_t>::max();
     rtc::setValveNextCheckMillis(nextCheck);
-    closeValve(VALVE_FULL_ROTATE_TIME);
+    rtc::read().mode == OFF ? closeValve(VALVE_FULL_ROTATE_TIME)
+                            : openValve(VALVE_FULL_ROTATE_TIME);
 
     Logger::log(Logger::DEBUG, "Heating is turned off, disabled heating");
     return nextCheck;
-  }
+  } else if (rtc::read().mode == UNKNOWN) {
+    Logger::log(Logger::ERROR, "Unknown heating mode!");
+    return nextCheckTime();
+  } // else mode is heat
 
   // store data once to work with consistent values
   const auto rtcData = rtc::read();
@@ -128,6 +132,9 @@ void open_heat::heating::RadiatorValve::handleTempTooHigh(
     closeTime = 1500;
   }
 
+  // todo make sure underflow is prevented
+  closeTime -= m_spinUpMillis;
+
   closeValve(closeTime);
 }
 
@@ -156,6 +163,8 @@ void open_heat::heating::RadiatorValve::handleTempTooLow(
     openTime = 1000;
   }
 
+  // todo make sure underflow is prevented
+  openTime -= m_spinUpMillis;
   openValve(openTime);
 }
 uint64_t open_heat::heating::RadiatorValve::nextCheckTime()
@@ -258,11 +267,10 @@ unsigned int open_heat::heating::RadiatorValve::remainingRotateTime(
   unsigned int rotateTime) const
 {
   auto remainingTime = VALVE_FULL_ROTATE_TIME - abs(rtc::read().currentRotateTime);
-  if (remainingTime < 0) {
-    remainingTime = 0;
+  if (remainingTime <= 0 || rotateTime > remainingTime) {
+    rotateTime = m_finalRotateMillis;
   }
 
-  rotateTime = std::min(rotateTime, static_cast<unsigned int>(remainingTime));
   return rotateTime;
 }
 
@@ -276,9 +284,7 @@ void open_heat::heating::RadiatorValve::rotateValve(
   digitalWrite(static_cast<uint8_t>(config.Vin), vinState);
   digitalWrite(static_cast<uint8_t>(config.Ground), groundState);
 
-  // assume it takes 20 milliseconds to spin up the motor
-  static const auto spinUpTime = 20U;
-  delay(rotateTime + spinUpTime);
+  delay(rotateTime + m_spinUpMillis);
   disablePins();
   Logger::log(Logger::DEBUG, "Rotating valve done");
 }

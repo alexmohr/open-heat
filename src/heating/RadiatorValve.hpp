@@ -20,7 +20,7 @@ class RadiatorValve {
 
   uint64_t loop();
   void setup();
-  static float getConfiguredTemp() ;
+  static float getConfiguredTemp();
   void setConfiguredTemp(float temp);
   void setMode(OperationMode mode);
   OperationMode getMode();
@@ -60,6 +60,9 @@ class RadiatorValve {
   static constexpr unsigned long m_checkIntervalMillis
     = static_cast<unsigned long>(5 * 60 * 1000);
 
+  static constexpr int m_spinUpMillis = 50;
+  static constexpr int m_finalRotateMillis = 1'000;
+
   std::vector<std::function<void(OperationMode)>> m_OpModeChangeHandler{};
   std::vector<std::function<void(bool)>> m_windowStateHandler{};
   std::vector<std::function<void(float)>> m_setTempChangeHandler{};
@@ -69,7 +72,7 @@ class RadiatorValve {
     const PinSettings& config,
     int vinState,
     int groundState);
-  static uint64_t nextCheckTime() ;
+  static uint64_t nextCheckTime();
   void handleTempTooLow(
     const open_heat::rtc::Memory& rtcData,
     const float measuredTemp,
