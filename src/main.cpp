@@ -158,7 +158,7 @@ void setup()
   open_heat::Logger::setup();
   const auto configValid = g_filesystem.setup();
 
-  if (ESP.getResetInfoPtr()->reason == REASON_DEEP_SLEEP_AWAKE) {
+  if (EspClass::getResetInfoPtr()->reason == REASON_DEEP_SLEEP_AWAKE) {
     open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
 
     if (!open_heat::rtc::read().drdDisabled) {
