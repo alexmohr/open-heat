@@ -66,7 +66,7 @@ class RadiatorValve {
   std::vector<std::function<void(OperationMode)>> m_OpModeChangeHandler{};
   std::vector<std::function<void(bool)>> m_windowStateHandler{};
   std::vector<std::function<void(float)>> m_setTempChangeHandler{};
-  [[nodiscard]] unsigned int remainingRotateTime(unsigned int rotateTime) const;
+  [[nodiscard]] static unsigned int remainingRotateTime(int rotateTime, bool close);
   void rotateValve(
     unsigned int rotateTime,
     const PinSettings& config,

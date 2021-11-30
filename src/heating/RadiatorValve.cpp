@@ -119,7 +119,7 @@ void open_heat::heating::RadiatorValve::handleTempTooHigh(
   const float predictTemp,
   const float closeHysteresis)
 {
-  auto closeTime = 200U;
+  auto closeTime = 200;
   const auto predictDiff = rtcData.setTemp - predictTemp - closeHysteresis;
   Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
   if (predictDiff <= 2) {
@@ -132,8 +132,10 @@ void open_heat::heating::RadiatorValve::handleTempTooHigh(
     closeTime = 1500;
   }
 
-  // todo make sure underflow is prevented
   closeTime -= m_spinUpMillis;
+  if (closeTime <= 0) {
+    return;
+  }
 
   closeValve(closeTime);
 }
@@ -144,7 +146,7 @@ void open_heat::heating::RadiatorValve::handleTempTooLow(
   const float predictTemp,
   const float openHysteresis)
 {
-  auto openTime = 350U;
+  auto openTime = 350;
   const float largeTempDiff = 3;
   const auto predictDiff = rtcData.setTemp - predictTemp - openHysteresis;
   Logger::log(Logger::INFO, "Open predict diff: %f", predictDiff);
@@ -163,8 +165,10 @@ void open_heat::heating::RadiatorValve::handleTempTooLow(
     openTime = 1000;
   }
 
-  // todo make sure underflow is prevented
   openTime -= m_spinUpMillis;
+  if (openTime <= 0) {
+    return;
+  }
   openValve(openTime);
 }
 uint64_t open_heat::heating::RadiatorValve::nextCheckTime()
@@ -216,7 +220,7 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
   }
 
   if (rtc::read().currentRotateTime < 0) {
-    rotateTime = remainingRotateTime(rotateTime);
+    rotateTime = remainingRotateTime(static_cast<int>(rotateTime), true);
   }
 
   rtc::setCurrentRotateTime(
@@ -245,7 +249,7 @@ void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
   }
 
   if (rtc::read().currentRotateTime > 0) {
-    rotateTime = remainingRotateTime(rotateTime);
+    rotateTime = remainingRotateTime(static_cast<int>(rotateTime), false);
   }
 
   rtc::setCurrentRotateTime(
@@ -264,10 +268,21 @@ void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
 }
 
 unsigned int open_heat::heating::RadiatorValve::remainingRotateTime(
-  unsigned int rotateTime) const
+  int rotateTime,
+  bool close)
 {
-  auto remainingTime = VALVE_FULL_ROTATE_TIME - abs(rtc::read().currentRotateTime);
+  int remainingTime;
+  // if close and rotate time is positive
+  // or open and rotate time is negative
+  // we still have the full range left
+  if ((close && rotateTime < 0) || (!close && rotateTime > 0)) {
+    remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+  } else {
+    remainingTime = VALVE_FULL_ROTATE_TIME;
+  }
+
   if (remainingTime <= 0 || rotateTime > remainingTime) {
+    // correct for eventual offsets
     rotateTime = m_finalRotateMillis;
   }
 
