@@ -106,6 +106,10 @@ uint64_t open_heat::network::MQTT::loop()
   publish(m_getBatteryTopic + "percent", String(m_battery->percentage()));
   publish(m_getBatteryTopic + "voltage", String(m_battery->voltage()));
 
+  publish(m_getConfiguredTempTopic, String(rtc::read().setTemp));
+  publish(m_getModeTopic, String(rtc::read().mode));
+
+
   // drain message queue for new messages
   sendMessageQueue();
 
