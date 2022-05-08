@@ -3,6 +3,17 @@ Checks: >
   *,
   -modernize-use-trailing-return-type,
   -llvmlibc*,
+  -altera*,
+  -fuchsia*,
+  -modernize-use-trailing-return-type,
+  -hicpp-signed-bitwise,
+  -llvm-include-order,
+  -llvm-header-guard,
+  -cppcoreguidelines-pro-bounds-array-to-pointer-decay,
+  -hicpp-no-array-decay,
+  -system-headers,
+  -readability-identifier-naming
+  -abseil-*
 WarningsAsErrors: '*'
 HeaderFilterRegex: '*'
 AnalyzeTemporaryDtors: false

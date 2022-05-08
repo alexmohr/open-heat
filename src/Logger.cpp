@@ -11,25 +11,25 @@
 
 namespace open_heat {
 // ToDo this could be moved into progmem if more RAM is needed
-std::array<char, 768> logBuffer_;
+std::array<char, 768> m_logBuffer;
 
-static constexpr const char COLORED_LEVEL_TRACE[] MEM_TYPE = "\033[1;37m[TRACE] ";
-static constexpr const char COLORED_LEVEL_DEBUG[] MEM_TYPE = "\033[1;37m[DEBUG] ";
-static constexpr const char COLORED_LEVEL_INFO[] MEM_TYPE = "\033[1;32m[INFO]  ";
-static constexpr const char COLORED_LEVEL_WARNING[] MEM_TYPE = "\033[1;33m[WARN]  ";
-static constexpr const char COLORED_LEVEL_ERROR[] MEM_TYPE = "\033[1;31m[ERROR] ";
-static constexpr const char COLORED_LEVEL_FATAL[] MEM_TYPE = "\033[1;31m[FATAL] ";
-static constexpr const char COLORED_LEVEL_OFF[] MEM_TYPE = "\033[1;31m[OFF]   ";
+static constexpr auto COLORED_LEVEL_TRACE MEM_TYPE = "\033[1;37m[TRACE] ";
+static constexpr auto COLORED_LEVEL_DEBUG MEM_TYPE = "\033[1;37m[DEBUG] ";
+static constexpr auto COLORED_LEVEL_INFO MEM_TYPE = "\033[1;32m[INFO]  ";
+static constexpr auto COLORED_LEVEL_WARNING MEM_TYPE = "\033[1;33m[WARN]  ";
+static constexpr auto COLORED_LEVEL_ERROR MEM_TYPE = "\033[1;31m[ERROR] ";
+static constexpr auto COLORED_LEVEL_FATAL MEM_TYPE = "\033[1;31m[FATAL] ";
+static constexpr auto COLORED_LEVEL_OFF MEM_TYPE = "\033[1;31m[OFF]   ";
 
-static constexpr const char LEVEL_TRACE[] MEM_TYPE = "[TRACE]";
-static constexpr const char LEVEL_DEBUG[] MEM_TYPE = "[DEBUG]";
-static constexpr const char LEVEL_INFO[] MEM_TYPE = "[INFO] ";
-static constexpr const char LEVEL_WARNING[] MEM_TYPE = "[WARN]";
-static constexpr const char LEVEL_ERROR[] MEM_TYPE = "[ERROR]";
-static constexpr const char LEVEL_FATAL[] MEM_TYPE = "[FATAL]";
-static constexpr const char LEVEL_OFF[] MEM_TYPE = "[OFF]  ";
+static constexpr auto LEVEL_TRACE[] MEM_TYPE = "[TRACE]";
+static constexpr auto LEVEL_DEBUG[] MEM_TYPE = "[DEBUG]";
+static constexpr auto LEVEL_INFO[] MEM_TYPE = "[INFO] ";
+static constexpr auto LEVEL_WARNING[] MEM_TYPE = "[WARN]";
+static constexpr auto LEVEL_ERROR[] MEM_TYPE = "[ERROR]";
+static constexpr auto LEVEL_FATAL[] MEM_TYPE = "[FATAL]";
+static constexpr auto LEVEL_OFF[] MEM_TYPE = "[OFF]  ";
 
-static constexpr const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
+static constexpr auto* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
   LEVEL_TRACE,
   LEVEL_DEBUG,
   LEVEL_INFO,
@@ -39,7 +39,7 @@ static constexpr const char* const LOG_LEVEL_STRINGS[] MEM_TYPE = {
   LEVEL_OFF,
 };
 
-const char* const COLORED_LOG_LEVEL_STRINGS[] MEM_TYPE = {
+constexpr const auto* const COLORED_LOG_LEVEL_STRINGS[] MEM_TYPE = {
   COLORED_LEVEL_TRACE,
   COLORED_LEVEL_DEBUG,
   COLORED_LEVEL_INFO,
@@ -67,17 +67,17 @@ void Logger::log(Level level, const char* format, ...)
     return;
   }
 
-  std::memset(logBuffer_.data(), 0, logBuffer_.size());
+  std::memset(m_logBuffer.data(), 0, m_logBuffer.size());
 
   va_list args;
   va_start(args, format);
   const auto time = rtc::offsetMillis();
-  const auto offset = std::sprintf(logBuffer_.data(), "[%010llu] ", time);
-  vsnprintf(logBuffer_.data() + offset, logBuffer_.size(), format, args);
+  const auto offset = std::sprintf(m_logBuffer.data(), "[%010llu] ", time);
+  vsnprintf(m_logBuffer.data() + offset, m_logBuffer.size(), format, args);
   va_end(args);
 
   for (const auto& outFun : getInstance().loggerOutputFunctions_) {
-    outFun(level, logBuffer_.data());
+    outFun(level, m_logBuffer.data());
   }
 }
 

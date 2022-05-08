@@ -24,8 +24,8 @@ class MQTT {
   MQTT(
     Filesystem* filesystem,
     WifiManager& wifi,
-    sensors::Temperature*& tempSensor,
-    sensors::Humidity*& humiditySensor,
+    sensors::Temperature* tempSensor,
+    sensors::Humidity* humiditySensor,
     heating::RadiatorValve* valve,
     sensors::Battery* battery) :
       m_wifi(wifi), m_tempSensor(tempSensor), m_humiditySensor(humiditySensor)
@@ -61,8 +61,8 @@ class MQTT {
   private:
   WifiManager& m_wifi;
 
-  sensors::Temperature*& m_tempSensor;
-  sensors::Humidity*& m_humiditySensor;
+  sensors::Temperature* m_tempSensor;
+  sensors::Humidity* m_humiditySensor;
   static sensors::Battery* m_battery;
   static Filesystem* m_filesystem;
   static heating::RadiatorValve* m_valve;
