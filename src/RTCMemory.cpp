@@ -181,7 +181,7 @@ void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
   open_heat::Logger::log(open_heat::Logger::INFO, "Sleeping for %lu ms", timeInMs);
   setMillisOffset(offsetMillis() + timeInMs);
 
-  ESP.deepSleepInstant(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);
+  EspClass::deepSleep(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);
   delay(1);
 }
 

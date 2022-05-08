@@ -27,14 +27,18 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   }
 
   // heating disabled
-  if (rtc::read().mode != HEAT) {
+  if (rtc::read().mode == OFF || rtc::read().mode == FULL_OPEN) {
     const auto nextCheck = std::numeric_limits<uint64_t>::max();
     rtc::setValveNextCheckMillis(nextCheck);
-    closeValve(VALVE_FULL_ROTATE_TIME);
+    rtc::read().mode == OFF ? closeValve(VALVE_FULL_ROTATE_TIME * 2)
+                            : openValve(VALVE_FULL_ROTATE_TIME * 2);
 
     Logger::log(Logger::DEBUG, "Heating is turned off, disabled heating");
     return nextCheck;
-  }
+  } else if (rtc::read().mode == UNKNOWN) {
+    Logger::log(Logger::ERROR, "Unknown heating mode!");
+    return nextCheckTime();
+  } // else mode is heat
 
   // store data once to work with consistent values
   const auto rtcData = rtc::read();
@@ -49,8 +53,8 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   const auto temperatureChange = measuredTemp - rtcData.lastMeasuredTemp;
   const auto minTemperatureChange = 0.2;
 
-  const auto hysteresis = 0.2f;
-  const auto predictDiff = rtcData.setTemp - predictTemp - hysteresis;
+  const auto openHysteresis = 0.3f;
+  const auto closeHysteresis = 0.2f;
   const auto absTempDiff
     = std::max(rtcData.setTemp, predictTemp) - std::min(rtcData.setTemp, predictTemp);
 
@@ -60,14 +64,13 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     Logger::INFO,
     "Valve loop\n"
     "\tpredictTemp %.2f in %lu ms\n"
-    "\tpredictPart: %.2f, predictionError: %.2f, predictDiff: %.2f\n"
+    "\tpredictPart: %.2f, predictionError: %.2f\n"
     "\tmeasuredTemp: %.2f, lastMeasuredTemp %.2f, setTemp %.2f \n"
     "\ttemperatureChange %.2f, absTempDiff: %.2f",
     predictTemp,
     m_checkIntervalMillis,
     predictPart,
     predictionError,
-    predictDiff,
     measuredTemp,
     rtcData.lastMeasuredTemp,
     rtcData.setTemp,
@@ -75,54 +78,107 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     absTempDiff);
 
   if (0 == predictTemp) {
-    const auto nextCheck = rtc::offsetMillis() + m_checkIntervalMillis;
-    rtc::setValveNextCheckMillis(nextCheck);
+    const auto nextCheck = nextCheckTime();
     Logger::log(Logger::DEBUG, "Skipping temperature setting, predictTemp = 0");
     return nextCheck;
   }
 
-  if (absTempDiff < hysteresis) {
-    Logger::log(Logger::INFO, "Predicated temperature is in tolerance, not changing");
-    return nextCheckTime();
-  }
+  // Act according to the prediction.
+  if (predictTemp < (rtcData.setTemp - openHysteresis)) {
+    if (temperatureChange < minTemperatureChange) {
+      handleTempTooLow(rtcData, measuredTemp, predictTemp, openHysteresis);
+    } else {
+      Logger::log(
+        Logger::INFO,
+        "RISE, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+        rtcData.lastMeasuredTemp,
+        measuredTemp,
+        temperatureChange);
+    }
 
-  const auto rotateFactorOpen = 1200.0f;
-  const auto rotateFactorClose = rotateFactorOpen + 300.0f;
-  const auto predictedTempTooLow = predictTemp < (rtcData.setTemp - hysteresis);
-  const auto rotateFactor = predictedTempTooLow ? rotateFactorOpen : rotateFactorClose;
-
-  // limit valve rotate time to something sane
-  const auto maxRotateTime = 10'000;
-  auto rotateTime = std::abs(predictDiff) * rotateFactor;
-  if (rotateTime > maxRotateTime) {
-    rotateTime = maxRotateTime;
-  }
-
-  const auto temperatureChangedEnough
-    = (predictedTempTooLow && temperatureChange >= (minTemperatureChange))
-    || (!predictedTempTooLow && temperatureChange <= (-minTemperatureChange));
-
-  if (temperatureChangedEnough) {
-    Logger::log(Logger::INFO, "Temperature changed enough by %.2f", temperatureChange);
-    return nextCheckTime();
-  }
-
-  if (predictedTempTooLow) {
-    openValve(rotateTime);
+  } else if (predictTemp > (rtcData.setTemp + closeHysteresis)) {
+    if (temperatureChange >= -minTemperatureChange) {
+      handleTempTooHigh(rtcData, predictTemp, closeHysteresis);
+    } else {
+      Logger::log(
+        Logger::INFO,
+        "SINK, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+        rtc::read().lastMeasuredTemp,
+        measuredTemp,
+        temperatureChange);
+    }
   } else {
-    closeValve(rotateTime);
+    Logger::log(Logger::INFO, "Temperature is in tolerance, not changing");
   }
 
   return nextCheckTime();
 }
-uint64_t open_heat::heating::RadiatorValve::nextCheckTime() const
+
+void open_heat::heating::RadiatorValve::handleTempTooHigh(
+  const open_heat::rtc::Memory& rtcData,
+  const float predictTemp,
+  const float closeHysteresis)
+{
+  auto closeTime = 200;
+  const auto predictDiff = rtcData.setTemp - predictTemp - closeHysteresis;
+  Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
+  if (predictDiff <= 2) {
+    closeTime = 5000;
+  } else if (predictDiff <= 1.5) {
+    closeTime = 4000;
+  } else if (predictDiff <= 1) {
+    closeTime = 2500;
+  } else if (predictDiff <= 0.5) {
+    closeTime = 1500;
+  }
+
+  closeTime -= m_spinUpMillis;
+  if (closeTime <= 0) {
+    return;
+  }
+
+  closeValve(closeTime);
+}
+
+void open_heat::heating::RadiatorValve::handleTempTooLow(
+  const open_heat::rtc::Memory& rtcData,
+  const float measuredTemp,
+  const float predictTemp,
+  const float openHysteresis)
+{
+  auto openTime = 350;
+  const float largeTempDiff = 3;
+  const auto predictDiff = rtcData.setTemp - predictTemp - openHysteresis;
+  Logger::log(Logger::INFO, "Open predict diff: %f", predictDiff);
+
+  if (
+    rtcData.setTemp - predictTemp > largeTempDiff
+    && rtcData.setTemp - measuredTemp > largeTempDiff) {
+    openTime *= 10;
+  } else if (predictDiff >= 2) {
+    openTime = 3000;
+  } else if (predictDiff >= 1.5) {
+    openTime = 2500;
+  } else if (predictDiff >= 1) {
+    openTime = 1500;
+  } else if (predictDiff >= 0.5) {
+    openTime = 1000;
+  }
+
+  openTime -= m_spinUpMillis;
+  if (openTime <= 0) {
+    return;
+  }
+  openValve(openTime);
+}
+uint64_t open_heat::heating::RadiatorValve::nextCheckTime()
 {
   const auto nextCheck = rtc::offsetMillis() + m_checkIntervalMillis;
   rtc::setValveNextCheckMillis(nextCheck);
   return nextCheck;
 }
 
-float open_heat::heating::RadiatorValve::getConfiguredTemp() const
+float open_heat::heating::RadiatorValve::getConfiguredTemp()
 {
   return rtc::read().setTemp;
 }
@@ -164,7 +220,7 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
   }
 
   if (rtc::read().currentRotateTime < 0) {
-    rotateTime = remainingRotateTime(rotateTime);
+    rotateTime = remainingRotateTime(static_cast<int>(rotateTime), true);
   }
 
   rtc::setCurrentRotateTime(
@@ -193,7 +249,7 @@ void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
   }
 
   if (rtc::read().currentRotateTime > 0) {
-    rotateTime = remainingRotateTime(rotateTime);
+    rotateTime = remainingRotateTime(static_cast<int>(rotateTime), false);
   }
 
   rtc::setCurrentRotateTime(
@@ -212,14 +268,24 @@ void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
 }
 
 unsigned int open_heat::heating::RadiatorValve::remainingRotateTime(
-  unsigned int rotateTime) const
+  int rotateTime,
+  bool close)
 {
-  auto remainingTime = VALVE_FULL_ROTATE_TIME - abs(rtc::read().currentRotateTime);
-  if (remainingTime < 0) {
-    remainingTime = 0;
+  int remainingTime;
+  // if close and rotate time is positive
+  // or open and rotate time is negative
+  // we still have the full range left
+  if ((close && rotateTime < 0) || (!close && rotateTime > 0)) {
+    remainingTime = VALVE_FULL_ROTATE_TIME - std::abs(rtc::read().currentRotateTime);
+  } else {
+    remainingTime = VALVE_FULL_ROTATE_TIME;
   }
 
-  rotateTime = std::min(rotateTime, static_cast<unsigned int>(remainingTime));
+  if (remainingTime <= 0 || rotateTime > remainingTime) {
+    // correct for eventual offsets
+    rotateTime = m_finalRotateMillis;
+  }
+
   return rotateTime;
 }
 
@@ -232,7 +298,8 @@ void open_heat::heating::RadiatorValve::rotateValve(
   enablePins();
   digitalWrite(static_cast<uint8_t>(config.Vin), vinState);
   digitalWrite(static_cast<uint8_t>(config.Ground), groundState);
-  delay(rotateTime);
+
+  delay(rotateTime + m_spinUpMillis);
   disablePins();
   Logger::log(Logger::DEBUG, "Rotating valve done");
 }

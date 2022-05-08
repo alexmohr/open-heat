@@ -7,6 +7,7 @@
 #define OPEN_HEAT_RADIATORVALVE_HPP
 
 #include <Filesystem.hpp>
+#include <RTCMemory.hpp>
 #include <sensors/Temperature.hpp>
 #include <chrono>
 namespace open_heat {
@@ -19,7 +20,7 @@ class RadiatorValve {
 
   uint64_t loop();
   void setup();
-  float getConfiguredTemp() const;
+  static float getConfiguredTemp();
   void setConfiguredTemp(float temp);
   void setMode(OperationMode mode);
   OperationMode getMode();
@@ -59,16 +60,28 @@ class RadiatorValve {
   static constexpr unsigned long m_checkIntervalMillis
     = static_cast<unsigned long>(5 * 60 * 1000);
 
+  static constexpr int m_spinUpMillis = 50;
+  static constexpr int m_finalRotateMillis = 1'000;
+
   std::vector<std::function<void(OperationMode)>> m_OpModeChangeHandler{};
   std::vector<std::function<void(bool)>> m_windowStateHandler{};
   std::vector<std::function<void(float)>> m_setTempChangeHandler{};
-  unsigned int remainingRotateTime(unsigned int rotateTime) const;
+  [[nodiscard]] static unsigned int remainingRotateTime(int rotateTime, bool close);
   void rotateValve(
     unsigned int rotateTime,
     const PinSettings& config,
     int vinState,
     int groundState);
-  uint64_t nextCheckTime() const;
+  static uint64_t nextCheckTime();
+  void handleTempTooLow(
+    const open_heat::rtc::Memory& rtcData,
+    const float measuredTemp,
+    const float predictTemp,
+    const float openHysteresis);
+  void handleTempTooHigh(
+    const open_heat::rtc::Memory& rtcData,
+    const float predictTemp,
+    const float closeHysteresis);
 };
 } // namespace heating
 } // namespace open_heat

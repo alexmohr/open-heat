@@ -352,7 +352,7 @@ String WebServer::indexHTMLProcessor(const String& var)
 
   // Mode
   else if (var == F("TURN_ON_OFF")) {
-    if (valve_.getMode() == HEAT) {
+    if (valve_.getMode() == HEAT || valve_.getMode() == FULL_OPEN) {
       return F("Turn off");
     } else {
       return F("Turn on");
