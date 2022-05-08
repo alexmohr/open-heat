@@ -17,91 +17,93 @@
 #include <chrono>
 #include <queue>
 
-namespace open_heat {
-namespace network {
+namespace open_heat::network {
 class MQTT {
   public:
   MQTT(
-    Filesystem* filesystem,
+    Filesystem& filesystem,
     WifiManager& wifi,
     sensors::Temperature* tempSensor,
     sensors::Humidity* humiditySensor,
-    heating::RadiatorValve* valve,
-    sensors::Battery* battery) :
-      m_wifi(wifi), m_tempSensor(tempSensor), m_humiditySensor(humiditySensor)
+    heating::RadiatorValve& valve,
+    sensors::Battery& battery) :
+      m_wifi(wifi),
+      m_tempSensor(tempSensor),
+      m_humiditySensor(humiditySensor),
+      m_battery(battery),
+      m_filesystem(filesystem),
+      m_valve(valve)
   {
-    m_valve = valve;
-    m_filesystem = filesystem;
-    m_battery = battery;
   }
 
-  MQTT(const MQTT&) = delete;
+  ~MQTT() = default;
+  MQTT(const MQTT &) = delete;
+  MQTT(const MQTT &&) = delete;
+  MQTT &operator=(MQTT &) = delete;
+  MQTT &operator=(MQTT &&) = delete;
 
-  public:
   void setup();
-  static bool needLoop();
+  bool needLoop();
   uint64_t loop();
 
-  static void enableDebug(bool value);
+  void enableDebug(bool value);
 
   private:
   void connect();
-  static void publish(const String& topic, const String& message);
-  static void messageReceivedCallback(String& topic, String& payload);
+  void publish(const String& topic, const String& message);
+  void messageReceivedCallback(String& topic, String& payload);
 
-  static void handleSetConfigTemp(const String& payload);
-  static void handleSetMode(const String& payload);
-  static void handleDebug(const String& payload);
-  static void subscribe(const String& topic);
-  static void handleLogLevel(const String& payload);
+  void handleSetConfigTemp(const String& payload);
+  void handleSetMode(const String& payload);
+  void handleDebug(const String& payload);
+  void subscribe(const String& topic);
+  void handleLogLevel(const String& payload);
   void setTopic(const String& baseTopic, const String& subTopic, String& out);
   void sendMessageQueue();
-  static void handleSetModemSleep(const String& payload);
+  void handleSetModemSleep(const String& payload);
 
-  private:
   WifiManager& m_wifi;
 
   sensors::Temperature* m_tempSensor;
   sensors::Humidity* m_humiditySensor;
-  static sensors::Battery* m_battery;
-  static Filesystem* m_filesystem;
-  static heating::RadiatorValve* m_valve;
+  sensors::Battery& m_battery;
+  Filesystem& m_filesystem;
+  heating::RadiatorValve& m_valve;
 
-  static MQTTClient m_mqttClient;
+  MQTTClient m_mqttClient;
 
   // Topics
-  static String m_getModeTopic;
-  static String m_setModeTopic;
+  String m_getModeTopic;
+  String m_setModeTopic;
 
-  static String m_setConfiguredTempTopic;
-  static String m_getConfiguredTempTopic;
+  String m_setConfiguredTempTopic;
+  String m_getConfiguredTempTopic;
 
-  static String m_getMeasuredTempTopic;
-  static String m_getMeasuredHumidTopic;
-  static String m_getBatteryTopic;
+  String m_getMeasuredTempTopic;
+  String m_getMeasuredHumidTopic;
+  String m_getBatteryTopic;
 
-  static String m_setModemSleepTopic;
-  static String m_getModemSleepTopic;
+  String m_setModemSleepTopic;
+  String m_getModemSleepTopic;
 
-  static String m_debugEnableTopic;
-  static String m_debugLogLevelTopic;
+  String m_debugEnableTopic;
+  String m_debugLogLevelTopic;
 
-  static String m_windowStateTopic;
+  String m_windowStateTopic;
 
-  static String m_logTopic;
+  String m_logTopic;
 
   struct message {
     const String* const topic;
     const String message;
   };
-  static std::queue<message> m_messageQueue;
+  std::queue<message> m_messageQueue;
 
   WiFiClient m_wifiClient;
 
   bool m_configValid{true};
   bool m_loggerAdded{false};
 };
-} // namespace network
-} // namespace open_heat
+} // namespace open_heat::network
 
 #endif // OPEN_EQIVA_MQTT_CUH

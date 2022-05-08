@@ -7,45 +7,21 @@
 #include <RTCMemory.hpp>
 #include <cstring>
 
-open_heat::heating::RadiatorValve* open_heat::network::MQTT::m_valve;
-open_heat::sensors::Battery* open_heat::network::MQTT::m_battery;
-open_heat::Filesystem* open_heat::network::MQTT::m_filesystem;
-MQTTClient open_heat::network::MQTT::m_mqttClient;
-
-String open_heat::network::MQTT::m_getModeTopic;
-String open_heat::network::MQTT::m_setModeTopic;
-
-String open_heat::network::MQTT::m_setConfiguredTempTopic;
-String open_heat::network::MQTT::m_getConfiguredTempTopic;
-String open_heat::network::MQTT::m_getMeasuredTempTopic;
-String open_heat::network::MQTT::m_getMeasuredHumidTopic;
-String open_heat::network::MQTT::m_getBatteryTopic;
-
-String open_heat::network::MQTT::m_setModemSleepTopic;
-String open_heat::network::MQTT::m_getModemSleepTopic;
-
-String open_heat::network::MQTT::m_debugEnableTopic;
-String open_heat::network::MQTT::m_debugLogLevelTopic;
-
-String open_heat::network::MQTT::m_windowStateTopic;
-
-String open_heat::network::MQTT::m_logTopic;
-std::queue<open_heat::network::MQTT::message> open_heat::network::MQTT::m_messageQueue;
-
 void open_heat::network::MQTT::setup()
 {
   Logger::log(Logger::INFO, "Running MQTT setup");
-  m_mqttClient.onMessage(&MQTT::messageReceivedCallback);
+  m_mqttClient.onMessage(std::bind(
+    &MQTT::messageReceivedCallback, this, std::placeholders::_1, std::placeholders::_2));
 
-  m_valve->registerModeChangedHandler([this](OperationMode mode) {
+  m_valve.registerModeChangedHandler([this](OperationMode mode) {
     m_messageQueue.push({&m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
   });
 
-  m_valve->registerSetTempChangedHandler([this](float temp) {
+  m_valve.registerSetTempChangedHandler([this](float temp) {
     m_messageQueue.push({&m_getConfiguredTempTopic, String(temp)});
   });
 
-  m_valve->registerWindowChangeHandler([this](bool state) {
+  m_valve.registerWindowChangeHandler([this](bool state) {
     m_messageQueue.push({&m_windowStateTopic, String(state)});
   });
 
@@ -65,10 +41,7 @@ void open_heat::network::MQTT::setup()
 
 bool open_heat::network::MQTT::needLoop()
 {
-  if (rtc::offsetMillis() < rtc::read().mqttNextCheckMillis) {
-    return false;
-  }
-  return true;
+  return rtc::offsetMillis() >= rtc::read().mqttNextCheckMillis;
 }
 
 uint64_t open_heat::network::MQTT::loop()
@@ -102,9 +75,9 @@ uint64_t open_heat::network::MQTT::loop()
 
   publish(m_getModemSleepTopic, String(rtc::read().modemSleepTime));
 
-  m_battery->loop();
-  publish(m_getBatteryTopic + "percent", String(m_battery->percentage()));
-  publish(m_getBatteryTopic + "voltage", String(m_battery->voltage()));
+  m_battery.loop();
+  publish(m_getBatteryTopic + "percent", String(m_battery.percentage()));
+  publish(m_getBatteryTopic + "voltage", String(m_battery.voltage()));
 
   publish(m_getConfiguredTempTopic, String(rtc::read().setTemp));
   publish(m_getModeTopic, String(rtc::read().mode));
@@ -179,17 +152,17 @@ void open_heat::network::MQTT::handleSetMode(const String& payload)
     return;
   }
 
-  m_valve->setMode(mode);
+  m_valve.setMode(mode);
 }
 
 void open_heat::network::MQTT::handleSetConfigTemp(const String& payload)
 {
   const auto newTemp = static_cast<float>(std::strtod(payload.c_str(), nullptr));
-  if (newTemp <= 0.0f) {
+  if (newTemp <= 0.0F) {
     return;
   }
 
-  m_valve->setConfiguredTemp(newTemp);
+  m_valve.setConfiguredTemp(newTemp);
 }
 
 void open_heat::network::MQTT::handleSetModemSleep(const String& payload)
@@ -218,7 +191,7 @@ void open_heat::network::MQTT::publish(const String& topic, const String& messag
 
 void open_heat::network::MQTT::connect()
 {
-  const auto& config = m_filesystem->getConfig();
+  const auto& config = m_filesystem.getConfig();
   if ((std::strlen(config.MQTT.Server) == 0 || config.MQTT.Port == 0)) {
     if (m_configValid) {
       Logger::log(
@@ -311,7 +284,7 @@ void open_heat::network::MQTT::enableDebug(bool value)
   }
 
   rtc::setDebug(value);
-  open_heat::rtc::wifiDeepSleep(1, value, *m_filesystem);
+  open_heat::rtc::wifiDeepSleep(1, value, m_filesystem);
 }
 
 void open_heat::network::MQTT::sendMessageQueue()

@@ -38,15 +38,15 @@ open_heat::network::WebServer g_webServer(g_filesystem, g_tempSensor, g_battery,
 
 open_heat::Serial g_serial;
 
-open_heat::network::WifiManager g_wifiManager_(g_filesystem, g_webServer);
+open_heat::network::WifiManager g_wifiManager(g_filesystem, g_webServer);
 
 open_heat::network::MQTT g_mqtt(
-  &g_filesystem,
-  g_wifiManager_,
+  g_filesystem,
+  g_wifiManager,
   g_tempSensor,
   g_humidSensor,
-  &g_valve,
-  &g_battery);
+  g_valve,
+  g_battery);
 
 void setupPins()
 {
@@ -184,7 +184,7 @@ void setup()
   g_valve.setup();
 
   if (g_mqtt.needLoop() || doubleReset) {
-    g_wifiManager_.setup(doubleReset);
+    g_wifiManager.setup(doubleReset);
     g_mqtt.setup();
   }
 
