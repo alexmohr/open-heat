@@ -9,8 +9,8 @@
 #include <Filesystem.hpp>
 #include <RTCMemory.hpp>
 #include <sensors/Temperature.hpp>
-#include <yal/yal.hpp>
 #include <chrono>
+#include <yal/yal.hpp>
 
 namespace open_heat::heating {
 
@@ -87,6 +87,6 @@ class RadiatorValve {
 
   yal::Logger m_logger;
 };
-} // namespace open_heat::heating
+} // namespace open_heat
 
 #endif // OPEN_HEAT_RADIATORVALVE_HPP

@@ -5,8 +5,8 @@
 
 #include <RTCMemory.hpp>
 #include <user_interface.h>
-#include <yal/yal.hpp>
 #include <string>
+#include <yal/yal.hpp>
 
 namespace open_heat {
 namespace rtc {
@@ -57,8 +57,7 @@ Memory readWithoutLock()
 {
   Memory rtcMemory{};
 
-  if (!ESP.rtcUserMemoryRead(
-        0, reinterpret_cast<uint32_t*>(&rtcMemory), sizeof(Memory))) {
+  if (!ESP.rtcUserMemoryRead(0, reinterpret_cast<uint32_t*>(&rtcMemory), sizeof(Memory))) {
     m_logger.log(yal::Level::ERROR, "Failed to read RTC user memory");
   }
 
@@ -181,7 +180,7 @@ void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
   pinMode(static_cast<uint8_t>(config.MotorPins.Ground), INPUT);
   pinMode(static_cast<uint8_t>(LED_BUILTIN), INPUT);
 
-  m_logger.log(yal::Level::INFO, "Sleeping for % ms", timeInMs);
+  m_logger.log(yal::Level::INFO, "Sleeping for %lu ms", timeInMs);
   setMillisOffset(offsetMillis() + timeInMs);
 
   EspClass::deepSleep(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);

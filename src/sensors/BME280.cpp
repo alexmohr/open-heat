@@ -4,8 +4,8 @@
 //
 
 #include "BME280.hpp"
-#include <RTCMemory.hpp>
 #include <yal/yal.hpp>
+#include <RTCMemory.hpp>
 
 namespace open_heat::sensors {
 
@@ -42,4 +42,4 @@ void BME280::wake()
 {
   m_bme.setSampling(Adafruit_BME280::MODE_NORMAL);
 }
-} // namespace open_heat::sensors
+} // namespace open_heat

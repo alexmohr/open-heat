@@ -27,6 +27,7 @@ class BMBase : public Sensor {
 
   private:
   bool m_isSetup = false;
+
 };
 } // namespace open_heat::sensors
 

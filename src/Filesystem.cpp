@@ -150,7 +150,7 @@ void Filesystem::format()
 String Filesystem::formatBytes(size_t bytes)
 {
   static constexpr const auto bitsPerByte = 1024.0;
-  if (bytes < bitsPerByte) {
+  if (bytes <bitsPerByte ) {
     return String(bytes) + "B";
   }
   if (bytes < (bitsPerByte * bitsPerByte)) {

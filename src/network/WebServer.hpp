@@ -8,10 +8,10 @@
 
 #include <ESPAsyncWebServer.h>
 #include <Filesystem.hpp>
+#include <yal/yal.hpp>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/Battery.hpp>
 #include <sensors/Temperature.hpp>
-#include <yal/yal.hpp>
 
 namespace open_heat::network {
 class WebServer {
@@ -88,6 +88,6 @@ class WebServer {
   yal::Logger m_logger;
 };
 
-} // namespace open_heat::network
+} // namespace open_heat
 
 #endif // WEBSERVER_HPP_

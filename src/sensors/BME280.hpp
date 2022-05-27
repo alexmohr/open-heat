@@ -28,5 +28,5 @@ class BME280 : public BMBase, public Temperature, public Humidity {
   private:
   Adafruit_BME280 m_bme;
 };
-} // namespace open_heat::sensors
+} // namespace open_heat
 #endif // BME280_HPP_

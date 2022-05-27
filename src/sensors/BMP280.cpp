@@ -33,4 +33,4 @@ void BMP280::wake()
 {
   m_bmp.setSampling(Adafruit_BMP280::MODE_NORMAL);
 }
-} // namespace open_heat::sensors
+} // namespace open_heat

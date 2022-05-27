@@ -31,7 +31,7 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     rtc::setValveNextCheckMillis(nextCheck);
     rtc::read().mode == OFF ? closeValve(VALVE_FULL_ROTATE_TIME * 2)
                             : openValve(VALVE_FULL_ROTATE_TIME * 2);
-
+    
     m_logger.log(yal::Level::DEBUG, "Heating is turned off, disabled heating");
     return nextCheck;
   }
@@ -64,10 +64,10 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   m_logger.log(
     yal::Level::INFO,
     "Valve loop\n"
-    "\tpredictTemp % in % ms\n"
-    "\tpredictPart: %, predictionError: %\n"
-    "\tmeasuredTemp: %, lastMeasuredTemp %, setTemp % \n"
-    "\ttemperatureChange %, absTempDiff: %",
+    "\tpredictTemp %.2f in %lu ms\n"
+    "\tpredictPart: %.2f, predictionError: %.2f\n"
+    "\tmeasuredTemp: %.2f, lastMeasuredTemp %.2f, setTemp %.2f \n"
+    "\ttemperatureChange %.2f, absTempDiff: %.2f",
     predictTemp,
     m_checkIntervalMillis,
     predictPart,
@@ -91,7 +91,7 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     } else {
       m_logger.log(
         yal::Level::INFO,
-        "RISE, NO ADJUST: Temp old %, temp now %, temp change %",
+        "RISE, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
         rtcData.lastMeasuredTemp,
         measuredTemp,
         temperatureChange);
@@ -103,7 +103,7 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     } else {
       m_logger.log(
         yal::Level::INFO,
-        "SINK, NO ADJUST: Temp old %, temp now %, temp change %",
+        "SINK, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
         rtc::read().lastMeasuredTemp,
         measuredTemp,
         temperatureChange);
@@ -122,7 +122,7 @@ void open_heat::heating::RadiatorValve::handleTempTooHigh(
 {
   auto closeTime = 200;
   const auto predictDiff = rtcData.setTemp - predictTemp - closeHysteresis;
-  m_logger.log(yal::Level::INFO, "Close predict diff: %", predictDiff);
+  m_logger.log(yal::Level::INFO, "Close predict diff: %f", predictDiff);
   if (predictDiff <= 2) {
     closeTime = 5000;
   } else if (predictDiff <= 1.5) {
@@ -150,7 +150,7 @@ void open_heat::heating::RadiatorValve::handleTempTooLow(
   auto openTime = 350;
   const float largeTempDiff = 3;
   const auto predictDiff = rtcData.setTemp - predictTemp - openHysteresis;
-  m_logger.log(yal::Level::INFO, "Open predict diff: %", predictDiff);
+  m_logger.log(yal::Level::INFO, "Open predict diff: %f", predictDiff);
 
   if (
     rtcData.setTemp - predictTemp > largeTempDiff
@@ -190,7 +190,7 @@ void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
     return;
   }
 
-  m_logger.log(yal::Level::INFO, "New target temperature %", temp);
+  m_logger.log(yal::Level::INFO, "New target temperature %f", temp);
   rtc::setSetTemp(temp);
   setNextCheckTimeNow();
 
@@ -215,7 +215,7 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
   if (rtc::read().currentRotateTime <= (-VALVE_FULL_ROTATE_TIME)) {
     m_logger.log(
       yal::Level::DEBUG,
-      "Valve already fully closed, current rotate time: %",
+      "Valve already fully closed, current rotate time: %i",
       rtc::read().currentRotateTime);
     return;
   }
@@ -230,7 +230,7 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
 
   m_logger.log(
     yal::Level::DEBUG,
-    "Closing valve for %ms, currentRotateTime: %ms, vin: %, ground: %",
+    "Closing valve for %ims, currentRotateTime: %ims, vin: %i, ground: %i",
     rotateTime,
     rtc::read().currentRotateTime,
     config.Vin,

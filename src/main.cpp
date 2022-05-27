@@ -17,8 +17,8 @@
 #include <sensors/BMP280.hpp>
 #include <sensors/WindowSensor.hpp>
 
-#include <yal/appender/ArduinoSerial.hpp>
 #include <yal/yal.hpp>
+#include <yal/appender/ArduinoSerial.hpp>
 
 // external voltage
 ADC_MODE(ADC_TOUT)
@@ -66,7 +66,8 @@ void setupPins()
     pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
     digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
   } else {
-    g_logger.log(yal::Level::ERROR, "Motor pin vin invalid: %", config.MotorPins.Vin);
+    g_logger.log(
+      yal::Level::ERROR, "Motor pin vin invalid: %i", config.MotorPins.Vin);
   }
   if (config.MotorPins.Ground > 1) {
     pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
@@ -74,7 +75,7 @@ void setupPins()
 
   } else {
     g_logger.log(
-      yal::Level::ERROR, "Motor pin ground invalid: %", config.MotorPins.Ground);
+      yal::Level::ERROR, "Motor pin ground invalid: %i", config.MotorPins.Ground);
   }
 
   // enable temp sensor
@@ -82,7 +83,8 @@ void setupPins()
     pinMode(static_cast<uint8_t>(config.TempVin), OUTPUT);
     digitalWrite(static_cast<uint8_t>(config.TempVin), HIGH);
   } else {
-    g_logger.log(yal::Level::ERROR, "Temp pin vin invalid: %", config.TempVin);
+    g_logger.log(
+      yal::Level::ERROR, "Temp pin vin invalid: %i", config.TempVin);
   }
 }
 
@@ -117,25 +119,25 @@ void setupTemperatureSensor()
 
 bool isDoubleReset()
 {
-  if (EspClass::getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
+  if (ESP.getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
     g_logger.log(
       yal::Level::DEBUG,
-      "no double reset, resetInfo: %",
-      EspClass::getResetInfo().c_str());
+      "no double reset, resetInfo: %s",
+      ESP.getResetInfo().c_str());
     open_heat::rtc::setDrdDisabled(true);
     return false;
   }
 
   const auto drdDetected = g_drd.detectDoubleReset();
 
-  g_logger.log(yal::Level::DEBUG, "DRD detected: %", drdDetected);
+  g_logger.log(yal::Level::DEBUG, "DRD detected: %i", drdDetected);
 
   const auto millisSinceReset
     = open_heat::rtc::read().lastResetTime - open_heat::rtc::offsetMillis();
 
   g_logger.log(
     yal::Level::DEBUG,
-    "millis since reset: %, last reset time %, offset millis: %",
+    "millis since reset: %lu, last reset time %lu, offset millis: %lu",
     millisSinceReset,
     open_heat::rtc::read().lastResetTime,
     open_heat::rtc::offsetMillis());
@@ -169,7 +171,8 @@ void setup()
   }
 
   const auto offsetMillis = open_heat::rtc::offsetMillis();
-  g_logger.log(yal::Level::DEBUG, "Set last reset time to %", offsetMillis);
+  g_logger.log(
+    yal::Level::DEBUG, "Set last reset time to %lu", offsetMillis);
   open_heat::rtc::setLastResetTime(offsetMillis);
 
   setupPins();
@@ -236,7 +239,7 @@ void loop()
   if (nextCheckMillis < (open_heat::rtc::offsetMillis() + minSleepTime)) {
     g_logger.log(
       yal::Level::DEBUG,
-      "Minimal sleep or underflow prevented, sleep set to % ms",
+      "Minimal sleep or underflow prevented, sleep set to %ul ms",
       minSleepTime);
     idleTime = minSleepTime;
   } else {

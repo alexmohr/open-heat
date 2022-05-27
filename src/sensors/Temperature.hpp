@@ -13,6 +13,6 @@ class Temperature {
   virtual float temperature() = 0;
 };
 
-} // namespace open_heat::sensors
+} // namespace open_heat
 
 #endif // TEMPERATUR_HPP_

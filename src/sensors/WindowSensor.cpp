@@ -34,7 +34,7 @@ void WindowSensor::setup()
 
   m_logger.log(
     yal::Level::INFO,
-    "WindowSwitch setup: ground %, vin %",
+    "WindowSwitch setup: ground %i, vin %i",
     config.WindowPins.Ground,
     config.WindowPins.Vin);
 
@@ -89,7 +89,7 @@ void ICACHE_RAM_ATTR WindowSensor::sensorChangedInterrupt()
   const auto& config = m_filesystem->getConfig();
   m_isOpen = digitalRead(static_cast<uint8_t>(config.WindowPins.Vin)) == HIGH;
 
-  m_logger.log(yal::Level::DEBUG, "Window switch changed, new state: %", m_isOpen);
+  m_logger.log(yal::Level::DEBUG, "Window switch changed, new state: %i", m_isOpen);
 
   const auto now = millis();
   if (now - m_lastChangeMillis < s_minMillisBetweenEvents_) {
@@ -103,4 +103,4 @@ void ICACHE_RAM_ATTR WindowSensor::sensorChangedInterrupt()
   m_validate = true;
 }
 
-} // namespace open_heat::sensors
+} // namespace open_heat

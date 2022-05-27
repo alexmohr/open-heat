@@ -15,7 +15,7 @@ void WifiManager::setup(bool doubleReset)
   // Check if any config is valid.
   auto startConfigPortal = !loadAPsFromConfig();
   if (doubleReset) {
-    m_logger.log(yal::Level::WARNING, ">>> Detected double reset <<<");
+   m_logger.log(yal::Level::WARNING, ">>> Detected double reset <<<");
     startConfigPortal = true;
   }
 
@@ -24,8 +24,7 @@ void WifiManager::setup(bool doubleReset)
     pinMode(LED_PIN, OUTPUT);
     digitalWrite(LED_PIN, LED_ON);
     while (!showConfigurationPortal()) {
-      m_logger.log(
-        yal::Level::WARNING, "Configuration did not yield valid wifi, retrying");
+      m_logger.log(yal::Level::WARNING, "Configuration did not yield valid wifi, retrying");
     }
     digitalWrite(LED_PIN, LED_OFF);
   }
@@ -44,9 +43,8 @@ bool WifiManager::loadAPsFromConfig()
     return false;
   }
 
-  m_logger.log(
-    yal::Level::TRACE,
-    "Wifi config is valid: SSID: %, PW: %",
+  m_logger.log(yal::Level::TRACE, 
+               "Wifi config is valid: SSID: %, PW: %",
     config.WifiCredentials.ssid,
     config.WifiCredentials.password);
 
@@ -56,7 +54,7 @@ bool WifiManager::loadAPsFromConfig()
 [[noreturn]] bool WifiManager::showConfigurationPortal()
 {
   auto accessPoints = getApList();
-  m_logger.log(yal::Level::DEBUG, "Starting access point");
+ m_logger.log(yal::Level::DEBUG, "Starting access point");
 
   DNSServer dnsServer;
   dnsServer.setErrorReplyCode(DNSReplyCode::NoError);
@@ -70,19 +68,19 @@ bool WifiManager::loadAPsFromConfig()
   WiFi.setHostname(hostname);
 
   const auto ip = WiFi.softAPIP();
-  m_logger.log(yal::Level::INFO, "IP address: %s", ip.toString().c_str());
+ m_logger.log(yal::Level::INFO, "IP address: %s", ip.toString().c_str());
 
   const auto dnsPort = 53;
   if (!dnsServer.start(dnsPort, "*", WiFi.softAPIP())) {
     // No socket available
-    m_logger.log(yal::Level::ERROR, "Can't start dns server");
+   m_logger.log(yal::Level::ERROR, "Can't start dns server");
   }
 
-  m_logger.log(yal::Level::INFO, "Starting Config Portal");
+ m_logger.log(yal::Level::INFO, "Starting Config Portal");
   m_webServer.setup(hostname);
   m_webServer.setApList(std::move(accessPoints));
 
-  m_logger.log(yal::Level::INFO, "Waiting for user configuration");
+ m_logger.log(yal::Level::INFO, "Waiting for user configuration");
   // WebServer will restart ESP after configuration is done
   while (true) {
     dnsServer.processNextRequest();
@@ -92,14 +90,14 @@ bool WifiManager::loadAPsFromConfig()
 
 std::vector<String> WifiManager::getApList() const
 {
-  m_logger.log(yal::Level::DEBUG, "Searching for available networks");
+ m_logger.log(yal::Level::DEBUG, "Searching for available networks");
   WiFi.mode(WIFI_STA);
   WiFi.disconnect();
   const auto apCount = WiFi.scanNetworks();
   std::vector<String> accessPoints;
   for (auto i = 0; i < apCount; ++i) {
     const auto ssid = WiFi.SSID(i);
-    m_logger.log(yal::Level::DEBUG, "Found SSID '%'", ssid.c_str());
+   m_logger.log(yal::Level::DEBUG, "Found SSID '%'", ssid.c_str());
     accessPoints.push_back(std::move(ssid));
   }
 
@@ -112,21 +110,20 @@ bool WifiManager::checkWifi()
     return true;
   }
 
-  m_logger.log(yal::Level::WARNING, "WIFi disconnected, reconnecting...");
+ m_logger.log(yal::Level::WARNING, "WIFi disconnected, reconnecting...");
   if (connectMultiWiFi() == WL_CONNECTED) {
     m_reconnectCount = 0;
     return true;
   }
 
-  m_logger.log(
-    yal::Level::WARNING, "WiFi reconnection failed, % times", ++m_reconnectCount);
+ m_logger.log(yal::Level::WARNING, "WiFi reconnection failed, % times", ++m_reconnectCount);
   return false;
 }
 
 wl_status_t WifiManager::connectMultiWiFi()
 {
   WiFi.forceSleepWake();
-  m_logger.log(yal::Level::INFO, "Connecting WiFi...");
+ m_logger.log(yal::Level::INFO, "Connecting WiFi...");
   const auto startTime = rtc::offsetMillis();
 
   const auto& config = m_fileSystem.getConfig();
@@ -140,7 +137,7 @@ wl_status_t WifiManager::connectMultiWiFi()
     = getFastConnectConfig(config.WifiCredentials.ssid, connectConfig);
   wl_status_t status;
   if (hasFastConfig) {
-    m_logger.log(yal::Level::DEBUG, "Using fast connect");
+   m_logger.log(yal::Level::DEBUG, "Using fast connect");
     status = WiFi.begin(
       config.WifiCredentials.ssid,
       config.WifiCredentials.password,
@@ -148,7 +145,7 @@ wl_status_t WifiManager::connectMultiWiFi()
       connectConfig.bssid,
       true);
   } else {
-    m_logger.log(yal::Level::DEBUG, "Using standard connect");
+   m_logger.log(yal::Level::DEBUG, "Using standard connect");
     status = WiFi.begin(config.WifiCredentials.ssid, config.WifiCredentials.password);
   }
 
@@ -164,22 +161,22 @@ wl_status_t WifiManager::connectMultiWiFi()
   const auto connectTime = rtc::offsetMillis() - startTime;
   if (status == WL_CONNECTED) {
     //@formatter:off
-    m_logger.log(
+   m_logger.log(
       yal::Level::INFO,
       "Wifi connected:\n"
-      "\ttime: %\n"
-      "\tSSID: %\n"
-      "\tRSSI=%\n"
-      "\tChannel: %\n"
-      "\tIP address: %",
+      "\ttime: %llu\n"
+      "\tSSID: %s\n"
+      "\tRSSI=%i\n"
+      "\tChannel: %i\n"
+      "\tIP address: %s",
       connectTime,
       WiFi.SSID().c_str(),
-      static_cast<int>(WiFi.RSSI()),
+      WiFi.RSSI(),
       WiFi.channel(),
       WiFi.localIP().toString().c_str());
     //@formatter:on
   } else {
-    m_logger.log(yal::Level::WARNING, "WiFi connect timeout");
+   m_logger.log(yal::Level::WARNING, "WiFi connect timeout");
   }
 
   return status;

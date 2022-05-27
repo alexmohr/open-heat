@@ -40,8 +40,9 @@ class WifiManager {
   WebServer& m_webServer;
   Filesystem& m_fileSystem;
   yal::Logger m_logger;
+
 };
 
-} // namespace open_heat::network
+} // namespace open_heat
 
 #endif // WIFIMANAGER_HPP_

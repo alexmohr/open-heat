@@ -8,13 +8,13 @@
 
 #include "WifiManager.hpp"
 #include <Filesystem.hpp>
+#include <yal/yal.hpp>
+#include <yal/appender/ArduinoMQTT.hpp>
 #include <MQTT.h>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/Battery.hpp>
 #include <sensors/Humidity.hpp>
 #include <sensors/Temperature.hpp>
-#include <yal/appender/ArduinoMQTT.hpp>
-#include <yal/yal.hpp>
 #include <chrono>
 #include <queue>
 
@@ -35,18 +35,15 @@ class MQTT {
       m_filesystem(filesystem),
       m_valve(valve),
       m_logger(yal::Logger("MQTT")),
-      m_mqttAppender(yal::appender::ArduinoMQTT<MQTTClient>(
-        &m_logger,
-        &m_mqttClient,
-        s_logTopic.c_str()))
+      m_mqttAppender(yal::appender::ArduinoMQTT<MQTTClient>(&m_logger, &m_mqttClient, s_logTopic.c_str()))
   {
   }
 
   ~MQTT() = default;
-  MQTT(const MQTT&) = delete;
-  MQTT(const MQTT&&) = delete;
-  MQTT& operator=(MQTT&) = delete;
-  MQTT& operator=(MQTT&&) = delete;
+  MQTT(const MQTT &) = delete;
+  MQTT(const MQTT &&) = delete;
+  MQTT &operator=(MQTT &) = delete;
+  MQTT &operator=(MQTT &&) = delete;
 
   void setup();
   bool needLoop();

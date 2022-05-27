@@ -34,5 +34,5 @@ class WindowSensor {
   const inline static yal::Logger m_logger = yal::Logger("WIDNOW");
 };
 
-} // namespace open_heat::sensors
+} // namespace open_heat
 #endif // OPEN_HEAT_WINDOWSENSOR_HPP
