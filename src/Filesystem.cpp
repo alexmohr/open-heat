@@ -4,15 +4,15 @@
 //
 
 #include "Filesystem.hpp"
-#include "Logger.hpp"
 #include "RTCMemory.hpp"
+#include <yal/yal.hpp>
 #include <cstring>
 
 namespace open_heat {
 
 bool Filesystem::setup()
 {
-  if (setup_) {
+  if (m_setup) {
     return true;
   }
 
@@ -23,15 +23,15 @@ bool Filesystem::setup()
   if (!FileFS.begin())
 #endif
   {
-    Logger::log(Logger::WARNING, "%s begin failed, formatting...", FS_Name);
+    m_logger.log(yal::Level::WARNING, "% begin failed, formatting...", FS_Name);
 #ifdef ESP8266
-    if (!filesystem->format()) {
-      Logger::log(Logger::ERROR, "Format of fs failed!");
+    if (!m_filesystem->format()) {
+      m_logger.log(yal::Level::ERROR, "Format of fs failed!");
     }
 #endif
   }
 
-  Logger::log(Logger::DEBUG, "FS setup done");
+  m_logger.log(yal::Level::DEBUG, "FS setup done");
 
   auto configValid = isConfigValid();
   if (configValid) {
@@ -40,103 +40,103 @@ bool Filesystem::setup()
     clearConfig();
   }
 
-  setup_ = true;
+  m_setup = true;
   return configValid;
 }
 
 void Filesystem::listFiles()
 {
-  Dir dir = filesystem->openDir("/");
-  Logger::log(Logger::DEBUG, "Opening / directory");
+  Dir dir = m_filesystem->openDir("/");
+  m_logger.log(yal::Level::DEBUG, "Opening / directory");
 
   while (dir.next()) {
     const String fileName = dir.fileName();
     const size_t fileSize = dir.fileSize();
-    Logger::log(
-      Logger::DEBUG,
-      "FS File: %s, size: %s",
+    m_logger.log(
+      yal::Level::DEBUG,
+      "FS File: %, size: %",
       fileName.c_str(),
-      Logger::formatBytes(fileSize).c_str());
+      formatBytes(fileSize).c_str());
   }
 }
 
 Config& Filesystem::getConfig()
 {
-  if (!setup_) {
+  if (!m_setup) {
     setup();
   }
-  return config_;
+  return m_config;
 }
 
 void Filesystem::clearConfig()
 {
-  config_ = {};
-  std::memset(&config_.WifiCredentials, 0, sizeof(config_.WifiCredentials));
-  config_.MQTT = {};
-  config_.Update = {};
+  m_config = {};
+  std::memset(&m_config.WifiCredentials, 0, sizeof(m_config.WifiCredentials));
+  m_config.MQTT = {};
+  m_config.Update = {};
 }
 
 void Filesystem::persistConfig()
 {
-  if (!setup_) {
+  if (!m_setup) {
     setup();
   }
 
   File file = FileFS.open(configFile_, "w");
-  Logger::log(Logger::DEBUG, "Saving config");
+  m_logger.log(yal::Level::DEBUG, "Saving config");
 
   if (!file) {
-    Logger::log(Logger::ERROR, "Failed to create config file on FS");
+    m_logger.log(yal::Level::ERROR, "Failed to create config file on FS");
     return;
   }
 
-  file.write((uint8_t*)&config_, sizeof(Config));
+  file.write((uint8_t*)&m_config, sizeof(Config));
 
   file.close();
 
-  Logger::log(Logger::DEBUG, "Configuration saved");
+  m_logger.log(yal::Level::DEBUG, "Configuration saved");
 }
 
 void Filesystem::initConfig()
 {
   File file = FileFS.open(configFile_, "r");
-  Logger::log(Logger::DEBUG, "Loading config");
+  m_logger.log(yal::Level::DEBUG, "Loading config");
   clearConfig();
 
   if (!file) {
-    Logger::log(Logger::ERROR, "Failed to create read config from FS");
+    m_logger.log(yal::Level::ERROR, "Failed to create read config from FS");
     return;
   }
 
-  file.readBytes((char*)&config_, sizeof(Config));
+  file.readBytes((char*)&m_config, sizeof(Config));
 
   file.close();
-  if (0 == std::strlen(config_.Hostname)) {
-    std::strcpy(config_.Hostname, DEFAULT_HOST_NAME);
+  if (0 == std::strlen(m_config.Hostname)) {
+    std::strcpy(m_config.Hostname, DEFAULT_HOST_NAME);
   }
 
-  if (0 == std::strlen(config_.Update.Username)) {
-    std::strcpy(config_.Update.Username, DEFAULT_USER);
+  if (0 == std::strlen(m_config.Update.Username)) {
+    std::strcpy(m_config.Update.Username, DEFAULT_USER);
   }
 
-  if (0 == std::strlen(config_.Update.Password)) {
-    std::strcpy(config_.Update.Username, DEFAULT_PW);
+  if (0 == std::strlen(m_config.Update.Password)) {
+    std::strcpy(m_config.Update.Username, DEFAULT_PW);
   }
 
-  const auto topic = std::string(config_.MQTT.Topic);
+  const auto topic = std::string(m_config.MQTT.Topic);
   if (topic.size() > 1 && topic[topic.size() - 1] != '/') {
-    std::strcpy(config_.MQTT.Topic, (topic + "/").c_str());
+    std::strcpy(m_config.MQTT.Topic, (topic + "/").c_str());
   }
 
-  Logger::log(Logger::DEBUG, "Successfully loaded config");
+  m_logger.log(yal::Level::DEBUG, "Successfully loaded config");
 }
 
 bool Filesystem::isConfigValid()
 {
   const File file = FileFS.open(configFile_, "r");
   if (file.size() != sizeof(Config)) {
-    Logger::log(
-      Logger::ERROR, "Config layout changed, invalidating and new config necessary");
+    m_logger.log(
+      yal::Level::ERROR, "Config layout changed, invalidating and new config necessary");
     return false;
   }
 
@@ -144,7 +144,19 @@ bool Filesystem::isConfigValid()
 }
 void Filesystem::format()
 {
-  filesystem->format();
+  m_filesystem->format();
+}
+
+String Filesystem::formatBytes(size_t bytes)
+{
+  static constexpr const auto bitsPerByte = 1024.0;
+  if (bytes < bitsPerByte) {
+    return String(bytes) + "B";
+  }
+  if (bytes < (bitsPerByte * bitsPerByte)) {
+    return String(bytes / bitsPerByte) + "KB";
+  }
+  return String(bytes / bitsPerByte / bitsPerByte) + "MB";
 }
 
 } // namespace open_heat

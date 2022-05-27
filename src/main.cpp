@@ -4,10 +4,7 @@
 //
 
 #include <Arduino.h>
-#include <Logger.hpp>
-
 #include <Filesystem.hpp>
-#include <Serial.hpp>
 #include <hardware/DoubleResetDetector.hpp>
 #include <hardware/esp_err.h>
 #include <network/MQTT.hpp>
@@ -20,8 +17,11 @@
 #include <sensors/BMP280.hpp>
 #include <sensors/WindowSensor.hpp>
 
+#include <yal/appender/ArduinoSerial.hpp>
+#include <yal/yal.hpp>
+
 // external voltage
-ADC_MODE(ADC_TOUT);
+ADC_MODE(ADC_TOUT)
 
 DoubleResetDetector g_drd(DRD_TIMEOUT, DRD_ADDRESS);
 
@@ -34,9 +34,6 @@ open_heat::heating::RadiatorValve g_valve(g_tempSensor, g_filesystem);
 open_heat::sensors::Battery g_battery;
 
 open_heat::network::WebServer g_webServer(g_filesystem, g_tempSensor, g_battery, g_valve);
-// open_heat::sensors::WindowSensor g_windowSensor(g_filesystem, g_valve);
-
-open_heat::Serial g_serial;
 
 open_heat::network::WifiManager g_wifiManager(g_filesystem, g_webServer);
 
@@ -48,9 +45,12 @@ open_heat::network::MQTT g_mqtt(
   g_valve,
   g_battery);
 
+yal::Logger g_logger("main");
+yal::appender::ArduinoSerial<HardwareSerial> g_serialAppender(&g_logger, &Serial, true);
+
 void setupPins()
 {
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Running setupPins");
+  g_logger.log(yal::Level::DEBUG, "Running setupPins");
 
   // set led pin as output
   pinMode(LED_BUILTIN_PIN, OUTPUT);
@@ -66,16 +66,15 @@ void setupPins()
     pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
     digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
   } else {
-    open_heat::Logger::log(
-      open_heat::Logger::ERROR, "Motor pin vin invalid: %i", config.MotorPins.Vin);
+    g_logger.log(yal::Level::ERROR, "Motor pin vin invalid: %", config.MotorPins.Vin);
   }
   if (config.MotorPins.Ground > 1) {
     pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
     digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
 
   } else {
-    open_heat::Logger::log(
-      open_heat::Logger::ERROR, "Motor pin ground invalid: %i", config.MotorPins.Ground);
+    g_logger.log(
+      yal::Level::ERROR, "Motor pin ground invalid: %", config.MotorPins.Ground);
   }
 
   // enable temp sensor
@@ -83,14 +82,13 @@ void setupPins()
     pinMode(static_cast<uint8_t>(config.TempVin), OUTPUT);
     digitalWrite(static_cast<uint8_t>(config.TempVin), HIGH);
   } else {
-    open_heat::Logger::log(
-      open_heat::Logger::ERROR, "Temp pin vin invalid: %i", config.TempVin);
+    g_logger.log(yal::Level::ERROR, "Temp pin vin invalid: %", config.TempVin);
   }
 }
 
 void setupTemperatureSensor()
 {
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "Running setupTemperatureSensor");
+  g_logger.log(yal::Level::DEBUG, "Running setupTemperatureSensor");
   const auto& config = g_filesystem.getConfig();
 
   open_heat::sensors::Sensor* sensor;
@@ -113,31 +111,31 @@ void setupTemperatureSensor()
       delay(250);
       digitalWrite(LED_PIN, LED_ON);
     }
-    open_heat::Logger::log(open_heat::Logger::ERROR, "Failed to init temp sensor");
+    g_logger.log(yal::Level::ERROR, "Failed to init temp sensor");
   }
 }
 
 bool isDoubleReset()
 {
-  if (ESP.getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
-    open_heat::Logger::log(
-      open_heat::Logger::DEBUG,
-      "no double reset, resetInfo: %s",
-      ESP.getResetInfo().c_str());
+  if (EspClass::getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
+    g_logger.log(
+      yal::Level::DEBUG,
+      "no double reset, resetInfo: %",
+      EspClass::getResetInfo().c_str());
     open_heat::rtc::setDrdDisabled(true);
     return false;
   }
 
   const auto drdDetected = g_drd.detectDoubleReset();
 
-  open_heat::Logger::log(open_heat::Logger::DEBUG, "DRD detected: %i", drdDetected);
+  g_logger.log(yal::Level::DEBUG, "DRD detected: %", drdDetected);
 
   const auto millisSinceReset
     = open_heat::rtc::read().lastResetTime - open_heat::rtc::offsetMillis();
 
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG,
-    "millis since reset: %lu, last reset time %lu, offset millis: %lu",
+  g_logger.log(
+    yal::Level::DEBUG,
+    "millis since reset: %, last reset time %, offset millis: %",
     millisSinceReset,
     open_heat::rtc::read().lastResetTime,
     open_heat::rtc::offsetMillis());
@@ -151,15 +149,14 @@ bool isDoubleReset()
 
 void setup()
 {
-  if (open_heat::Logger::getLogLevel() < open_heat::Logger::OFF && !DISABLE_ALL_LOGGING) {
-    g_serial.setup();
+  if (g_logger.level() < yal::Level::OFF && !DISABLE_ALL_LOGGING) {
+    g_serialAppender.begin(115200);
   }
 
-  open_heat::Logger::setup();
   const auto configValid = g_filesystem.setup();
 
   if (EspClass::getResetInfoPtr()->reason == REASON_DEEP_SLEEP_AWAKE) {
-    open_heat::Logger::log(open_heat::Logger::DEBUG, "woke up from deep sleep");
+    g_logger.log(yal::Level::DEBUG, "woke up from deep sleep");
 
     if (!open_heat::rtc::read().drdDisabled) {
       g_drd.stop();
@@ -172,8 +169,7 @@ void setup()
   }
 
   const auto offsetMillis = open_heat::rtc::offsetMillis();
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG, "Set last reset time to %lu", offsetMillis);
+  g_logger.log(yal::Level::DEBUG, "Set last reset time to %", offsetMillis);
   open_heat::rtc::setLastResetTime(offsetMillis);
 
   setupPins();
@@ -197,7 +193,7 @@ void setup()
   }
 
   g_drd.stop();
-  open_heat::Logger::log(open_heat::Logger::INFO, "Device startup and setup done");
+  g_logger.log(yal::Level::INFO, "Device startup and setup done");
 
   loop();
 }
@@ -224,7 +220,7 @@ void loop()
   const auto msg = "Sleep times: valveSleep: "
     + std::to_string(valveSleep - open_heat::rtc::offsetMillis())
     + ", mqttSleep: " + std::to_string(mqttSleep - open_heat::rtc::offsetMillis());
-  open_heat::Logger::log(open_heat::Logger::DEBUG, msg.c_str());
+  g_logger.log(yal::Level::DEBUG, msg.c_str());
 
   const auto minSleepTime = 10000UL;
   unsigned long idleTime;
@@ -238,9 +234,9 @@ void loop()
   }
 
   if (nextCheckMillis < (open_heat::rtc::offsetMillis() + minSleepTime)) {
-    open_heat::Logger::log(
-      open_heat::Logger::DEBUG,
-      "Minimal sleep or underflow prevented, sleep set to %ul ms",
+    g_logger.log(
+      yal::Level::DEBUG,
+      "Minimal sleep or underflow prevented, sleep set to % ms",
       minSleepTime);
     idleTime = minSleepTime;
   } else {

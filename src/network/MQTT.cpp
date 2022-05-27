@@ -9,34 +9,22 @@
 
 void open_heat::network::MQTT::setup()
 {
-  Logger::log(Logger::INFO, "Running MQTT setup");
-  m_mqttClient.onMessage(std::bind(
-    &MQTT::messageReceivedCallback, this, std::placeholders::_1, std::placeholders::_2));
+  m_logger.log(yal::Level::INFO, "Running MQTT setup");
+  m_mqttClient.onMessage(
+    [this](String& topic, String& payload) { messageReceivedCallback(topic, payload); });
 
   m_valve.registerModeChangedHandler([this](OperationMode mode) {
-    m_messageQueue.push({&m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
+    m_mqttAppender.queue().push(
+      {m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
   });
 
   m_valve.registerSetTempChangedHandler([this](float temp) {
-    m_messageQueue.push({&m_getConfiguredTempTopic, String(temp)});
+    m_mqttAppender.queue().push({m_getConfiguredTempTopic, String(temp)});
   });
 
   m_valve.registerWindowChangeHandler([this](bool state) {
-    m_messageQueue.push({&m_windowStateTopic, String(state)});
+    m_mqttAppender.queue().push({m_windowStateTopic, String(static_cast<int>(state))});
   });
-
-  if (!m_loggerAdded) {
-    Logger::addPrinter([this](const Logger::Level level, const std::string& message) {
-      if (!m_configValid) {
-        return;
-      }
-      String buffer = Logger::levelToText(level, false);
-      buffer += F(" ");
-      buffer += message.c_str();
-      m_messageQueue.push({&m_logTopic, buffer});
-    });
-    m_loggerAdded = true;
-  }
 }
 
 bool open_heat::network::MQTT::needLoop()
@@ -47,7 +35,7 @@ bool open_heat::network::MQTT::needLoop()
 uint64_t open_heat::network::MQTT::loop()
 {
   if (!m_configValid) {
-    Logger::log(Logger::ERROR, "Config is not valid, no mqtt loop!");
+    m_logger.log(yal::Level::ERROR, "Config is not valid, no mqtt loop!");
     enableDebug(true);
     return 0UL;
   }
@@ -82,7 +70,6 @@ uint64_t open_heat::network::MQTT::loop()
   publish(m_getConfiguredTempTopic, String(rtc::read().setTemp));
   publish(m_getModeTopic, String(rtc::read().mode));
 
-
   // drain message queue for new messages
   sendMessageQueue();
 
@@ -95,15 +82,6 @@ uint64_t open_heat::network::MQTT::loop()
 
 void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& payload)
 {
-  // todo this log statement breaks mqtt logger with floating point numbers
-  /*
-  Logger::log(
-    Logger::INFO,
-    "Received message in topic '%s', payload '%s'",
-    topic.c_str(),
-    payload.c_str());
-    */
-
   if (payload.isEmpty()) {
     return;
   }
@@ -120,15 +98,16 @@ void open_heat::network::MQTT::messageReceivedCallback(String& topic, String& pa
     handleLogLevel(payload);
   }
 }
+
 void open_heat::network::MQTT::handleLogLevel(const String& payload)
 {
   std::stringstream ss(payload.c_str());
-  int level;
+  int level = 0;
   if (!(ss >> level)) {
     return;
   }
 
-  Logger::setLogLevel(static_cast<Logger::Level>(level));
+  m_logger.setLevel(static_cast<yal::Level::Value>(level));
 }
 void open_heat::network::MQTT::handleDebug(const String& payload)
 {
@@ -148,7 +127,7 @@ void open_heat::network::MQTT::handleSetMode(const String& payload)
   } else if (payload == "off") {
     mode = OFF;
   } else {
-    Logger::log(Logger::WARNING, "Mode %s not supported", payload.c_str());
+    m_logger.log(yal::Level::WARNING, "Mode % not supported", payload.c_str());
     return;
   }
 
@@ -177,15 +156,15 @@ void open_heat::network::MQTT::handleSetModemSleep(const String& payload)
   }
 
   rtc::setModemSleepTime(newTime);
-  Logger::log(Logger::INFO, "Set new modem sleep time %lu", newTime);
+  m_logger.log(yal::Level::INFO, "Set new modem sleep time %", newTime);
 }
 
 void open_heat::network::MQTT::publish(const String& topic, const String& message)
 {
-  Logger::log(
-    Logger::DEBUG, "MQTT send '%s' in topic '%s'", message.c_str(), topic.c_str());
+  m_logger.log(
+    yal::Level::DEBUG, "MQTT send '%' in topic '%'", message.c_str(), topic.c_str());
   if (!m_mqttClient.publish(topic, message)) {
-    Logger::log(Logger::ERROR, "Mqtt publish failed: %i", m_mqttClient.lastError());
+    m_logger.log(yal::Level::ERROR, "MQTT publish failed: %", m_mqttClient.lastError());
   }
 }
 
@@ -194,9 +173,9 @@ void open_heat::network::MQTT::connect()
   const auto& config = m_filesystem.getConfig();
   if ((std::strlen(config.MQTT.Server) == 0 || config.MQTT.Port == 0)) {
     if (m_configValid) {
-      Logger::log(
-        Logger::ERROR,
-        "MQTT Server (%s) or port (%i) not set up",
+      m_logger.log(
+        yal::Level::ERROR,
+        "MQTT Server (%) or port (%) not set up",
         config.MQTT.Server,
         config.MQTT.Port);
       enableDebug(true);
@@ -222,9 +201,9 @@ void open_heat::network::MQTT::connect()
   }
 
   if (!m_mqttClient.connect(config.Hostname, username, password)) {
-    Logger::log(
-      Logger::ERROR,
-      "Failed to connect to mqtt server host %s, user: %s, pw: %s",
+    m_logger.log(
+      yal::Level::ERROR,
+      "Failed to connect to mqtt server host %, user: %, pw: %",
       config.MQTT.Server,
       config.MQTT.Username,
       config.MQTT.Password);
@@ -233,9 +212,9 @@ void open_heat::network::MQTT::connect()
 
   setTopic(config.MQTT.Topic, "log", m_logTopic);
 
-  Logger::log(
-    Logger::INFO,
-    "MQTT topic: %s, topic len: %i",
+  m_logger.log(
+    yal::Level::INFO,
+    "MQTT topic: %, topic len: %",
     config.MQTT.Topic,
     std::strlen(config.MQTT.Topic));
 
@@ -255,7 +234,9 @@ void open_heat::network::MQTT::connect()
   subscribe(m_setModemSleepTopic);
   subscribe(m_setConfiguredTempTopic);
 
-  if (!DISABLE_ALL_LOGGING) {
+  if (DISABLE_ALL_LOGGING) {
+    m_logger.setLevel(yal::Level::OFF);
+  } else {
     setTopic(config.MQTT.Topic, "debug/loglevel", m_debugLogLevelTopic);
     subscribe(m_debugLogLevelTopic);
   }
@@ -269,11 +250,14 @@ void open_heat::network::MQTT::connect()
 void open_heat::network::MQTT::subscribe(const String& topic)
 {
   if (m_mqttClient.subscribe(topic)) {
-    Logger::log(Logger::INFO, "MQTT subscribed to topic: %s", topic.c_str());
+    m_logger.log(yal::Level::INFO, "MQTT subscribed to topic: %", topic.c_str());
   } else {
-    Logger::log(Logger::ERROR, "MQTT failed to subscribe to topic: %s", topic.c_str());
-    Logger::log(
-      Logger::ERROR, "MQTT last error: %i", static_cast<int>(m_mqttClient.lastError()));
+    m_logger.log(
+      yal::Level::ERROR, "MQTT failed to subscribe to topic: %", topic.c_str());
+    m_logger.log(
+      yal::Level::ERROR,
+      "MQTT last error: %",
+      static_cast<int>(m_mqttClient.lastError()));
   }
 }
 
@@ -289,16 +273,16 @@ void open_heat::network::MQTT::enableDebug(bool value)
 
 void open_heat::network::MQTT::sendMessageQueue()
 {
-  while (!m_messageQueue.empty()) {
-    const auto msg = m_messageQueue.front();
-    if (*msg.topic == m_logTopic) {
+  while (!m_mqttAppender.queue().empty()) {
+    const auto msg = m_mqttAppender.queue().front();
+    if (msg.topic == m_logTopic) {
       // do not log again
-      m_mqttClient.publish(*msg.topic, msg.message);
+      m_mqttClient.publish(msg.topic, msg.message);
     } else {
-      publish(*msg.topic, msg.message);
+      publish(msg.topic, msg.message);
     }
 
-    m_messageQueue.pop();
+    m_mqttAppender.queue().pop();
   }
 }
 

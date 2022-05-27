@@ -4,10 +4,9 @@
 //
 
 #include "BMBase.hpp"
-#include <Logger.hpp>
+#include <Arduino.h>
 
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 
 bool BMBase::init(std::function<bool()>&& sensorBegin)
 {
@@ -15,16 +14,18 @@ bool BMBase::init(std::function<bool()>&& sensorBegin)
     return true;
   }
 
-  const auto maxRetries = 5;
-  auto retries = 0;
+  static constexpr const auto maxRetries = 5U;
+  auto retries = 0U;
   auto initResult = false;
   while (retries < maxRetries) {
     initResult = sensorBegin();
-    Logger::log(Logger::INFO, "BMSensor init result: %d, try: %d", initResult, ++retries);
+    m_logger.log(
+      yal::Level::INFO, "BMSensor init result: %, try: %", initResult, ++retries);
     if (initResult) {
       break;
     }
-    delay(100);
+    static constexpr const auto bmeInitRetryDelay = 100U;
+    delay(bmeInitRetryDelay);
   }
 
   sleep();
@@ -32,5 +33,4 @@ bool BMBase::init(std::function<bool()>&& sensorBegin)
   return initResult;
 }
 
-} // namespace sensors
-} // namespace open_heat
+} // namespace open_heat::sensors
