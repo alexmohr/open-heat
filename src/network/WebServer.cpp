@@ -11,22 +11,21 @@
 #include <cstring>
 #include <functional>
 
-namespace open_heat {
-namespace network {
+namespace open_heat::network {
 
 void open_heat::network::WebServer::setup(const char* const hostname)
 {
   if (m_setupDone) {
-    Logger::log(Logger::DEBUG, "Webserver setup already done");
+    m_logger.log(yal::Level::DEBUG, "Webserver setup already done");
     return;
   }
 
   if (hostname != nullptr) {
     m_serveIndex = HTML_CONFIG;
-    Logger::log(Logger::INFO, "Serving configuration portal");
+    m_logger.log(yal::Level::INFO, "Serving configuration portal");
     m_hostname = String(hostname);
   } else {
-    Logger::log(Logger::INFO, "Serving webinterface");
+    m_logger.log(yal::Level::INFO, "Serving webinterface");
     m_serveIndex = HTML_INDEX;
     m_hostname = "";
   }
@@ -77,10 +76,8 @@ void open_heat::network::WebServer::setup(const char* const hostname)
   asyncWebServer_.on(
     installUpdatePath,
     HTTP_POST,
-    [&config](AsyncWebServerRequest* request) {
-      installUpdateHandlePost(request, config);
-    },
-    [](
+    [&](AsyncWebServerRequest* request) { installUpdateHandlePost(request, config); },
+    [&](
       AsyncWebServerRequest* request,
       const String& filename,
       size_t index,
@@ -89,7 +86,7 @@ void open_heat::network::WebServer::setup(const char* const hostname)
       bool final) { installUpdateHandleUpload(filename, index, data, len, final); });
 
   asyncWebServer_.begin();
-  Logger::log(Logger::DEBUG, "Web server ready");
+  m_logger.log(yal::Level::DEBUG, "Web server ready");
 }
 
 void open_heat::network::WebServer::loop()
@@ -123,9 +120,9 @@ void WebServer::reset(
   AsyncResponseStream* const response)
 {
   response->addHeader("Connection", "close");
-  request->onDisconnect([]() {
-    Logger::log(Logger::WARNING, "Restarting");
-    ESP.reset();
+  request->onDisconnect([this]() {
+    m_logger.log(yal::Level::WARNING, "Restarting");
+    EspClass::reset();
   });
 }
 
@@ -147,7 +144,7 @@ void WebServer::installUpdateHandleUpload(
 {
 
   if (!index) {
-    Logger::log(Logger::INFO, "Starting update with file: %s", filename.c_str());
+    m_logger.log(yal::Level::INFO, "Starting update with file: %", filename.c_str());
 
     Update.runAsync(true);
     if (!Update.begin((ESP.getFreeSketchSpace() - 0x1000) & 0xFFFFF000)) {
@@ -163,7 +160,7 @@ void WebServer::installUpdateHandleUpload(
 
   if (final) {
     if (Update.end(true)) {
-      Logger::log(Logger::INFO, "Update success, filesize: %uB\n", index + len);
+      m_logger.log(yal::Level::INFO, "Update success, filesize: %", index + len);
     } else {
       Update.printError(Serial);
     }
@@ -172,7 +169,7 @@ void WebServer::installUpdateHandleUpload(
 
 void WebServer::rootHandleGet(AsyncWebServerRequest* const request)
 {
-  Logger::log(Logger::DEBUG, "Received request for /");
+  m_logger.log(yal::Level::DEBUG, "Received request for /");
   request->send_P(HTTP_OK, CONTENT_TYPE_HTML, m_serveIndex, [this](const String& data) {
     return indexHTMLProcessor(data);
   });
@@ -240,7 +237,7 @@ bool WebServer::updateConfig(AsyncWebServerRequest* const request)
     }
 
     if (std::strlen(portBuf) > 0) {
-      config.MQTT.Port = static_cast<unsigned short>(std::strtol(portBuf, nullptr, 10));
+      config.MQTT.Port = static_cast<uint16>(std::strtol(portBuf, nullptr, 10));
     }
     if (std::strlen(motorVinBuf) > 0) {
       config.MotorPins.Vin = static_cast<int8>(std::strtol(motorVinBuf, nullptr, 10));
@@ -284,7 +281,7 @@ void WebServer::updateSetTemp(const AsyncWebServerRequest* const request)
     const auto newTemp = static_cast<float>(strtod(param->value().c_str(), nullptr));
     valve_.setConfiguredTemp(newTemp);
   } else {
-    Logger::log(Logger::DEBUG, "updatingField, param not found %s", paramSetTemp);
+    m_logger.log(yal::Level::DEBUG, "updatingField, param not found %", paramSetTemp);
   }
 }
 
@@ -296,16 +293,16 @@ bool WebServer::updateField(
 {
   const bool isPost = request->method() == HTTP_POST;
   if (!request->hasParam(paramName, isPost)) {
-    Logger::log(open_heat::Logger::DEBUG, "updatingField, param not found %s", paramName);
+    m_logger.log(yal::Level::DEBUG, "updatingField, param not found %", paramName);
     return false;
   }
 
   const AsyncWebParameter* const param = request->getParam(paramName, isPost);
   std::memset(field, 0, fieldLen);
   std::strcpy(field, param->value().c_str());
-  Logger::log(
-    Logger::DEBUG,
-    "Updating field %s (len: %i), new value %s",
+  m_logger.log(
+    yal::Level::DEBUG,
+    "Updating field %s (len: %i), new value %",
     paramName,
     fieldLen,
     param->value().c_str());
@@ -323,7 +320,8 @@ void WebServer::togglePost(AsyncWebServerRequest* const pRequest)
 String WebServer::indexHTMLProcessor(const String& var)
 {
   const auto& config = filesystem_.getConfig();
-  const auto setTemp = static_cast<uint8_t>(valve_.getConfiguredTemp());
+  const auto setTemp
+    = static_cast<uint8_t>(open_heat::heating::RadiatorValve::getConfiguredTemp());
 
   // Temp
   if (var == F("CURRENT_TEMP")) {
@@ -411,8 +409,8 @@ String WebServer::indexHTMLProcessor(const String& var)
     return String(config.Update.Password);
   }
 
-  Logger::log(Logger::WARNING, "Invalid template: %s", var.c_str());
-  return String();
+  m_logger.log(yal::Level::WARNING, "Invalid template: %s", var.c_str());
+  return {};
 }
 
 bool WebServer::isCaptivePortal(AsyncWebServerRequest* request)
@@ -446,18 +444,14 @@ void WebServer::onNotFound(AsyncWebServerRequest* request)
 }
 bool WebServer::isIp(const String& str)
 {
-  for (const auto& c : str) {
-    if (c != '.' && (c < '0' || c > '9')) {
-      return false;
-    }
-  }
-  return true;
+  // todo replace this with a regex
+  return std::all_of(str.begin(), str.end(), [](const char c) {
+    return c != '.' && (c < '0' || c > '9');
+  });
 }
-
 void WebServer::setApList(std::vector<String>&& apList)
 {
   m_accessPointList = std::move(apList);
 }
 
-} // namespace network
-} // namespace open_heat
+} // namespace open_heat::network

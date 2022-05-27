@@ -4,11 +4,9 @@
 //
 
 #include "BMP280.hpp"
-#include <Logger.hpp>
 #include <RTCMemory.hpp>
 
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 
 float BMP280::temperature()
 {
@@ -22,7 +20,7 @@ float BMP280::temperature()
 
 bool BMP280::setup()
 {
-  Logger::log(Logger::INFO, "Setting up BMP280");
+  m_logger.log(yal::Level::INFO, "Setting up BMP280");
   return BMBase::init([this]() { return m_bmp.begin(BMP280_ADDRESS_ALT); });
 }
 
@@ -35,5 +33,4 @@ void BMP280::wake()
 {
   m_bmp.setSampling(Adafruit_BMP280::MODE_NORMAL);
 }
-} // namespace sensors
-} // namespace open_heat
+} // namespace open_heat::sensors

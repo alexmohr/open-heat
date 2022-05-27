@@ -4,13 +4,12 @@
 //
 
 #include "RadiatorValve.hpp"
-#include <Logger.hpp>
 #include <RTCMemory.hpp>
 
 open_heat::heating::RadiatorValve::RadiatorValve(
   open_heat::sensors::Temperature*& tempSensor,
   open_heat::Filesystem& filesystem) :
-    m_filesystem(filesystem), m_temperatureSensor(tempSensor)
+    m_filesystem(filesystem), m_temperatureSensor(tempSensor), m_logger("VALVE")
 {
 }
 
@@ -33,16 +32,18 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     rtc::read().mode == OFF ? closeValve(VALVE_FULL_ROTATE_TIME * 2)
                             : openValve(VALVE_FULL_ROTATE_TIME * 2);
 
-    Logger::log(Logger::DEBUG, "Heating is turned off, disabled heating");
+    m_logger.log(yal::Level::DEBUG, "Heating is turned off, disabled heating");
     return nextCheck;
-  } else if (rtc::read().mode == UNKNOWN) {
-    Logger::log(Logger::ERROR, "Unknown heating mode!");
+  }
+
+  if (rtc::read().mode == UNKNOWN) {
+    m_logger.log(yal::Level::ERROR, "Unknown heating mode!");
     return nextCheckTime();
   } // else mode is heat
 
   // store data once to work with consistent values
   const auto rtcData = rtc::read();
-  Logger::log(Logger::DEBUG, "trying to reach temperature: %f", rtcData.setTemp);
+  m_logger.log(yal::Level::DEBUG, "trying to reach temperature: %", rtcData.setTemp);
 
   // also updates last measured temp
   const auto measuredTemp = m_temperatureSensor->temperature();
@@ -53,20 +54,20 @@ uint64_t open_heat::heating::RadiatorValve::loop()
   const auto temperatureChange = measuredTemp - rtcData.lastMeasuredTemp;
   const auto minTemperatureChange = 0.2;
 
-  const auto openHysteresis = 0.3f;
-  const auto closeHysteresis = 0.2f;
+  const auto openHysteresis = 0.3F;
+  const auto closeHysteresis = 0.2F;
   const auto absTempDiff
     = std::max(rtcData.setTemp, predictTemp) - std::min(rtcData.setTemp, predictTemp);
 
   rtc::setLastPredictedTemp(predictTemp);
 
-  Logger::log(
-    Logger::INFO,
+  m_logger.log(
+    yal::Level::INFO,
     "Valve loop\n"
-    "\tpredictTemp %.2f in %lu ms\n"
-    "\tpredictPart: %.2f, predictionError: %.2f\n"
-    "\tmeasuredTemp: %.2f, lastMeasuredTemp %.2f, setTemp %.2f \n"
-    "\ttemperatureChange %.2f, absTempDiff: %.2f",
+    "\tpredictTemp % in % ms\n"
+    "\tpredictPart: %, predictionError: %\n"
+    "\tmeasuredTemp: %, lastMeasuredTemp %, setTemp % \n"
+    "\ttemperatureChange %, absTempDiff: %",
     predictTemp,
     m_checkIntervalMillis,
     predictPart,
@@ -79,7 +80,7 @@ uint64_t open_heat::heating::RadiatorValve::loop()
 
   if (0 == predictTemp) {
     const auto nextCheck = nextCheckTime();
-    Logger::log(Logger::DEBUG, "Skipping temperature setting, predictTemp = 0");
+    m_logger.log(yal::Level::DEBUG, "Skipping temperature setting, predictTemp = 0");
     return nextCheck;
   }
 
@@ -88,9 +89,9 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     if (temperatureChange < minTemperatureChange) {
       handleTempTooLow(rtcData, measuredTemp, predictTemp, openHysteresis);
     } else {
-      Logger::log(
-        Logger::INFO,
-        "RISE, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+      m_logger.log(
+        yal::Level::INFO,
+        "RISE, NO ADJUST: Temp old %, temp now %, temp change %",
         rtcData.lastMeasuredTemp,
         measuredTemp,
         temperatureChange);
@@ -100,15 +101,15 @@ uint64_t open_heat::heating::RadiatorValve::loop()
     if (temperatureChange >= -minTemperatureChange) {
       handleTempTooHigh(rtcData, predictTemp, closeHysteresis);
     } else {
-      Logger::log(
-        Logger::INFO,
-        "SINK, NO ADJUST: Temp old %.2f, temp now %.2f, temp change %.2f",
+      m_logger.log(
+        yal::Level::INFO,
+        "SINK, NO ADJUST: Temp old %, temp now %, temp change %",
         rtc::read().lastMeasuredTemp,
         measuredTemp,
         temperatureChange);
     }
   } else {
-    Logger::log(Logger::INFO, "Temperature is in tolerance, not changing");
+    m_logger.log(yal::Level::INFO, "Temperature is in tolerance, not changing");
   }
 
   return nextCheckTime();
@@ -121,7 +122,7 @@ void open_heat::heating::RadiatorValve::handleTempTooHigh(
 {
   auto closeTime = 200;
   const auto predictDiff = rtcData.setTemp - predictTemp - closeHysteresis;
-  Logger::log(Logger::INFO, "Close predict diff: %f", predictDiff);
+  m_logger.log(yal::Level::INFO, "Close predict diff: %", predictDiff);
   if (predictDiff <= 2) {
     closeTime = 5000;
   } else if (predictDiff <= 1.5) {
@@ -149,7 +150,7 @@ void open_heat::heating::RadiatorValve::handleTempTooLow(
   auto openTime = 350;
   const float largeTempDiff = 3;
   const auto predictDiff = rtcData.setTemp - predictTemp - openHysteresis;
-  Logger::log(Logger::INFO, "Open predict diff: %f", predictDiff);
+  m_logger.log(yal::Level::INFO, "Open predict diff: %", predictDiff);
 
   if (
     rtcData.setTemp - predictTemp > largeTempDiff
@@ -189,7 +190,7 @@ void open_heat::heating::RadiatorValve::setConfiguredTemp(float temp)
     return;
   }
 
-  open_heat::Logger::log(open_heat::Logger::INFO, "New target temperature %f", temp);
+  m_logger.log(yal::Level::INFO, "New target temperature %", temp);
   rtc::setSetTemp(temp);
   setNextCheckTimeNow();
 
@@ -212,9 +213,9 @@ void open_heat::heating::RadiatorValve::updateConfig()
 void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
 {
   if (rtc::read().currentRotateTime <= (-VALVE_FULL_ROTATE_TIME)) {
-    open_heat::Logger::log(
-      open_heat::Logger::DEBUG,
-      "Valve already fully closed, current rotate time: %i",
+    m_logger.log(
+      yal::Level::DEBUG,
+      "Valve already fully closed, current rotate time: %",
       rtc::read().currentRotateTime);
     return;
   }
@@ -227,9 +228,9 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
     rtc::read().currentRotateTime - rotateTime, VALVE_FULL_ROTATE_TIME);
   const auto& config = m_filesystem.getConfig().MotorPins;
 
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG,
-    "Closing valve for %ims, currentRotateTime: %ims, vin: %i, ground: %i",
+  m_logger.log(
+    yal::Level::DEBUG,
+    "Closing valve for %ms, currentRotateTime: %ms, vin: %, ground: %",
     rotateTime,
     rtc::read().currentRotateTime,
     config.Vin,
@@ -241,9 +242,9 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
 void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
 {
   if (rtc::read().currentRotateTime >= VALVE_FULL_ROTATE_TIME) {
-    open_heat::Logger::log(
-      open_heat::Logger::DEBUG,
-      "Valve already fully open, current rotate time: %i",
+    m_logger.log(
+      yal::Level::DEBUG,
+      "Valve already fully open, current rotate time: %",
       rtc::read().currentRotateTime);
     return;
   }
@@ -256,9 +257,9 @@ void open_heat::heating::RadiatorValve::openValve(unsigned int rotateTime)
     rtc::read().currentRotateTime + rotateTime, VALVE_FULL_ROTATE_TIME);
   const auto& config = m_filesystem.getConfig().MotorPins;
 
-  open_heat::Logger::log(
-    open_heat::Logger::DEBUG,
-    "Opening valve for %ims, currentRotateTime: %ims, vin: %i, ground: %i",
+  m_logger.log(
+    yal::Level::DEBUG,
+    "Opening valve for %ms, currentRotateTime: %ms, vin: %, ground: %",
     rotateTime,
     rtc::read().currentRotateTime,
     config.Vin,
@@ -301,7 +302,7 @@ void open_heat::heating::RadiatorValve::rotateValve(
 
   delay(rotateTime + m_spinUpMillis);
   disablePins();
-  Logger::log(Logger::DEBUG, "Rotating valve done");
+  m_logger.log(yal::Level::DEBUG, "Rotating valve done");
 }
 
 void open_heat::heating::RadiatorValve::disablePins()
@@ -373,23 +374,23 @@ void open_heat::heating::RadiatorValve::registerModeChangedHandler(
 void open_heat::heating::RadiatorValve::setWindowState(const bool isOpen)
 {
   if (isOpen == rtc::read().isWindowOpen) {
-    Logger::log(Logger::DEBUG, "Window mode %i already set", isOpen);
+    m_logger.log(yal::Level::DEBUG, "Window mode % already set", isOpen);
     return;
   }
 
   if (isOpen) {
-    Logger::log(Logger::DEBUG, "Storing mode, window open");
+    m_logger.log(yal::Level::DEBUG, "Storing mode, window open");
     rtc::setLastMode(rtc::read().mode);
     setMode(OFF);
     rtc::setRestoreMode(true);
   } else {
     if (rtc::read().restoreMode) {
-      Logger::log(Logger::DEBUG, "Restoring mode, window closed");
+      m_logger.log(yal::Level::DEBUG, "Restoring mode, window closed");
       rtc::setValveNextCheckMillis(rtc::offsetMillis() + SLEEP_MILLIS_AFTER_WINDOW_CLOSE);
       setMode(rtc::read().lastMode);
     } else {
-      Logger::log(
-        Logger::DEBUG, "Mode changed while window was open, not enabled old mode");
+      m_logger.log(
+        yal::Level::DEBUG, "Mode changed while window was open, not enabled old mode");
     }
   }
 

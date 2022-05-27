@@ -8,31 +8,31 @@
 
 #include <Filesystem.hpp>
 #include <heating/RadiatorValve.hpp>
-namespace open_heat {
-namespace sensors {
+#include <yal/yal.hpp>
+namespace open_heat::sensors {
 
 class WindowSensor {
   public:
   WindowSensor(Filesystem* filesystem, heating::RadiatorValve*& valve);
 
   void setup();
-  static void loop();
+  void loop();
 
   private:
   static void sensorChangedInterrupt();
 
-  private:
-  static Filesystem* filesystem_;
-  static heating::RadiatorValve* valve_;
+  static Filesystem* m_filesystem;
+  static heating::RadiatorValve* m_valve;
 
-  static const unsigned int minMillisBetweenEvents_{250};
-  static unsigned long lastChangeMillis_;
+  static const unsigned int s_minMillisBetweenEvents_{250};
+  static unsigned long m_lastChangeMillis;
 
-  bool isSetUp{false};
-  static bool isOpen_;
-  static bool validate_;
+  bool m_isSetUp{false};
+  static bool m_isOpen;
+  static bool m_validate;
+
+  const inline static yal::Logger m_logger = yal::Logger("WIDNOW");
 };
 
-} // namespace sensors
-} // namespace open_heat
+} // namespace open_heat::sensors
 #endif // OPEN_HEAT_WINDOWSENSOR_HPP

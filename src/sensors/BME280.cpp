@@ -4,11 +4,10 @@
 //
 
 #include "BME280.hpp"
-#include <Logger.hpp>
 #include <RTCMemory.hpp>
+#include <yal/yal.hpp>
 
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 
 float BME280::temperature()
 {
@@ -30,7 +29,7 @@ float BME280::humidity()
 
 bool BME280::setup()
 {
-  Logger::log(Logger::INFO, "Setting up BME280");
+  m_logger.log(yal::Level::INFO, "Setting up BME280");
   return BMBase::init([this]() { return m_bme.begin(BME280_ADDRESS_ALTERNATE); });
 }
 
@@ -43,5 +42,4 @@ void BME280::wake()
 {
   m_bme.setSampling(Adafruit_BME280::MODE_NORMAL);
 }
-} // namespace sensors
-} // namespace open_heat
+} // namespace open_heat::sensors

@@ -5,14 +5,12 @@
 
 #ifndef OPEN_HEAT_SENSOR_HPP
 #define OPEN_HEAT_SENSOR_HPP
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 
 class Sensor {
   public:
   virtual bool setup() = 0;
 };
 
-} // namespace sensors
-} // namespace open_heat
+} // namespace open_heat::sensors
 #endif // OPEN_HEAT_SENSOR_HPP

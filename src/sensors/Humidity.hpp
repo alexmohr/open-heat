@@ -6,15 +6,13 @@
 #ifndef HUMIDITY_HPP_
 #define HUMIDITY_HPP_
 
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 
 class Humidity {
   public:
   virtual float humidity() = 0;
 };
 
-} // namespace sensors
-} // namespace open_heat
+} // namespace open_heat::sensors
 
 #endif // HUMIDITY_HPP_

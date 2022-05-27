@@ -8,13 +8,12 @@
 
 #include <ESPAsyncWebServer.h>
 #include <Filesystem.hpp>
-#include <Logger.hpp>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/Battery.hpp>
 #include <sensors/Temperature.hpp>
+#include <yal/yal.hpp>
 
-namespace open_heat {
-namespace network {
+namespace open_heat::network {
 class WebServer {
   public:
   WebServer(
@@ -37,7 +36,7 @@ class WebServer {
   void setApList(std::vector<String>&& apList);
   void loop();
 
-  static void installUpdateHandlePost(AsyncWebServerRequest* request, Config& config);
+  void installUpdateHandlePost(AsyncWebServerRequest* request, Config& config);
   void fullOpenHandlePost(AsyncWebServerRequest* request);
 
   private:
@@ -61,14 +60,14 @@ class WebServer {
     HTTP_NOT_FOUND = 404
   };
 
-  static void installUpdateHandleUpload(
+  void installUpdateHandleUpload(
     const String& filename,
     size_t index,
     uint8_t* data,
     size_t len,
     bool final);
 
-  static bool updateField(
+  bool updateField(
     AsyncWebServerRequest* request,
     const char* paramName,
     char* field,
@@ -83,11 +82,12 @@ class WebServer {
   void onNotFound(AsyncWebServerRequest* request);
 
   String indexHTMLProcessor(const String& var);
-  static void reset(AsyncWebServerRequest* request, AsyncResponseStream* response);
+  void reset(AsyncWebServerRequest* request, AsyncResponseStream* response);
   static bool isIp(const String& str);
+
+  yal::Logger m_logger;
 };
 
-} // namespace network
-} // namespace open_heat
+} // namespace open_heat::network
 
 #endif // WEBSERVER_HPP_
