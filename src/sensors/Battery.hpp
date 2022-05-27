@@ -12,8 +12,8 @@ class Battery {
   Battery(const Battery&) = delete;
   void setup();
   void loop();
-  float percentage();
-  float voltage();
+  [[nodiscard]] float percentage() const;
+  [[nodiscard]] float voltage() const;
 
   private:
   double m_voltage;

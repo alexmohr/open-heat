@@ -8,7 +8,8 @@
 
 #include "WifiManager.hpp"
 #include <Filesystem.hpp>
-#include <Logger.hpp>
+#include <yal/yal.hpp>
+#include <yal/appender/ArduinoMQTT.hpp>
 #include <MQTT.h>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/Battery.hpp>
@@ -32,7 +33,9 @@ class MQTT {
       m_humiditySensor(humiditySensor),
       m_battery(battery),
       m_filesystem(filesystem),
-      m_valve(valve)
+      m_valve(valve),
+      m_logger(yal::Logger("MQTT")),
+      m_mqttAppender(yal::appender::ArduinoMQTT<MQTTClient>(&m_logger, &m_mqttClient, s_logTopic.c_str()))
   {
   }
 
@@ -58,7 +61,7 @@ class MQTT {
   void handleDebug(const String& payload);
   void subscribe(const String& topic);
   void handleLogLevel(const String& payload);
-  void setTopic(const String& baseTopic, const String& subTopic, String& out);
+  static void setTopic(const String& baseTopic, const String& subTopic, String& out);
   void sendMessageQueue();
   void handleSetModemSleep(const String& payload);
 
@@ -97,12 +100,15 @@ class MQTT {
     const String* const topic;
     const String message;
   };
-  std::queue<message> m_messageQueue;
 
   WiFiClient m_wifiClient;
 
   bool m_configValid{true};
-  bool m_loggerAdded{false};
+
+  yal::Logger m_logger;
+  yal::appender::ArduinoMQTT<MQTTClient> m_mqttAppender;
+
+  static inline String s_logTopic = "log";
 };
 } // namespace open_heat::network
 

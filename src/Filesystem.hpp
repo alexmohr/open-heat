@@ -8,6 +8,7 @@
 
 #include <Config.hpp>
 #include <hardware/ESP8266.h>
+#include <yal/yal.hpp>
 
 namespace open_heat {
 class Filesystem {
@@ -26,13 +27,16 @@ class Filesystem {
   private:
   void listFiles();
   void initConfig();
-  static bool isConfigValid();
+  bool isConfigValid();
+
+  [[nodiscard]] String formatBytes(size_t bytes);
 
   static constexpr const char* configFile_ = "/config.dat";
 
-  Config config_{};
-  bool setup_ = false;
-  FS* filesystem = &FileFS;
+  Config m_config{};
+  bool m_setup = false;
+  FS* m_filesystem = &FileFS;
+  yal::Logger m_logger;
 };
 } // namespace open_heat
 

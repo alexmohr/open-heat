@@ -11,13 +11,13 @@
 #include "WebServer.hpp"
 #include <Config.hpp>
 #include <Filesystem.hpp>
+#include <yal/yal.hpp>
 
-namespace open_heat {
-namespace network {
+namespace open_heat::network {
 class WifiManager {
   public:
   WifiManager(Filesystem& filesystem, WebServer& webServer) :
-      m_webServer(webServer), m_fileSystem(filesystem){};
+      m_webServer(webServer), m_fileSystem(filesystem), m_logger(yal::Logger("WIFI")){};
 
   void setup(bool doubleReset);
   bool checkWifi();
@@ -30,7 +30,7 @@ class WifiManager {
 
   [[noreturn]] bool showConfigurationPortal();
   bool loadAPsFromConfig();
-  std::vector<String> getApList() const;
+  [[nodiscard]] std::vector<String> getApList() const;
   bool getFastConnectConfig(const String& ssid, fastConfig& config);
 
   wl_status_t connectMultiWiFi();
@@ -39,9 +39,10 @@ class WifiManager {
 
   WebServer& m_webServer;
   Filesystem& m_fileSystem;
+  yal::Logger m_logger;
+
 };
 
-} // namespace network
 } // namespace open_heat
 
 #endif // WIFIMANAGER_HPP_

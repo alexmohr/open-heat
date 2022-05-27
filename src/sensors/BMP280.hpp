@@ -10,8 +10,7 @@
 #include "Temperature.hpp"
 #include <Adafruit_BMP280.h>
 
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 
 class BMP280 : public BMBase, public Temperature {
   public:
@@ -28,6 +27,5 @@ class BMP280 : public BMBase, public Temperature {
 
   Adafruit_BMP280 m_bmp;
 };
-} // namespace sensors
 } // namespace open_heat
 #endif // OPEN_HEAT_BMP280_H

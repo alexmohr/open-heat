@@ -3,14 +3,16 @@
 // Licensed under the terms of the GNU General Public License v3.0
 //
 
-#include "Logger.hpp"
 #include <RTCMemory.hpp>
 #include <user_interface.h>
+#include <string>
+#include <yal/yal.hpp>
 
 namespace open_heat {
 namespace rtc {
 
 bool _lock = false;
+yal::Logger m_logger;
 
 void printRTCMemory(const Memory& rtcMemory)
 {
@@ -27,14 +29,14 @@ void printRTCMemory(const Memory& rtcMemory)
     + std::to_string(rtcMemory.restoreMode) + "\ndrdDisabled "
     + std::to_string(rtcMemory.drdDisabled);
 
-  Logger::log(Logger::DEBUG, "Rtc memory data: %s", msg.c_str());
+  m_logger.log(yal::Level::DEBUG, "Rtc memory data: %", msg.c_str());
 }
 
 void writeRTCMemory(const Memory& rtcMemory)
 {
   // printRTCMemory(rtcMemory);
   if (!ESP.rtcUserMemoryWrite(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
-    Logger::log(Logger::ERROR, "Failed to write RTC user memory");
+    m_logger.log(yal::Level::ERROR, "Failed to write RTC user memory");
   }
 }
 
@@ -55,8 +57,8 @@ Memory readWithoutLock()
 {
   Memory rtcMemory{};
 
-  if (!ESP.rtcUserMemoryRead(0, (uint32_t*)&rtcMemory, sizeof(Memory))) {
-    Logger::log(Logger::ERROR, "Failed to read RTC user memory");
+  if (!ESP.rtcUserMemoryRead(0, reinterpret_cast<uint32_t*>(&rtcMemory), sizeof(Memory))) {
+    m_logger.log(yal::Level::ERROR, "Failed to read RTC user memory");
   }
 
   return rtcMemory;
@@ -178,7 +180,7 @@ void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
   pinMode(static_cast<uint8_t>(config.MotorPins.Ground), INPUT);
   pinMode(static_cast<uint8_t>(LED_BUILTIN), INPUT);
 
-  open_heat::Logger::log(open_heat::Logger::INFO, "Sleeping for %lu ms", timeInMs);
+  m_logger.log(yal::Level::INFO, "Sleeping for %lu ms", timeInMs);
   setMillisOffset(offsetMillis() + timeInMs);
 
   EspClass::deepSleep(timeInMs * 1000, enableRF ? RF_CAL : RF_DISABLED);

@@ -6,15 +6,13 @@
 #ifndef TEMPERATUR_HPP_
 #define TEMPERATUR_HPP_
 
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 
 class Temperature {
   public:
   virtual float temperature() = 0;
 };
 
-} // namespace sensors
 } // namespace open_heat
 
 #endif // TEMPERATUR_HPP_

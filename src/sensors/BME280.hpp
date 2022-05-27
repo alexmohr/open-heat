@@ -10,8 +10,7 @@
 #include "Temperature.hpp"
 #include <Adafruit_BME280.h>
 
-namespace open_heat {
-namespace sensors {
+namespace open_heat::sensors {
 class BME280 : public BMBase, public Temperature, public Humidity {
   public:
   BME280() = default;
@@ -29,6 +28,5 @@ class BME280 : public BMBase, public Temperature, public Humidity {
   private:
   Adafruit_BME280 m_bme;
 };
-} // namespace sensors
 } // namespace open_heat
 #endif // BME280_HPP_

@@ -10,13 +10,15 @@
 #include <RTCMemory.hpp>
 #include <sensors/Temperature.hpp>
 #include <chrono>
-namespace open_heat {
-namespace heating {
+#include <yal/yal.hpp>
+
+namespace open_heat::heating {
 
 class RadiatorValve {
   public:
   RadiatorValve(sensors::Temperature*& tempSensor, Filesystem& filesystem);
   RadiatorValve(const RadiatorValve&) = delete;
+  RadiatorValve(RadiatorValve&&) = default;
 
   uint64_t loop();
   void setup();
@@ -75,15 +77,16 @@ class RadiatorValve {
   static uint64_t nextCheckTime();
   void handleTempTooLow(
     const open_heat::rtc::Memory& rtcData,
-    const float measuredTemp,
-    const float predictTemp,
-    const float openHysteresis);
+    float measuredTemp,
+    float predictTemp,
+    float openHysteresis);
   void handleTempTooHigh(
     const open_heat::rtc::Memory& rtcData,
-    const float predictTemp,
-    const float closeHysteresis);
+    float predictTemp,
+    float closeHysteresis);
+
+  yal::Logger m_logger;
 };
-} // namespace heating
 } // namespace open_heat
 
 #endif // OPEN_HEAT_RADIATORVALVE_HPP
