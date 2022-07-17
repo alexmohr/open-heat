@@ -95,12 +95,12 @@ void setupTemperatureSensor()
 
   open_heat::sensors::Sensor* sensor;
   if (config.TempSensor == BME) {
-    auto bme = new open_heat::sensors::BME280();
+    auto *bme = new open_heat::sensors::BME280();
     g_humidSensor = bme;
     g_tempSensor = bme;
     sensor = reinterpret_cast<open_heat::sensors::Sensor*>(bme);
   } else {
-    auto bmp = new open_heat::sensors::BMP280();
+    auto* bmp = new open_heat::sensors::BMP280();
     g_humidSensor = nullptr;
     g_tempSensor = bmp;
     sensor = reinterpret_cast<open_heat::sensors::Sensor*>(bmp);
@@ -119,11 +119,11 @@ void setupTemperatureSensor()
 
 bool isDoubleReset()
 {
-  if (ESP.getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
+  if (EspClass::getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
     g_logger.log(
       yal::Level::DEBUG,
       "no double reset, resetInfo: %s",
-      ESP.getResetInfo().c_str());
+      EspClass::getResetInfo().c_str());
     open_heat::rtc::setDrdDisabled(true);
     return false;
   }
@@ -137,7 +137,7 @@ bool isDoubleReset()
 
   g_logger.log(
     yal::Level::DEBUG,
-    "millis since reset: %lu, last reset time %lu, offset millis: %lu",
+    "millis since reset: %l, last reset time %, offset millis: %",
     millisSinceReset,
     open_heat::rtc::read().lastResetTime,
     open_heat::rtc::offsetMillis());
@@ -172,7 +172,7 @@ void setup()
 
   const auto offsetMillis = open_heat::rtc::offsetMillis();
   g_logger.log(
-    yal::Level::DEBUG, "Set last reset time to %lu", offsetMillis);
+    yal::Level::DEBUG, "Set last reset time to %", offsetMillis);
   open_heat::rtc::setLastResetTime(offsetMillis);
 
   setupPins();
@@ -186,7 +186,7 @@ void setup()
     g_wifiManager.setup(doubleReset);
     g_mqtt.setup();
   }
-
+  g_mqtt.enableDebug(true);
   if (!configValid) {
     g_mqtt.enableDebug(true);
   }
@@ -226,8 +226,8 @@ void loop()
   g_logger.log(yal::Level::DEBUG, msg.c_str());
 
   const auto minSleepTime = 10000UL;
-  unsigned long idleTime;
-  unsigned long nextCheckMillis;
+  uint32_t idleTime;
+  uint32_t nextCheckMillis;
   bool enableWifi = false;
   if (valveSleep < mqttSleep) {
     nextCheckMillis = valveSleep;
