@@ -164,14 +164,14 @@ wl_status_t WifiManager::connectMultiWiFi()
    m_logger.log(
       yal::Level::INFO,
       "Wifi connected:\n"
-      "\ttime: %llu\n"
-      "\tSSID: %s\n"
-      "\tRSSI=%i\n"
-      "\tChannel: %i\n"
-      "\tIP address: %s",
+      "\ttime: %\n"
+      "\tSSID: %\n"
+      "\tRSSI=%\n"
+      "\tChannel: %\n"
+      "\tIP address: %",
       connectTime,
       WiFi.SSID().c_str(),
-      WiFi.RSSI(),
+      static_cast<int>(WiFi.RSSI()),
       WiFi.channel(),
       WiFi.localIP().toString().c_str());
     //@formatter:on

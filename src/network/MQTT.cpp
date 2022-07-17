@@ -15,15 +15,21 @@ void open_heat::network::MQTT::setup()
   });
 
   m_valve.registerModeChangedHandler([this](OperationMode mode) {
-    m_mqttAppender.queue().push({m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
+    if (m_mqttAppender != nullptr) {
+      m_mqttAppender->queue().push({m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
+}
   });
 
   m_valve.registerSetTempChangedHandler([this](float temp) {
-    m_mqttAppender.queue().push({m_getConfiguredTempTopic, String(temp)});
+    if (m_mqttAppender != nullptr) {
+    m_mqttAppender->queue().push({m_getConfiguredTempTopic, String(temp)});
+}
   });
 
   m_valve.registerWindowChangeHandler([this](bool state) {
-    m_mqttAppender.queue().push({m_windowStateTopic, String(static_cast<int>(state))});
+    if (m_mqttAppender != nullptr) {
+      m_mqttAppender->queue().push({m_windowStateTopic, String(static_cast<int>(state))});
+}
   });
 }
 
@@ -205,10 +211,13 @@ void open_heat::network::MQTT::connect()
       config.MQTT.Server,
       config.MQTT.Username,
       config.MQTT.Password);
+    enableDebug(true);
     return;
   }
 
   setTopic(config.MQTT.Topic, "log", m_logTopic);
+  delete m_mqttAppender;
+  m_mqttAppender = new yal::appender::ArduinoMQTT<MQTTClient>(&m_logger, &m_mqttClient, m_logTopic.c_str());
 
   m_logger.log(yal::Level::INFO,
     "MQTT topic: %, topic len: %",
@@ -266,8 +275,11 @@ void open_heat::network::MQTT::enableDebug(bool value)
 
 void open_heat::network::MQTT::sendMessageQueue()
 {
-  while (!m_mqttAppender.queue().empty()) {
-    const auto msg = m_mqttAppender.queue().front();
+  if (m_mqttAppender == nullptr) {
+    return;
+  }
+  while (!m_mqttAppender->queue().empty()) {
+    const auto msg = m_mqttAppender->queue().front();
     if (msg.topic == m_logTopic) {
       // do not log again
       m_mqttClient.publish(msg.topic, msg.message);
@@ -275,7 +287,7 @@ void open_heat::network::MQTT::sendMessageQueue()
       publish(msg.topic, msg.message);
     }
 
-    m_mqttAppender.queue().pop();
+    m_mqttAppender->queue().pop();
   }
 }
 

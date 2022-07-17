@@ -230,7 +230,7 @@ void open_heat::heating::RadiatorValve::closeValve(unsigned int rotateTime)
 
   m_logger.log(
     yal::Level::DEBUG,
-    "Closing valve for %ims, currentRotateTime: %ims, vin: %i, ground: %i",
+    "Closing valve for %ms, currentRotateTime: %, vin: %, ground: %",
     rotateTime,
     rtc::read().currentRotateTime,
     config.Vin,

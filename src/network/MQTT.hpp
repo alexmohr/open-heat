@@ -24,8 +24,8 @@ class MQTT {
   MQTT(
     Filesystem& filesystem,
     WifiManager& wifi,
-    sensors::Temperature* tempSensor,
-    sensors::Humidity* humiditySensor,
+    sensors::Temperature*& tempSensor,
+    sensors::Humidity*& humiditySensor,
     heating::RadiatorValve& valve,
     sensors::Battery& battery) :
       m_wifi(wifi),
@@ -35,7 +35,7 @@ class MQTT {
       m_filesystem(filesystem),
       m_valve(valve),
       m_logger(yal::Logger("MQTT")),
-      m_mqttAppender(yal::appender::ArduinoMQTT<MQTTClient>(&m_logger, &m_mqttClient, s_logTopic.c_str()))
+      m_mqttAppender(nullptr)
   {
   }
 
@@ -67,8 +67,8 @@ class MQTT {
 
   WifiManager& m_wifi;
 
-  sensors::Temperature* m_tempSensor;
-  sensors::Humidity* m_humiditySensor;
+  sensors::Temperature*& m_tempSensor;
+  sensors::Humidity*& m_humiditySensor;
   sensors::Battery& m_battery;
   Filesystem& m_filesystem;
   heating::RadiatorValve& m_valve;
@@ -106,9 +106,7 @@ class MQTT {
   bool m_configValid{true};
 
   yal::Logger m_logger;
-  yal::appender::ArduinoMQTT<MQTTClient> m_mqttAppender;
-
-  static inline String s_logTopic = "log";
+  yal::appender::ArduinoMQTT<MQTTClient>* m_mqttAppender = nullptr;
 };
 } // namespace open_heat::network
 
