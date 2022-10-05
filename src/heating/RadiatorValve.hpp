@@ -6,8 +6,9 @@
 #ifndef OPEN_HEAT_RADIATORVALVE_HPP
 #define OPEN_HEAT_RADIATORVALVE_HPP
 
-#include <Filesystem.hpp>
 #include <RTCMemory.hpp>
+#include <esp-gui/Configuration.hpp>
+#include <esp-gui/WebServer.hpp>
 #include <sensors/Temperature.hpp>
 #include <yal/yal.hpp>
 #include <chrono>
@@ -16,7 +17,10 @@ namespace open_heat::heating {
 
 class RadiatorValve {
   public:
-  RadiatorValve(sensors::Temperature*& tempSensor, Filesystem& filesystem);
+  RadiatorValve(
+    sensors::Temperature*& tempSensor,
+    esp_gui::WebServer& webServer,
+    esp_gui::Configuration& config);
   RadiatorValve(const RadiatorValve&) = delete;
   RadiatorValve(RadiatorValve&&) = default;
 
@@ -24,12 +28,13 @@ class RadiatorValve {
   void setup();
   static float getConfiguredTemp();
   void setConfiguredTemp(float temp);
-  void setMode(OperationMode mode);
-  OperationMode getMode();
-  static const char* modeToCharArray(OperationMode mode);
+  void setMode(const config::OperationMode& mode);
+  config::OperationMode getMode();
+  static const char* modeToCharArray(const config::OperationMode& mode);
 
   void registerSetTempChangedHandler(const std::function<void(float)>& handler);
-  void registerModeChangedHandler(const std::function<void(OperationMode)>& handler);
+  void registerModeChangedHandler(
+    const std::function<void(const config::OperationMode&)>& handler);
   void registerWindowChangeHandler(const std::function<void(bool)>& handler);
 
   void setWindowState(bool isOpen);
@@ -55,7 +60,8 @@ class RadiatorValve {
   */
   static constexpr float PREDICTION_STEEPNESS = 2;
 
-  Filesystem& m_filesystem;
+  esp_gui::WebServer& m_webServer;
+  esp_gui::Configuration& m_config;
 
   sensors::Temperature*& m_temperatureSensor;
 
@@ -65,13 +71,13 @@ class RadiatorValve {
   static constexpr int m_spinUpMillis = 50;
   static constexpr int m_finalRotateMillis = 1'000;
 
-  std::vector<std::function<void(OperationMode)>> m_OpModeChangeHandler{};
+  std::vector<std::function<void(config::OperationMode)>> m_OpModeChangeHandler{};
   std::vector<std::function<void(bool)>> m_windowStateHandler{};
   std::vector<std::function<void(float)>> m_setTempChangeHandler{};
   [[nodiscard]] static unsigned int remainingRotateTime(int rotateTime, bool close);
   void rotateValve(
     unsigned int rotateTime,
-    const PinSettings& config,
+    const config::PinSettings& config,
     int vinState,
     int groundState);
   static uint64_t nextCheckTime();

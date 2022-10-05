@@ -28,7 +28,6 @@ static constexpr uint8_t LED_ON = HIGH;
 static constexpr uint8_t LED_OFF = LOW;
 
 // Filesystem
-#include <LittleFS.h>
 
 #define FileFS LittleFS
 #define FS_Name "LittleFS"

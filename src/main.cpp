@@ -4,15 +4,14 @@
 //
 
 #include <Arduino.h>
-#include <Filesystem.hpp>
 #include <hardware/DoubleResetDetector.hpp>
 #include <hardware/esp_err.h>
 #include <network/MQTT.hpp>
-#include <network/WebServer.hpp>
-#include <network/WifiManager.hpp>
 #include <sensors/Battery.hpp>
 
 #include "RTCMemory.hpp"
+#include "hardware/ESP8266.h"
+#include "hardware/pins.h"
 #include <sensors/BME280.hpp>
 #include <sensors/BMP280.hpp>
 #include <sensors/WindowSensor.hpp>
@@ -28,18 +27,16 @@ DoubleResetDetector g_drd(DRD_TIMEOUT, DRD_ADDRESS);
 open_heat::sensors::Temperature* g_tempSensor = nullptr;
 open_heat::sensors::Humidity* g_humidSensor = nullptr;
 
-open_heat::Filesystem g_filesystem;
+esp_gui::Configuration g_config;
+esp_gui::WebServer g_webServer(80, "open-heat" /*default hostname*/, g_config);
+esp_gui::WifiManager g_wifiManager(g_config, g_webServer);
 
-open_heat::heating::RadiatorValve g_valve(g_tempSensor, g_filesystem);
+open_heat::heating::RadiatorValve g_valve(g_tempSensor, g_webServer, g_config);
 open_heat::sensors::Battery g_battery;
 
-open_heat::network::WebServer g_webServer(g_filesystem, g_tempSensor, g_battery, g_valve);
-
-open_heat::network::WifiManager g_wifiManager(g_filesystem, g_webServer);
-
 open_heat::network::MQTT g_mqtt(
-  g_filesystem,
   g_wifiManager,
+  g_config,
   g_tempSensor,
   g_humidSensor,
   g_valve,
@@ -61,44 +58,46 @@ void setupPins()
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LED_OFF);
 
-  const auto& config = g_filesystem.getConfig();
-  if (config.MotorPins.Vin > 1) {
-    pinMode(static_cast<uint8_t>(config.MotorPins.Vin), OUTPUT);
-    digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
+  const auto motorVin = g_config.value<int>(open_heat::config::MOTOR_VIN);
+  if (motorVin > 1) {
+    pinMode(static_cast<uint8_t>(motorVin), OUTPUT);
+    digitalWrite(static_cast<uint8_t>(motorVin), LOW);
   } else {
-    g_logger.log(yal::Level::ERROR, "Motor pin vin invalid: %", config.MotorPins.Vin);
+    g_logger.log(yal::Level::ERROR, "Motor pin vin invalid: %i", motorVin);
   }
-  if (config.MotorPins.Ground > 1) {
-    pinMode(static_cast<uint8_t>(config.MotorPins.Ground), OUTPUT);
-    digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
+  const auto motorGround = g_config.value<int>(open_heat::config::MOTOR_GROUND);
+  if (motorGround > 1) {
+    pinMode(static_cast<uint8_t>(motorGround), OUTPUT);
+    digitalWrite(static_cast<uint8_t>(motorGround), LOW);
 
   } else {
-    g_logger.log(
-      yal::Level::ERROR, "Motor pin ground invalid: %", config.MotorPins.Ground);
+    g_logger.log(yal::Level::ERROR, "Motor pin ground invalid: %i", motorGround);
   }
 
   // enable temp sensor
-  if (config.TempVin > 0) {
-    pinMode(static_cast<uint8_t>(config.TempVin), OUTPUT);
-    digitalWrite(static_cast<uint8_t>(config.TempVin), HIGH);
+  const auto tempVin = g_config.value<int>(open_heat::config::TEMP_VIN);
+  if (tempVin > 0) {
+    pinMode(static_cast<uint8_t>(tempVin), OUTPUT);
+    digitalWrite(static_cast<uint8_t>(tempVin), HIGH);
   } else {
-    g_logger.log(yal::Level::ERROR, "Temp pin vin invalid: %", config.TempVin);
+    g_logger.log(yal::Level::ERROR, "Temp pin vin invalid: %i", tempVin);
   }
 }
 
 void setupTemperatureSensor()
 {
   g_logger.log(yal::Level::DEBUG, "Running setupTemperatureSensor");
-  const auto& config = g_filesystem.getConfig();
 
   open_heat::sensors::Sensor* sensor;
-  if (config.TempSensor == BME) {
-    auto bme = new open_heat::sensors::BME280();
+  const auto configuredSensor = static_cast<open_heat::config::TemperatureSensor>(
+    g_config.value<int>(open_heat::config::TEMP_SENSOR_TYPE));
+  if (configuredSensor == open_heat::config::TemperatureSensor::BME) {
+    auto* bme = new open_heat::sensors::BME280();
     g_humidSensor = bme;
     g_tempSensor = bme;
     sensor = reinterpret_cast<open_heat::sensors::Sensor*>(bme);
   } else {
-    auto bmp = new open_heat::sensors::BMP280();
+    auto* bmp = new open_heat::sensors::BMP280();
     g_humidSensor = nullptr;
     g_tempSensor = bmp;
     sensor = reinterpret_cast<open_heat::sensors::Sensor*>(bmp);
@@ -120,7 +119,7 @@ bool isDoubleReset()
   if (EspClass::getResetInfoPtr()->reason != REASON_EXT_SYS_RST) {
     g_logger.log(
       yal::Level::DEBUG,
-      "no double reset, resetInfo: %",
+      "no double reset, resetInfo: %s",
       EspClass::getResetInfo().c_str());
     open_heat::rtc::setDrdDisabled(true);
     return false;
@@ -128,14 +127,14 @@ bool isDoubleReset()
 
   const auto drdDetected = g_drd.detectDoubleReset();
 
-  g_logger.log(yal::Level::DEBUG, "DRD detected: %", drdDetected);
+  g_logger.log(yal::Level::DEBUG, "DRD detected: %i", drdDetected);
 
   const auto millisSinceReset
     = open_heat::rtc::read().lastResetTime - open_heat::rtc::offsetMillis();
 
   g_logger.log(
     yal::Level::DEBUG,
-    "millis since reset: %, last reset time %, offset millis: %",
+    "millis since reset: %l, last reset time %, offset millis: %",
     millisSinceReset,
     open_heat::rtc::read().lastResetTime,
     open_heat::rtc::offsetMillis());
@@ -153,7 +152,7 @@ void setup()
     g_serialAppender.begin(115200);
   }
 
-  const auto configValid = g_filesystem.setup();
+  g_config.setup();
 
   if (EspClass::getResetInfoPtr()->reason == REASON_DEEP_SLEEP_AWAKE) {
     g_logger.log(yal::Level::DEBUG, "woke up from deep sleep");
@@ -162,10 +161,6 @@ void setup()
       g_drd.stop();
       open_heat::rtc::setDrdDisabled(true);
     }
-
-  } else {
-    // system reset
-    open_heat::rtc::init(g_filesystem);
   }
 
   const auto offsetMillis = open_heat::rtc::offsetMillis();
@@ -183,13 +178,10 @@ void setup()
     g_wifiManager.setup(doubleReset);
     g_mqtt.setup();
   }
-
-  if (!configValid) {
-    g_mqtt.enableDebug(true);
-  }
+  g_mqtt.enableDebug(true);
 
   if (open_heat::rtc::read().debug) {
-    g_webServer.setup(nullptr);
+    g_webServer.setup(g_config.value<String>("wifi_hostname"));
   }
 
   g_drd.stop();
@@ -223,8 +215,8 @@ void loop()
   g_logger.log(yal::Level::DEBUG, msg.c_str());
 
   const auto minSleepTime = 10000UL;
-  unsigned long idleTime;
-  unsigned long nextCheckMillis;
+  uint32_t idleTime;
+  uint32_t nextCheckMillis;
   bool enableWifi = false;
   if (valveSleep < mqttSleep) {
     nextCheckMillis = valveSleep;
@@ -236,7 +228,7 @@ void loop()
   if (nextCheckMillis < (open_heat::rtc::offsetMillis() + minSleepTime)) {
     g_logger.log(
       yal::Level::DEBUG,
-      "Minimal sleep or underflow prevented, sleep set to % ms",
+      "Minimal sleep or underflow prevented, sleep set to %ul ms",
       minSleepTime);
     idleTime = minSleepTime;
   } else {
@@ -245,5 +237,5 @@ void loop()
 
   // Wait before forcing sleep to send messages.
   delay(50);
-  open_heat::rtc::wifiDeepSleep(idleTime, enableWifi, g_filesystem);
+  open_heat::rtc::wifiDeepSleep(idleTime, enableWifi, g_config);
 }

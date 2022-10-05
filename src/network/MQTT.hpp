@@ -6,9 +6,9 @@
 #ifndef OPEN_EQIVA_MQTT_CUH
 #define OPEN_EQIVA_MQTT_CUH
 
-#include "WifiManager.hpp"
-#include <Filesystem.hpp>
 #include <MQTT.h>
+#include <esp-gui/Configuration.hpp>
+#include <esp-gui/WifiManager.hpp>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/Battery.hpp>
 #include <sensors/Humidity.hpp>
@@ -22,23 +22,20 @@ namespace open_heat::network {
 class MQTT {
   public:
   MQTT(
-    Filesystem& filesystem,
-    WifiManager& wifi,
-    sensors::Temperature* tempSensor,
-    sensors::Humidity* humiditySensor,
+    esp_gui::WifiManager& wifi,
+    esp_gui::Configuration& config,
+    sensors::Temperature*& tempSensor,
+    sensors::Humidity*& humiditySensor,
     heating::RadiatorValve& valve,
     sensors::Battery& battery) :
       m_wifi(wifi),
+      m_config(config),
       m_tempSensor(tempSensor),
       m_humiditySensor(humiditySensor),
       m_battery(battery),
-      m_filesystem(filesystem),
       m_valve(valve),
       m_logger(yal::Logger("MQTT")),
-      m_mqttAppender(yal::appender::ArduinoMQTT<MQTTClient>(
-        &m_logger,
-        &m_mqttClient,
-        s_logTopic.c_str()))
+      m_mqttAppender(nullptr)
   {
   }
 
@@ -68,12 +65,12 @@ class MQTT {
   void sendMessageQueue();
   void handleSetModemSleep(const String& payload);
 
-  WifiManager& m_wifi;
+  esp_gui::WifiManager& m_wifi;
+  esp_gui::Configuration& m_config;
 
-  sensors::Temperature* m_tempSensor;
-  sensors::Humidity* m_humiditySensor;
+  sensors::Temperature*& m_tempSensor;
+  sensors::Humidity*& m_humiditySensor;
   sensors::Battery& m_battery;
-  Filesystem& m_filesystem;
   heating::RadiatorValve& m_valve;
 
   MQTTClient m_mqttClient;
@@ -109,9 +106,7 @@ class MQTT {
   bool m_configValid{true};
 
   yal::Logger m_logger;
-  yal::appender::ArduinoMQTT<MQTTClient> m_mqttAppender;
-
-  static inline String s_logTopic = "log";
+  yal::appender::ArduinoMQTT<MQTTClient>* m_mqttAppender = nullptr;
 };
 } // namespace open_heat::network
 
