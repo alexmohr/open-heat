@@ -52,4 +52,4 @@ float Battery::voltage() const
 {
   return m_voltage;
 }
-} // namespace open_heat
+} // namespace open_heat::sensors

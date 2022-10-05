@@ -4,7 +4,7 @@
 //
 
 #include "Config.hpp"
-#include "Filesystem.hpp"
+#include <esp-gui/Configuration.hpp>
 
 #include <cstdint>
 
@@ -25,8 +25,8 @@ struct Memory {
   int currentRotateTime = 0;
   bool debug = false;
 
-  OperationMode mode = UNKNOWN;
-  OperationMode lastMode = mode;
+  config::OperationMode mode = config::OperationMode::UNKNOWN;
+  config::OperationMode lastMode = mode;
 
   bool isWindowOpen = false;
   bool restoreMode = false;
@@ -43,8 +43,8 @@ void setLastMeasuredTemp(float val);
 void setLastPredictedTemp(float val);
 void setSetTemp(float val);
 void setCurrentRotateTime(int val, int absoluteLimit);
-void setMode(OperationMode val);
-void setLastMode(OperationMode val);
+void setMode(config::OperationMode val);
+void setLastMode(config::OperationMode val);
 void setIsWindowOpen(bool val);
 void setRestoreMode(bool val);
 void setDrdDisabled(bool val);
@@ -52,10 +52,10 @@ void setDebug(bool val);
 void setLastResetTime(uint64_t val);
 void setModemSleepTime(unsigned long val);
 Memory read();
-void init(Filesystem& filesystem);
+void init(esp_gui::Configuration config);
 
 uint64_t offsetMillis();
-void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem);
+void wifiDeepSleep(uint64_t timeInMs, bool enableRF, esp_gui::Configuration& filesystem);
 
 } // namespace rtc
 } // namespace open_heat

@@ -3,10 +3,10 @@
 // Licensed under the terms of the GNU General Public License v3.0
 //
 
-#include <RTCMemory.hpp>
-#include <user_interface.h>
-#include <string>
+#include "RTCMemory.hpp"
+#include "Config.hpp"
 #include <yal/yal.hpp>
+#include <string>
 
 namespace open_heat {
 namespace rtc {
@@ -24,7 +24,7 @@ void printRTCMemory(const Memory& rtcMemory)
     + std::to_string(rtcMemory.lastPredictedTemp) + "\nsetTemp "
     + std::to_string(rtcMemory.setTemp) + "\ncurrentRotateTime "
     + std::to_string(rtcMemory.currentRotateTime) + "\nturnOff " + "\nlastMode "
-    + std::to_string(rtcMemory.lastMode) + "\nisWindowOpen "
+    + std::to_string(static_cast<int>(rtcMemory.lastMode)) + "\nisWindowOpen "
     + std::to_string(rtcMemory.isWindowOpen) + "\nrestoreMode "
     + std::to_string(rtcMemory.restoreMode) + "\ndrdDisabled "
     + std::to_string(rtcMemory.drdDisabled);
@@ -57,7 +57,8 @@ Memory readWithoutLock()
 {
   Memory rtcMemory{};
 
-  if (!ESP.rtcUserMemoryRead(0, reinterpret_cast<uint32_t*>(&rtcMemory), sizeof(Memory))) {
+  if (!ESP.rtcUserMemoryRead(
+        0, reinterpret_cast<uint32_t*>(&rtcMemory), sizeof(Memory))) {
     m_logger.log(yal::Level::ERROR, "Failed to read RTC user memory");
   }
 
@@ -73,12 +74,12 @@ Memory read()
   return mem;
 }
 
-void init(Filesystem& filesystem)
+void init(esp_gui::Configuration config)
 {
   Memory rtcMem{};
-  const auto& config = filesystem.getConfig();
-  rtcMem.setTemp = config.SetTemperature;
-  rtcMem.mode = config.Mode;
+
+  rtcMem.setTemp = config.value<float>(config::TEMP_SET);
+  rtcMem.mode = static_cast<config::OperationMode>(config.value<int>(config::TEMP_MODE));
 
   writeRTCMemory(rtcMem);
 }
@@ -132,11 +133,11 @@ void setCurrentRotateTime(int val, const int absoluteLimit)
     mem.currentRotateTime = val;
   });
 }
-void setMode(OperationMode val)
+void setMode(config::OperationMode val)
 {
   updateMemory([&val](Memory& mem) { mem.mode = val; });
 }
-void setLastMode(OperationMode val)
+void setLastMode(config::OperationMode val)
 {
   updateMemory([&val](Memory& mem) { mem.lastMode = val; });
 }
@@ -168,16 +169,19 @@ uint64_t offsetMillis()
   return ms;
 }
 
-void wifiDeepSleep(uint64_t timeInMs, bool enableRF, Filesystem& filesystem)
+void wifiDeepSleep(uint64_t timeInMs, bool enableRF, esp_gui::Configuration& config)
 {
-  const auto& config = filesystem.getConfig();
-  digitalWrite(static_cast<uint8_t>(config.TempVin), LOW);
-  digitalWrite(static_cast<uint8_t>(config.MotorPins.Vin), LOW);
-  digitalWrite(static_cast<uint8_t>(config.MotorPins.Ground), LOW);
+  const auto tempVin = config.value<uint8_t>(open_heat::config::TEMP_VIN);
+  const auto motorGround = config.value<uint8_t>(open_heat::config::MOTOR_GROUND);
+  const auto motorVin = config.value<uint8_t>(open_heat::config::MOTOR_VIN);
 
-  pinMode(static_cast<uint8_t>(config.TempVin), INPUT);
-  pinMode(static_cast<uint8_t>(config.MotorPins.Vin), INPUT);
-  pinMode(static_cast<uint8_t>(config.MotorPins.Ground), INPUT);
+  digitalWrite(tempVin, LOW);
+  digitalWrite(motorGround, LOW);
+  digitalWrite(motorVin, LOW);
+
+  pinMode(static_cast<uint8_t>(tempVin), INPUT);
+  pinMode(static_cast<uint8_t>(motorGround), INPUT);
+  pinMode(static_cast<uint8_t>(motorVin), INPUT);
   pinMode(static_cast<uint8_t>(LED_BUILTIN), INPUT);
 
   m_logger.log(yal::Level::INFO, "Sleeping for %lu ms", timeInMs);

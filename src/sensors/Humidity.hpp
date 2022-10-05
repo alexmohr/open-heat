@@ -13,6 +13,6 @@ class Humidity {
   virtual float humidity() = 0;
 };
 
-} // namespace open_heat
+} // namespace open_heat::sensors
 
 #endif // HUMIDITY_HPP_
