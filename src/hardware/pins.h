@@ -92,7 +92,7 @@
 #define PIN_D9 3 // Pin D9 /RX mapped to pin GPIO3/RXD0 of ESP8266
 #define PIN_D10 1 // Pin D10/TX mapped to pin GPIO1/TXD0 of ESP8266
 #define PIN_RX 3 // Pin RX mapped to pin GPIO3/RXD0 of ESP8266
-#define PIN_TX 1 // Pin RX mapped to pin GPIO1/TXD0 of ESP8266
+#define PIN_TX 1 // Pin RX mapped to pin GPIO1/TXD`0 of ESP8266
 
 #define LED_PIN PIN_D8
 

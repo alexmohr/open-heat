@@ -6,15 +6,15 @@
 #ifndef OPEN_EQIVA_MQTT_CUH
 #define OPEN_EQIVA_MQTT_CUH
 
-#include "WifiManager.hpp"
-#include <Filesystem.hpp>
-#include <yal/yal.hpp>
-#include <yal/appender/ArduinoMQTT.hpp>
 #include <MQTT.h>
+#include <esp-gui/Configuration.hpp>
+#include <esp-gui/WifiManager.hpp>
 #include <heating/RadiatorValve.hpp>
 #include <sensors/Battery.hpp>
 #include <sensors/Humidity.hpp>
 #include <sensors/Temperature.hpp>
+#include <yal/appender/ArduinoMQTT.hpp>
+#include <yal/yal.hpp>
 #include <chrono>
 #include <queue>
 
@@ -22,17 +22,17 @@ namespace open_heat::network {
 class MQTT {
   public:
   MQTT(
-    Filesystem& filesystem,
-    WifiManager& wifi,
+    esp_gui::WifiManager& wifi,
+    esp_gui::Configuration& config,
     sensors::Temperature*& tempSensor,
     sensors::Humidity*& humiditySensor,
     heating::RadiatorValve& valve,
     sensors::Battery& battery) :
       m_wifi(wifi),
+      m_config(config),
       m_tempSensor(tempSensor),
       m_humiditySensor(humiditySensor),
       m_battery(battery),
-      m_filesystem(filesystem),
       m_valve(valve),
       m_logger(yal::Logger("MQTT")),
       m_mqttAppender(nullptr)
@@ -40,10 +40,10 @@ class MQTT {
   }
 
   ~MQTT() = default;
-  MQTT(const MQTT &) = delete;
-  MQTT(const MQTT &&) = delete;
-  MQTT &operator=(MQTT &) = delete;
-  MQTT &operator=(MQTT &&) = delete;
+  MQTT(const MQTT&) = delete;
+  MQTT(const MQTT&&) = delete;
+  MQTT& operator=(MQTT&) = delete;
+  MQTT& operator=(MQTT&&) = delete;
 
   void setup();
   bool needLoop();
@@ -65,12 +65,12 @@ class MQTT {
   void sendMessageQueue();
   void handleSetModemSleep(const String& payload);
 
-  WifiManager& m_wifi;
+  esp_gui::WifiManager& m_wifi;
+  esp_gui::Configuration& m_config;
 
   sensors::Temperature*& m_tempSensor;
   sensors::Humidity*& m_humiditySensor;
   sensors::Battery& m_battery;
-  Filesystem& m_filesystem;
   heating::RadiatorValve& m_valve;
 
   MQTTClient m_mqttClient;

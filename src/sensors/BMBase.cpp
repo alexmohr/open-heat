@@ -19,7 +19,8 @@ bool BMBase::init(std::function<bool()>&& sensorBegin)
   auto initResult = false;
   while (retries < maxRetries) {
     initResult = sensorBegin();
-    m_logger.log(yal::Level::INFO, "BMSensor init result: %, try: %", initResult, ++retries);
+    m_logger.log(
+      yal::Level::INFO, "BMSensor init result: %, try: %", initResult, ++retries);
     if (initResult) {
       break;
     }
@@ -32,4 +33,4 @@ bool BMBase::init(std::function<bool()>&& sensorBegin)
   return initResult;
 }
 
-} // namespace open_heat
+} // namespace open_heat::sensors

@@ -10,26 +10,26 @@
 void open_heat::network::MQTT::setup()
 {
   m_logger.log(yal::Level::INFO, "Running MQTT setup");
-  m_mqttClient.onMessage([this] (String& topic, String& payload) {
-    messageReceivedCallback(topic, payload);
-  });
+  m_mqttClient.onMessage(
+    [this](String& topic, String& payload) { messageReceivedCallback(topic, payload); });
 
-  m_valve.registerModeChangedHandler([this](OperationMode mode) {
+  m_valve.registerModeChangedHandler([this](config::OperationMode mode) {
     if (m_mqttAppender != nullptr) {
-      m_mqttAppender->queue().push({m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
-}
+      m_mqttAppender->queue().push(
+        {m_getModeTopic, heating::RadiatorValve::modeToCharArray(mode)});
+    }
   });
 
   m_valve.registerSetTempChangedHandler([this](float temp) {
     if (m_mqttAppender != nullptr) {
-    m_mqttAppender->queue().push({m_getConfiguredTempTopic, String(temp)});
-}
+      m_mqttAppender->queue().push({m_getConfiguredTempTopic, String(temp)});
+    }
   });
 
   m_valve.registerWindowChangeHandler([this](bool state) {
     if (m_mqttAppender != nullptr) {
       m_mqttAppender->queue().push({m_windowStateTopic, String(static_cast<int>(state))});
-}
+    }
   });
 }
 
@@ -75,7 +75,6 @@ uint64_t open_heat::network::MQTT::loop()
 
   publish(m_getConfiguredTempTopic, String(rtc::read().setTemp));
   publish(m_getModeTopic, String(rtc::read().mode));
-
 
   // drain message queue for new messages
   sendMessageQueue();
@@ -168,9 +167,10 @@ void open_heat::network::MQTT::handleSetModemSleep(const String& payload)
 
 void open_heat::network::MQTT::publish(const String& topic, const String& message)
 {
-  m_logger.log(yal::Level::DEBUG, "MQTT send '%' in topic '%'", message.c_str(), topic.c_str());
+  m_logger.log(
+    yal::Level::DEBUG, "MQTT send '%' in topic '%'", message.c_str(), topic.c_str());
   if (!m_mqttClient.publish(topic, message)) {
-    m_logger.log(yal::Level::ERROR,"MQTT publish failed: %", m_mqttClient.lastError());
+    m_logger.log(yal::Level::ERROR, "MQTT publish failed: %", m_mqttClient.lastError());
   }
 }
 
@@ -179,7 +179,8 @@ void open_heat::network::MQTT::connect()
   const auto& config = m_filesystem.getConfig();
   if ((std::strlen(config.MQTT.Server) == 0 || config.MQTT.Port == 0)) {
     if (m_configValid) {
-      m_logger.log(yal::Level::ERROR,
+      m_logger.log(
+        yal::Level::ERROR,
         "MQTT Server (%) or port (%) not set up",
         config.MQTT.Server,
         config.MQTT.Port);
@@ -206,7 +207,8 @@ void open_heat::network::MQTT::connect()
   }
 
   if (!m_mqttClient.connect(config.Hostname, username, password)) {
-    m_logger.log(yal::Level::ERROR,
+    m_logger.log(
+      yal::Level::ERROR,
       "Failed to connect to mqtt server host %, user: %, pw: %",
       config.MQTT.Server,
       config.MQTT.Username,
@@ -217,9 +219,11 @@ void open_heat::network::MQTT::connect()
 
   setTopic(config.MQTT.Topic, "log", m_logTopic);
   delete m_mqttAppender;
-  m_mqttAppender = new yal::appender::ArduinoMQTT<MQTTClient>(&m_logger, &m_mqttClient, m_logTopic.c_str());
+  m_mqttAppender = new yal::appender::ArduinoMQTT<MQTTClient>(
+    &m_logger, &m_mqttClient, m_logTopic.c_str());
 
-  m_logger.log(yal::Level::INFO,
+  m_logger.log(
+    yal::Level::INFO,
     "MQTT topic: %, topic len: %",
     config.MQTT.Topic,
     std::strlen(config.MQTT.Topic));
@@ -258,8 +262,12 @@ void open_heat::network::MQTT::subscribe(const String& topic)
   if (m_mqttClient.subscribe(topic)) {
     m_logger.log(yal::Level::INFO, "MQTT subscribed to topic: %", topic.c_str());
   } else {
-    m_logger.log(yal::Level::ERROR,"MQTT failed to subscribe to topic: %", topic.c_str());
-    m_logger.log(yal::Level::ERROR, "MQTT last error: %", static_cast<int>(m_mqttClient.lastError()));
+    m_logger.log(
+      yal::Level::ERROR, "MQTT failed to subscribe to topic: %", topic.c_str());
+    m_logger.log(
+      yal::Level::ERROR,
+      "MQTT last error: %",
+      static_cast<int>(m_mqttClient.lastError()));
   }
 }
 

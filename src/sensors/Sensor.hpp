@@ -12,5 +12,5 @@ class Sensor {
   virtual bool setup() = 0;
 };
 
-} // namespace open_heat
+} // namespace open_heat::sensors
 #endif // OPEN_HEAT_SENSOR_HPP

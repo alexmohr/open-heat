@@ -6,14 +6,14 @@
 #ifndef OPEN_HEAT_WINDOWSENSOR_HPP
 #define OPEN_HEAT_WINDOWSENSOR_HPP
 
-#include <Filesystem.hpp>
+#include <esp-gui/Configuration.hpp>
 #include <heating/RadiatorValve.hpp>
 #include <yal/yal.hpp>
 namespace open_heat::sensors {
 
 class WindowSensor {
   public:
-  WindowSensor(Filesystem* filesystem, heating::RadiatorValve*& valve);
+  WindowSensor(esp_gui::Configuration* config, heating::RadiatorValve*& valve);
 
   void setup();
   void loop();
@@ -21,7 +21,7 @@ class WindowSensor {
   private:
   static void sensorChangedInterrupt();
 
-  static Filesystem* m_filesystem;
+  static esp_gui::Configuration* m_config;
   static heating::RadiatorValve* m_valve;
 
   static const unsigned int s_minMillisBetweenEvents_{250};
@@ -34,5 +34,5 @@ class WindowSensor {
   const inline static yal::Logger m_logger = yal::Logger("WIDNOW");
 };
 
-} // namespace open_heat
+} // namespace open_heat::sensors
 #endif // OPEN_HEAT_WINDOWSENSOR_HPP

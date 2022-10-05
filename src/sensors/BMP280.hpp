@@ -27,5 +27,5 @@ class BMP280 : public BMBase, public Temperature {
 
   Adafruit_BMP280 m_bmp;
 };
-} // namespace open_heat
+} // namespace open_heat::sensors
 #endif // OPEN_HEAT_BMP280_H
